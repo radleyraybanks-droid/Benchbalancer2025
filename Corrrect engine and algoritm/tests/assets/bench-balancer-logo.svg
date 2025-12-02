@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="128" viewBox="0 0 512 128">
+  <defs>
+    <radialGradient id="bg-glow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#00ffe0" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#00ffe0" stop-opacity="0" />
+    </radialGradient>
+    <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="128" fill="none" />
+  <ellipse cx="256" cy="64" rx="240" ry="70" fill="url(#bg-glow)" opacity="0.45" />
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+        font-family="'Baloo 2', 'Poppins', 'Arial Rounded MT Bold', sans-serif"
+        font-size="64" font-weight="700" fill="#00ffe0" stroke="#0d2b2a"
+        stroke-width="2" paint-order="stroke" filter="url(#neon-glow)">
+    Bench Balancer.
+  </text>
+</svg>

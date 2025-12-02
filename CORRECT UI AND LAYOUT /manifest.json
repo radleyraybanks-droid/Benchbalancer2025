@@ -1,0 +1,11 @@
+{
+    "name": "BenchBalancer - Smart Substitution Manager",
+    "short_name": "BenchBalancer",
+    "description": "Smart substitution management for equal playing time in team sports",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#2c3e50",
+    "theme_color": "#3498db",
+    "orientation": "any",
+    "categories": ["sports", "utilities"]
+}

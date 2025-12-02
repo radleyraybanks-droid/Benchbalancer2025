@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BenchBalancers - Professional Basketball Team Management">
+    <meta name="theme-color" content="#1a1a1a">
+    
+    <title>Bench Balancers - Basketball Team Management</title>
+    
+    <!-- Basketball UI Styles -->
+    <link rel="stylesheet" href="basketball-styles.css?v=1">
+</head>
+<body class="basketball-app">
+    <!-- Main App Container -->
+    <div id="basketball-app" class="app-container">
+        
+        <!-- Header with Branding -->
+        <header class="app-header">
+            <div class="header-left">
+                🇬🇧
+            </div>
+            <div class="header-center">
+                <h1 class="app-title">Bench Balancers.</h1>
+            </div>
+            <div class="header-right">
+                <button class="settings-btn" id="settingsBtn">⚙️</button>
+            </div>
+        </header>
+
+        <!-- Coach Welcome Bar -->
+        <div class="coach-welcome">
+            <div class="welcome-text">
+                <span class="welcome-label">WELCOME BACK,</span>
+                <span class="coach-name" id="coachName">COACH BOB</span>
+            </div>
+            <div class="games-info">
+                <span class="games-label">GAMES PLAYED: <span id="gamesPlayed">24</span></span>
+                <div class="team-selector" id="teamSelector">
+                    <span class="team-name">WEBBERS WARRIORS</span>
+                    <span>▼</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="app-main" id="appMain">
+            
+            <!-- HOME SCREEN (Dashboard) -->
+            <section id="homeScreen" class="screen active">
+                <div class="dashboard-grid">
+                    
+                    <!-- Bench Balance Card -->
+                    <div class="stats-card bench-balance-card">
+                        <h2 class="card-title">BENCH BALANCE</h2>
+                        <div class="player-stats-list" id="benchBalanceList">
+                            <div class="player-stat">
+                                <span class="player-name">BEN</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">TIM</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">RONALDO</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">FELIX</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">CHRIS</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">GLEN</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">MARCUS</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">HARRY</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Players Card -->
+                    <div class="stats-card top-players-card">
+                        <h2 class="card-title">TOP PLAYERS</h2>
+                        <div class="player-stats-list" id="topPlayersList">
+                            <div class="player-stat">
+                                <span class="player-name">BEN</span>
+                                <span class="stat-value">25P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">TIM</span>
+                                <span class="stat-value">10P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">RONALDO</span>
+                                <span class="stat-value">6P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">FELIX</span>
+                                <span class="stat-value">4P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">CHRIS</span>
+                                <span class="stat-value">3P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">GLEN</span>
+                                <span class="stat-value">2P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">MARCUS</span>
+                                <span class="stat-value">1P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">HARRY</span>
+                                <span class="stat-value">1P/G</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Start Game Hero Card -->
+                    <div class="hero-card start-game-card">
+                        <h2 class="hero-title">START GAME</h2>
+                        <button class="play-btn" id="startGameBtn">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                <circle cx="20" cy="20" r="20" fill="white"/>
+                                <polygon points="16,12 16,28 28,20" fill="#1a1a1a"/>
+                            </svg>
+                        </button>
+                        <div class="hero-image"></div>
+                    </div>
+
+                    <!-- Team Season Stats -->
+                    <div class="stats-card season-stats-card">
+                        <h2 class="card-title">TEAM SEASON STATS</h2>
+                        <div class="season-stats" id="seasonStats">
+                            <div class="stat-row">
+                                <span class="stat-label">POINTS SCORED</span>
+                                <span class="stat-value">1255</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">POINTS CONCEDED</span>
+                                <span class="stat-value">925</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">+/-</span>
+                                <span class="stat-value positive">330</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">WINS</span>
+                                <span class="stat-value">20</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Coaches -->
+                    <div class="stats-card coaches-card">
+                        <h2 class="card-title">TOP COACHES</h2>
+                        <div class="coaches-list" id="coachesList">
+                            <div class="coach-stat">
+                                <span class="coach-rank">1.</span>
+                                <span class="coach-name">COACH BOB</span>
+                                <span class="coach-games">22 GAMES</span>
+                            </div>
+                            <div class="coach-stat">
+                                <span class="coach-rank">2.</span>
+                                <span class="coach-name">COACH TIM</span>
+                                <span class="coach-games">1 GAME</span>
+                            </div>
+                            <div class="coach-stat">
+                                <span class="coach-rank">3.</span>
+                                <span class="coach-name">COACH STEPH</span>
+                                <span class="coach-games">1 GAME</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TEAMS SCREEN (Formation) -->
+            <section id="teamsScreen" class="screen">
+                <div class="teams-container">
+                    <div class="team-header">
+                        <div class="team-name-display">WEBBERS WARRIORS</div>
+                        <div class="formation-selector">
+                            <select id="formationSelect">
+                                <option value="formation">FORMATION</option>
+                                <option value="1-2-1-1">1-2-1-1</option>
+                                <option value="2-1-2">2-1-2</option>
+                                <option value="1-3-1">1-3-1</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Basketball Court -->
+                    <div class="basketball-court-container">
+                        <div class="basketball-court" id="basketballCourt">
+                            <div class="court-lines">
+                                <div class="three-point-arc"></div>
+                                <div class="paint-area"></div>
+                                <div class="free-throw-circle"></div>
+                                <div class="center-circle-outline"></div>
+                            </div>
+                            <div class="player-positions" id="playerPositions">
+                                <!-- Player positions will be dynamically generated -->
+                                <div class="player-position pos-pg">
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">BEN</div>
+                                    </div>
+                                    <div class="position-badge">PG</div>
+                                </div>
+                                <div class="player-position pos-sg">
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">TIM</div>
+                                    </div>
+                                    <div class="position-badge">SG</div>
+                                </div>
+                                <div class="player-position pos-sf">
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">CHRIS</div>
+                                    </div>
+                                    <div class="position-badge">SF</div>
+                                </div>
+                                <div class="player-position pos-pf">
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">FELIX</div>
+                                    </div>
+                                    <div class="position-badge">PF</div>
+                                </div>
+                                <div class="player-position pos-c">
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">RONALDO</div>
+                                    </div>
+                                    <div class="position-badge">C</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bench Section -->
+                    <div class="bench-section">
+                        <h3 class="bench-title">BENCH</h3>
+                        <div class="bench-players" id="benchPlayers">
+                            <div class="bench-player">
+                                <div class="player-avatar">🏀</div>
+                                <div class="player-info">
+                                    <div class="player-name">GLEN</div>
+                                    <div class="player-position-text">FWD/C</div>
+                                </div>
+                            </div>
+                            <div class="bench-player">
+                                <div class="player-avatar">🏀</div>
+                                <div class="player-info">
+                                    <div class="player-name">MARCUS</div>
+                                    <div class="player-position-text">C</div>
+                                </div>
+                            </div>
+                            <div class="bench-player">
+                                <div class="player-avatar">🏀</div>
+                                <div class="player-info">
+                                    <div class="player-name">HARRY</div>
+                                    <div class="player-position-text">G/FWD</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Team Button -->
+                    <button class="edit-team-btn" id="editTeamBtn">
+                        <span>✏️</span>
+                        EDIT TEAM
+                    </button>
+                </div>
+            </section>
+
+            <!-- START SCREEN (Live Game) -->
+            <section id="startScreen" class="screen">
+                <div class="live-game-container">
+                    <div class="game-header">
+                        <div class="team-name-display">WEBBERS WARRIORS</div>
+                        <div class="game-info">
+                            <div class="game-number">GAME <span id="currentGameNumber">25</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Game Timer -->
+                    <div class="game-timer" id="gameTimer">
+                        <div class="period-indicator" id="periodIndicator">H1</div>
+                        <div class="timer-display" id="timerDisplay">20:00</div>
+                        <div class="timer-controls">
+                            <button class="timer-btn start-stop" id="startStopBtn">START</button>
+                            <button class="timer-btn reset" id="resetBtn">RESET</button>
+                        </div>
+                        <div class="period-progress">
+                            <span class="period-label">Period Timer:</span>
+                            <span class="period-time" id="periodTime">20:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Basketball Court Live View -->
+                    <div class="basketball-court-container">
+                        <div class="basketball-court" id="liveBasketballCourt">
+                            <div class="court-lines">
+                                <div class="three-point-arc"></div>
+                                <div class="paint-area"></div>
+                                <div class="free-throw-circle"></div>
+                                <div class="center-circle-outline"></div>
+                            </div>
+                            <div class="player-positions">
+                                <!-- Point Guard -->
+                                <div class="player-position pos-pg" id="player-pg">
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">BEN</div>
+                                        <div class="player-time-display">
+                                            <div class="time-row">
+                                                <span class="time-label">TOT:</span>
+                                                <span class="time-value" id="pg-total-time">COURT: 0:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="position-badge">PG</div>
+                                </div>
+                                
+                                <!-- Shooting Guard -->
+                                <div class="player-position pos-sg next-out" id="player-sg">
+                                    <div class="next-out-badge">NEXT OUT</div>
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">TIM</div>
+                                        <div class="player-time-display">
+                                            <div class="time-row">
+                                                <span class="time-label">TOT:</span>
+                                                <span class="time-value" id="sg-total-time">COURT: 0:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="position-badge">SG</div>
+                                </div>
+                                
+                                <!-- Small Forward -->
+                                <div class="player-position pos-sf" id="player-sf">
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">CHRIS</div>
+                                        <div class="player-time-display">
+                                            <div class="time-row">
+                                                <span class="time-label">TOT:</span>
+                                                <span class="time-value" id="sf-total-time">COURT: 0:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="position-badge">SF</div>
+                                </div>
+                                
+                                <!-- Power Forward -->
+                                <div class="player-position pos-pf" id="player-pf">
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">FELIX</div>
+                                        <div class="player-time-display">
+                                            <div class="time-row">
+                                                <span class="time-label">TOT:</span>
+                                                <span class="time-value" id="pf-total-time">COURT: 0:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="position-badge">PF</div>
+                                </div>
+                                
+                                <!-- Center -->
+                                <div class="player-position pos-c" id="player-c">
+                                    <div class="player-icon">🏀</div>
+                                    <div class="player-info">
+                                        <div class="player-name">RONALDO</div>
+                                        <div class="player-time-display">
+                                            <div class="time-row">
+                                                <span class="time-label">TOT:</span>
+                                                <span class="time-value" id="c-total-time">COURT: 0:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="position-badge">C</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bench Section (moved from game controls) -->
+                    <div class="bench-live">
+                        <h3 class="section-title">BENCH</h3>
+                        <div class="bench-players-live" id="benchPlayersLive">
+                            <div class="bench-player-live next-in" data-player="GLEN">
+                                <div class="next-in-indicator">NEXT IN</div>
+                                <div class="player-avatar">🏀</div>
+                                <div class="player-info">
+                                    <div class="player-name">GLEN</div>
+                                    <div class="player-position-text">FWD/C</div>
+                                </div>
+                                <div class="player-time-display">BENCH: 0:00</div>
+                            </div>
+                            <div class="bench-player-live next-in" data-player="MARCUS">
+                                <div class="next-in-indicator">NEXT IN</div>
+                                <div class="player-avatar">🏀</div>
+                                <div class="player-info">
+                                    <div class="player-name">MARCUS</div>
+                                    <div class="player-position-text">C</div>
+                                </div>
+                                <div class="player-time-display">BENCH: 0:00</div>
+                            </div>
+                            <div class="bench-player-live" data-player="HARRY">
+                                <div class="player-avatar">🏀</div>
+                                <div class="player-info">
+                                    <div class="player-name">HARRY</div>
+                                    <div class="player-position-text">G/FWD</div>
+                                </div>
+                                <div class="player-time-display">BENCH: 0:00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OUT Players Section -->
+                    <div class="out-players">
+                        <h3 class="section-title">OUT</h3>
+                        <div class="out-players-list" id="outPlayersList">
+                            <!-- Empty for now -->
+                        </div>
+                    </div>
+
+                    <!-- Live Score -->
+                    <div class="live-score" id="liveScore">
+                        <span class="period">H2</span>
+                        <span class="score">48-20</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STATS SCREEN -->
+            <section id="statsScreen" class="screen">
+                <div class="stats-container">
+                    <!-- Live Stats for Current Game -->
+                    <div class="live-stats-header">
+                        <div class="current-score">48-20</div>
+                        <h2 class="section-title">LIVE STATS</h2>
+                        <div class="game-indicator">GAME 25</div>
+                    </div>
+
+                    <!-- Score Management -->
+                    <div class="score-section">
+                        <h3 class="subsection-title">SCORE</h3>
+                        <div class="team-tabs">
+                            <button class="team-tab active" id="myTeamTab">MY TEAM</button>
+                            <button class="team-tab" id="opponentTab">OPPONENT</button>
+                        </div>
+                        
+                        <div class="players-scoring" id="playersScoring">
+                            <div class="player-scoring-row">
+                                <span class="player-name">BEN</span>
+                                <div class="scoring-controls">
+                                    <button class="score-btn add">+</button>
+                                    <button class="score-btn subtract">−</button>
+                                </div>
+                                <span class="player-score">20</span>
+                            </div>
+                            <div class="player-scoring-row">
+                                <span class="player-name">TIM</span>
+                                <div class="scoring-controls">
+                                    <button class="score-btn add">+</button>
+                                    <button class="score-btn subtract">−</button>
+                                </div>
+                                <span class="player-score">8</span>
+                            </div>
+                            <div class="player-scoring-row">
+                                <span class="player-name">RONALDO</span>
+                                <div class="scoring-controls">
+                                    <button class="score-btn add">+</button>
+                                    <button class="score-btn subtract">−</button>
+                                </div>
+                                <span class="player-score">8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COACHES SCREEN -->
+            <section id="coachesScreen" class="screen">
+                <div class="coaches-container">
+                    <!-- All Coaches Section -->
+                    <div class="all-coaches-section">
+                        <div class="section-header">
+                            <h2 class="section-title">ALL COACHES</h2>
+                            <button class="edit-coaches-btn" id="editCoachesBtn">✏️</button>
+                        </div>
+                        
+                        <div class="coaches-list-section">
+                            <div class="coach-item">
+                                <span class="coach-info">1.COACH BOB (ADMIN)</span>
+                                <input type="checkbox" class="coach-checkbox" checked>
+                            </div>
+                            <div class="coach-item">
+                                <span class="coach-info">2.COACH TIM</span>
+                                <input type="checkbox" class="coach-checkbox">
+                            </div>
+                            <div class="coach-item">
+                                <span class="coach-info">3.COACH STEPH</span>
+                                <input type="checkbox" class="coach-checkbox">
+                            </div>
+                        </div>
+
+                        <div class="coach-actions">
+                            <button class="action-btn primary" id="selectNextCoachBtn">SELECT NEXT GAMES COACH</button>
+                            <button class="action-btn secondary" id="inviteMoreBtn">INVITE MORE</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Fixed Bottom Management Controls -->
+        <div class="bottom-management-bar">
+            <button class="control-button emergency-sub" id="emergencySubBtn">
+                EMERGENCY SUB
+            </button>
+            <button class="control-button end-period" id="endPeriodBtn">
+                END PERIOD
+            </button>
+            <button class="control-button manage-players" id="managePlayersBtn">
+                MANAGE PLAYERS
+            </button>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="nav-item active" data-screen="home" id="homeNavBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+                <span>HOME</span>
+            </button>
+            <button class="nav-item" data-screen="teams" id="teamsNavBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                </svg>
+                <span>TEAMS</span>
+            </button>
+            <button class="nav-item start-nav" data-screen="start" id="startNavBtn">
+                <div class="start-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="16" fill="currentColor"/>
+                        <polygon points="12,10 12,22 22,16" fill="white"/>
+                    </svg>
+                </div>
+                <span>START</span>
+            </button>
+            <button class="nav-item" data-screen="stats" id="statsNavBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18"/>
+                    <path d="m19 9-5 5-4-4-3 3"/>
+                </svg>
+                <span>STATS</span>
+            </button>
+            <button class="nav-item" data-screen="coaches" id="coachesNavBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>COACHES</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- Simple JavaScript for navigation and interactions -->
+    <script>
+        console.log('Basketball Standalone App Loaded');
+        
+        // Game State Management
+        class GameTimer {
+            constructor() {
+                this.isRunning = false;
+                this.isPaused = false;
+                this.periodTime = 20 * 60; // 20 minutes in seconds
+                this.currentPeriodTime = this.periodTime; // Period time counting DOWN
+                this.totalGameTime = 0; // Total game time counting UP
+                this.period = 1;
+                this.playerCourtTimes = new Map(); // Track time on court
+                this.playerBenchTimes = new Map(); // Track time on bench
+                this.playerSessionStartTimes = new Map(); // When each player started current session (in game seconds)
+                this.playerCurrentLocation = new Map(); // 'court' or 'bench'
+                
+                this.initializePlayerTimes();
+                this.bindEvents();
+                this.updateDisplay();
+            }
+            
+            initializePlayerTimes() {
+                // Initialize all player times and locations
+                const players = ['BEN', 'TIM', 'CHRIS', 'FELIX', 'RONALDO', 'GLEN', 'MARCUS', 'HARRY'];
+                const starters = ['BEN', 'TIM', 'CHRIS', 'FELIX', 'RONALDO'];
+                const benchPlayers = ['GLEN', 'MARCUS', 'HARRY'];
+                
+                players.forEach(player => {
+                    this.playerCourtTimes.set(player, 0); // Total seconds on court
+                    this.playerBenchTimes.set(player, 0); // Total seconds on bench
+                });
+                
+                // Set starting 5 as on court
+                starters.forEach(player => {
+                    this.playerSessionStartTimes.set(player, this.totalGameTime); // Start from game time 0
+                    this.playerCurrentLocation.set(player, 'court');
+                });
+                
+                // Set bench players as on bench
+                benchPlayers.forEach(player => {
+                    this.playerSessionStartTimes.set(player, this.totalGameTime); // Start from game time 0
+                    this.playerCurrentLocation.set(player, 'bench');
+                });
+            }
+            
+            bindEvents() {
+                const startStopBtn = document.getElementById('startStopBtn');
+                const resetBtn = document.getElementById('resetBtn');
+                const timerDisplay = document.getElementById('timerDisplay');
+                const endPeriodBtn = document.getElementById('endPeriodBtn');
+                
+                if (startStopBtn) {
+                    startStopBtn.addEventListener('click', () => this.toggleTimer());
+                }
+                
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', () => this.resetTimer());
+                }
+                
+                if (timerDisplay) {
+                    timerDisplay.addEventListener('click', () => this.toggleTimer());
+                }
+                
+                if (endPeriodBtn) {
+                    endPeriodBtn.addEventListener('click', () => this.endPeriod());
+                }
+            }
+            
+            toggleTimer() {
+                if (!this.isRunning) {
+                    this.startTimer();
+                } else {
+                    this.pauseTimer();
+                }
+            }
+            
+            startTimer() {
+                if (this.currentPeriodTime <= 0) return;
+                
+                this.isRunning = true;
+                this.isPaused = false;
+                
+                // Play start sound (if available)
+                this.playSound('start');
+                
+                this.timerInterval = setInterval(() => {
+                    this.totalGameTime++; // Game time counts UP
+                    this.currentPeriodTime--; // Period time counts DOWN
+                    this.updatePlayerTimes();
+                    this.updateDisplay();
+                    
+                    // Warning sound at 1 minute remaining
+                    if (this.currentPeriodTime === 60) {
+                        this.playSound('warning');
+                    }
+                    
+                    // End sound at 10 seconds
+                    if (this.currentPeriodTime === 10) {
+                        this.playSound('countdown');
+                    }
+                    
+                    if (this.currentPeriodTime <= 0) {
+                        this.endPeriod();
+                    }
+                }, 1000);
+                
+                this.updateTimerButton();
+                console.log('Game timer started');
+            }
+            
+            pauseTimer() {
+                this.isRunning = false;
+                this.isPaused = true;
+                
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+                
+                // Update and save all player times before pausing
+                this.saveAllPlayerTimes();
+                
+                this.updateTimerButton();
+                console.log('Game timer paused');
+            }
+            
+            saveAllPlayerTimes() {
+                // Save all player times using game time instead of real time
+                this.playerCurrentLocation.forEach((location, player) => {
+                    if (this.playerSessionStartTimes.has(player)) {
+                        const sessionStartTime = this.playerSessionStartTimes.get(player);
+                        const sessionDuration = this.totalGameTime - sessionStartTime;
+                        
+                        if (location === 'court') {
+                            const currentCourtTime = this.playerCourtTimes.get(player) || 0;
+                            this.playerCourtTimes.set(player, currentCourtTime + sessionDuration);
+                        } else if (location === 'bench') {
+                            const currentBenchTime = this.playerBenchTimes.get(player) || 0;
+                            this.playerBenchTimes.set(player, currentBenchTime + sessionDuration);
+                        }
+                        
+                        // Reset session start time to current game time
+                        this.playerSessionStartTimes.set(player, this.totalGameTime);
+                    }
+                });
+            }
+            
+            resetTimer() {
+                this.isRunning = false;
+                this.isPaused = false;
+                
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+                
+                this.currentPeriodTime = this.periodTime;
+                this.totalGameTime = 0;
+                this.period = 1;
+                
+                // Reset all player times
+                this.playerCourtTimes.forEach((value, key) => {
+                    this.playerCourtTimes.set(key, 0);
+                    this.playerBenchTimes.set(key, 0);
+                });
+                
+                // Restart time tracking for current positions from game time 0
+                this.initializePlayerTimes();
+                
+                this.updateDisplay();
+                this.updateTimerButton();
+                console.log('Game timer reset');
+            }
+            
+            endPeriod() {
+                this.pauseTimer();
+                this.playSound('end');
+                
+                if (this.period === 1) {
+                    this.period = 2;
+                    this.currentPeriodTime = this.periodTime; // Reset period timer for 2nd half
+                    document.getElementById('periodIndicator').textContent = 'H2';
+                    console.log('Starting second half');
+                    alert('Half Time! Click START to begin second half.');
+                } else {
+                    console.log('Game ended');
+                    alert('Game Ended!');
+                }
+                
+                this.updateDisplay();
+            }
+            
+            playSound(type) {
+                // Simple audio feedback using Web Audio API or HTML5 Audio
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    // Different tones for different events
+                    switch(type) {
+                        case 'start':
+                            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                            break;
+                        case 'warning':
+                            oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                            break;
+                        case 'countdown':
+                            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+                            break;
+                        case 'end':
+                            oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                            break;
+                    }
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                } catch (e) {
+                    console.log('Audio not available:', e);
+                }
+            }
+            
+            getPlayersOnCourt() {
+                // Get currently displayed players (simplified - in a real app this would be more dynamic)
+                return ['BEN', 'TIM', 'CHRIS', 'FELIX', 'RONALDO'];
+            }
+            
+            updatePlayerTimes() {
+                if (!this.isRunning) return;
+                
+                // Update times for all players based on their current location using game time
+                this.playerCurrentLocation.forEach((location, player) => {
+                    if (this.playerSessionStartTimes.has(player)) {
+                        const sessionStartTime = this.playerSessionStartTimes.get(player);
+                        const sessionDuration = this.totalGameTime - sessionStartTime;
+                        
+                        if (location === 'court') {
+                            const currentCourtTime = this.playerCourtTimes.get(player) || 0;
+                            this.updatePlayerTimeDisplay(player, currentCourtTime + sessionDuration, 'court');
+                        } else if (location === 'bench') {
+                            const currentBenchTime = this.playerBenchTimes.get(player) || 0;
+                            this.updatePlayerTimeDisplay(player, currentBenchTime + sessionDuration, 'bench');
+                        }
+                    }
+                });
+            }
+            
+            updatePlayerTimeDisplay(playerName, totalSeconds, location) {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update player time display elements
+                const displays = {
+                    'BEN': 'pg-total-time',
+                    'TIM': 'sg-total-time', 
+                    'CHRIS': 'sf-total-time',
+                    'FELIX': 'pf-total-time',
+                    'RONALDO': 'c-total-time'
+                };
+                
+                const elementId = displays[playerName];
+                if (elementId) {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        // Show court time for court players, bench time for bench players
+                        if (location === 'court') {
+                            element.innerHTML = `<span style="color: #00ff88;">COURT: ${timeString}</span>`;
+                        } else {
+                            element.innerHTML = `<span style="color: #ffaa00;">BENCH: ${timeString}</span>`;
+                        }
+                    }
+                }
+                
+                // Also update bench players display
+                this.updateBenchPlayerTimeDisplays();
+            }
+            
+            updateBenchPlayerTimeDisplays() {
+                const benchPlayers = ['GLEN', 'MARCUS', 'HARRY'];
+                benchPlayers.forEach(player => {
+                    const location = this.playerCurrentLocation.get(player);
+                    let displayTime = '';
+                    
+                    if (this.playerSessionStartTimes.has(player)) {
+                        const sessionStartTime = this.playerSessionStartTimes.get(player);
+                        const sessionDuration = this.totalGameTime - sessionStartTime;
+                        
+                        if (location === 'court') {
+                            const courtTime = this.playerCourtTimes.get(player) + sessionDuration;
+                            const minutes = Math.floor(courtTime / 60);
+                            const seconds = courtTime % 60;
+                            displayTime = `COURT: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        } else if (location === 'bench') {
+                            const benchTime = this.playerBenchTimes.get(player) + sessionDuration;
+                            const minutes = Math.floor(benchTime / 60);
+                            const seconds = benchTime % 60;
+                            displayTime = `BENCH: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        }
+                    }
+                    
+                    // Update bench display elements (you may need to add these to HTML)
+                    const benchElement = document.querySelector(`[data-player="${player}"] .player-time-display`);
+                    if (benchElement) {
+                        benchElement.textContent = displayTime;
+                    }
+                });
+            }
+            
+            updateDisplay() {
+                // Period time (counting DOWN)
+                const periodMinutes = Math.floor(this.currentPeriodTime / 60);
+                const periodSeconds = this.currentPeriodTime % 60;
+                const periodTimeString = `${periodMinutes}:${periodSeconds.toString().padStart(2, '0')}`;
+                
+                // Game time (counting UP)
+                const gameMinutes = Math.floor(this.totalGameTime / 60);
+                const gameSeconds = this.totalGameTime % 60;
+                const gameTimeString = `${gameMinutes}:${gameSeconds.toString().padStart(2, '0')}`;
+                
+                const timerDisplay = document.getElementById('timerDisplay');
+                const periodTime = document.getElementById('periodTime');
+                
+                if (timerDisplay) {
+                    // Show period time as main display (counting down)
+                    timerDisplay.textContent = periodTimeString;
+                    
+                    // Update timer display styling
+                    timerDisplay.classList.remove('running', 'paused');
+                    if (this.isRunning) {
+                        timerDisplay.classList.add('running');
+                    } else if (this.isPaused) {
+                        timerDisplay.classList.add('paused');
+                    }
+                }
+                
+                if (periodTime) {
+                    // Show total game time in the period progress area
+                    periodTime.textContent = `Game Time: ${gameTimeString}`;
+                }
+            }
+            
+            updateTimerButton() {
+                const startStopBtn = document.getElementById('startStopBtn');
+                if (startStopBtn) {
+                    if (this.isRunning) {
+                        startStopBtn.textContent = 'STOP';
+                        startStopBtn.classList.add('running');
+                    } else {
+                        startStopBtn.textContent = 'START';
+                        startStopBtn.classList.remove('running');
+                    }
+                }
+            }
+            
+            // Player substitution methods
+            substitutePlayer(outPlayer, inPlayer) {
+                // Save time for outgoing player (from court to bench)
+                if (this.playerSessionStartTimes.has(outPlayer)) {
+                    const sessionStartTime = this.playerSessionStartTimes.get(outPlayer);
+                    const sessionDuration = this.totalGameTime - sessionStartTime;
+                    const currentCourtTime = this.playerCourtTimes.get(outPlayer) || 0;
+                    
+                    // Add session time to their court time
+                    this.playerCourtTimes.set(outPlayer, currentCourtTime + sessionDuration);
+                    
+                    // Move to bench and start bench timing from current game time
+                    this.playerCurrentLocation.set(outPlayer, 'bench');
+                    this.playerSessionStartTimes.set(outPlayer, this.totalGameTime);
+                }
+                
+                // Save time for incoming player (from bench to court)
+                if (this.playerSessionStartTimes.has(inPlayer)) {
+                    const sessionStartTime = this.playerSessionStartTimes.get(inPlayer);
+                    const sessionDuration = this.totalGameTime - sessionStartTime;
+                    const currentBenchTime = this.playerBenchTimes.get(inPlayer) || 0;
+                    
+                    // Add session time to their bench time
+                    this.playerBenchTimes.set(inPlayer, currentBenchTime + sessionDuration);
+                    
+                    // Move to court and start court timing from current game time
+                    this.playerCurrentLocation.set(inPlayer, 'court');
+                    this.playerSessionStartTimes.set(inPlayer, this.totalGameTime);
+                }
+                
+                console.log(`Substitution: ${outPlayer} out (to bench), ${inPlayer} in (to court)`);
+                this.playSound('start');
+            }
+            
+            // Get player statistics
+            getPlayerStats() {
+                const stats = {};
+                
+                this.playerCourtTimes.forEach((courtTime, player) => {
+                    const benchTime = this.playerBenchTimes.get(player) || 0;
+                    let currentCourtTime = courtTime;
+                    let currentBenchTime = benchTime;
+                    
+                    // Add current session time if player is actively playing/benched
+                    if (this.playerSessionStartTimes.has(player) && this.isRunning) {
+                        const sessionStartTime = this.playerSessionStartTimes.get(player);
+                        const sessionDuration = this.totalGameTime - sessionStartTime;
+                        const location = this.playerCurrentLocation.get(player);
+                        
+                        if (location === 'court') {
+                            currentCourtTime += sessionDuration;
+                        } else if (location === 'bench') {
+                            currentBenchTime += sessionDuration;
+                        }
+                    }
+                    
+                    const courtMinutes = Math.floor(currentCourtTime / 60);
+                    const courtSeconds = currentCourtTime % 60;
+                    const benchMinutes = Math.floor(currentBenchTime / 60);
+                    const benchSecondsDisplay = currentBenchTime % 60;
+                    
+                    stats[player] = {
+                        courtTime: currentCourtTime,
+                        benchTime: currentBenchTime,
+                        courtDisplay: `${courtMinutes}:${courtSeconds.toString().padStart(2, '0')}`,
+                        benchDisplay: `${benchMinutes}:${benchSecondsDisplay.toString().padStart(2, '0')}`,
+                        location: this.playerCurrentLocation.get(player),
+                        isPlaying: this.playerCurrentLocation.get(player) === 'court'
+                    };
+                });
+                
+                return stats;
+            }
+        }
+        
+        // Initialize game timer
+        let gameTimer;
+        
+        // Initialize navigation
+        const navButtons = document.querySelectorAll('.nav-item');
+        const screens = document.querySelectorAll('.screen');
+        
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetScreen = button.getAttribute('data-screen');
+                
+                // Hide all screens
+                screens.forEach(screen => screen.classList.remove('active'));
+                
+                // Show target screen
+                const screen = document.getElementById(targetScreen + 'Screen');
+                if (screen) {
+                    screen.classList.add('active');
+                }
+                
+                // Update active nav button
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                console.log('Switched to:', targetScreen);
+                
+                // Initialize game timer when switching to start screen
+                if (targetScreen === 'start' && !gameTimer) {
+                    gameTimer = new GameTimer();
+                }
+            });
+        });
+        
+        // Start Game button
+        const startGameBtn = document.getElementById('startGameBtn');
+        if (startGameBtn) {
+            startGameBtn.addEventListener('click', () => {
+                // Switch to start screen
+                screens.forEach(screen => screen.classList.remove('active'));
+                document.getElementById('startScreen').classList.add('active');
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                document.getElementById('startNavBtn').classList.add('active');
+                
+                // Initialize game timer
+                if (!gameTimer) {
+                    gameTimer = new GameTimer();
+                }
+                
+                console.log('Game Started!');
+            });
+        }
+        
+        // Team tabs
+        const teamTabs = document.querySelectorAll('.team-tab');
+        teamTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                teamTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                console.log('Team tab:', tab.textContent);
+            });
+        });
+        
+        // Score buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('score-btn')) {
+                const row = e.target.closest('.player-scoring-row');
+                const scoreSpan = row.querySelector('.player-score');
+                const playerName = row.querySelector('.player-name').textContent;
+                let score = parseInt(scoreSpan.textContent);
+                
+                if (e.target.classList.contains('add')) {
+                    score++;
+                } else if (e.target.classList.contains('subtract')) {
+                    score = Math.max(0, score - 1);
+                }
+                
+                scoreSpan.textContent = score;
+                console.log(`${playerName}: ${score} points`);
+            }
+        });
+        
+        // Game control buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'emergencySubBtn') {
+                // Test substitution functionality
+                if (gameTimer) {
+                    gameTimer.substitutePlayer('TIM', 'GLEN');
+                    alert('Emergency substitution: TIM out, GLEN in!');
+                }
+                console.log('Emergency substitution');
+            }
+            
+            if (e.target.id === 'managePlayersBtn') {
+                // Show player stats
+                if (gameTimer) {
+                    const stats = gameTimer.getPlayerStats();
+                    let statsText = 'Player Statistics:\n\n';
+                    Object.entries(stats).forEach(([player, data]) => {
+                        statsText += `${player}:\n`;
+                        statsText += `  Court Time: ${data.courtDisplay}\n`;
+                        statsText += `  Bench Time: ${data.benchDisplay}\n`;
+                        statsText += `  Location: ${data.location}\n\n`;
+                    });
+                    alert(statsText);
+                }
+                console.log('Manage players');
+            }
+        });
+        
+        console.log('Basketball app ready! Navigate to START to begin timing.');
+    </script>
+</body>
+</html>

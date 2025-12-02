@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BenchBalancers - Professional Basketball Team Management Setup">
+    <meta name="theme-color" content="#2a2a2a">
+    
+    <title>Bench Balancers - Basketball Game Setup</title>
+    
+    <!-- Basketball Setup Styles -->
+    <link rel="stylesheet" href="basketball-setup-styles.css?v=1">
+    
+    <!-- Add Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="basketball-app">
+    <!-- Main App Container -->
+    <div class="app-container">
+        
+        <!-- Header with Branding -->
+        <header class="app-header">
+            <div class="header-left">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiBmaWxsPSIjMDEyMjY5Ii8+CjxyZWN0IHg9IjEzLjMzMzMiIHk9IjAiIHdpZHRoPSIxMy4zMzMzIiBoZWlnaHQ9IjI0IiBmaWxsPSJ3aGl0ZSIvPgo8cmVjdCB4PSIyNi42NjY3IiB5PSIwIiB3aWR0aD0iMTMuMzMzMyIgaGVpZ2h0PSIyNCIgZmlsbD0iI0NFMTEyNiIvPgo8L3N2Zz4K" alt="UK Flag" class="flag-icon">
+            </div>
+            <div class="header-center">
+                <h1 class="app-title">BenchBalancers.</h1>
+            </div>
+            <div class="header-right">
+                <button class="settings-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.56 12a7.56 7.56 0 0 0-.16-1.57l1.68-1.32a.4.4 0 0 0 .1-.51l-1.6-2.77a.4.4 0 0 0-.49-.18l-1.99.8a5.8 5.8 0 0 0-1.36-.79l-.3-2.12a.4.4 0 0 0-.4-.34h-3.2a.4.4 0 0 0-.4.34l-.3 2.12a5.8 5.8 0 0 0-1.36.79l-1.99-.8a.4.4 0 0 0-.49.18l-1.6 2.77a.4.4 0 0 0 .1.51l1.68 1.32a7.56 7.56 0 0 0 0 3.14l-1.68 1.32a.4.4 0 0 0-.1.51l1.6 2.77a.4.4 0 0 0 .49.18l1.99-.8a5.8 5.8 0 0 0 1.36.79l.3 2.12a.4.4 0 0 0 .4.34h3.2a.4.4 0 0 0 .4-.34l.3-2.12a5.8 5.8 0 0 0 1.36-.79l1.99.8a.4.4 0 0 0 .49-.18l1.6-2.77a.4.4 0 0 0-.1-.51l-1.68-1.32a7.56 7.56 0 0 0 .16-1.57z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            
+            <!-- Setup Section -->
+            <section class="setup-container" id="setup">
+                <div class="setup-header">
+                    <h2 class="setup-title">BASKETBALL GAME SETUP</h2>
+                    <p class="setup-subtitle">Configure your team and game settings for optimal playing time balance</p>
+                </div>
+
+                <form class="setup-form">
+                    <!-- Game Configuration -->
+                    <div class="config-section">
+                        <h3 class="section-title">GAME STRUCTURE</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="minsPerPeriod">MINUTES PER HALF</label>
+                                <input type="number" id="minsPerPeriod" min="5" max="30" value="20" class="form-input">
+                                <span class="field-note">Standard basketball half duration</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="numOnCourt">PLAYERS ON COURT</label>
+                                <select id="numOnCourt" class="form-select">
+                                    <option value="3">3 (3v3)</option>
+                                    <option value="4">4 (4v4)</option>
+                                    <option value="5" selected>5 (Full Court)</option>
+                                </select>
+                                <span class="field-note">Players actively playing</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="numReserves">RESERVES (BENCH)</label>
+                                <select id="numReserves" class="form-select">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3" selected>3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                </select>
+                                <span class="field-note">Players available for substitution</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="subsPerChange">SUBS PER CHANGE</label>
+                                <select id="subsPerChange" class="form-select">
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                                <span class="field-note">Players swapped simultaneously</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Options -->
+                    <div class="config-section">
+                        <h3 class="section-title">ADVANCED OPTIONS</h3>
+                        
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="warningSoundToggle" checked>
+                                <span class="checkbox-custom"></span>
+                                ENABLE SUB WARNING SOUND
+                            </label>
+                            <span class="field-note">Plays alert 10 seconds before substitution</span>
+                        </div>
+                    </div>
+
+                    <!-- Preliminary Plan Section -->
+                    <div class="preliminary-plan-section">
+                        <button type="button" id="getPlanButton" class="plan-button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                            </svg>
+                            SHOW PRELIMINARY SUBSTITUTION PLAN
+                        </button>
+                        <div id="preliminaryPlanOutput" class="plan-output hidden">
+                            <!-- Plan details will appear here -->
+                        </div>
+                    </div>
+
+                    <!-- Player Names -->
+                    <div class="config-section">
+                        <h3 class="section-title">PLAYER NAMES</h3>
+                        
+                        <div class="form-group">
+                            <label for="starterNamesContainer">STARTING LINEUP</label>
+                            <div id="starterNamesContainer" class="player-names-container">
+                                <!-- Inputs will be dynamically generated here -->
+                            </div>
+                            <span class="field-note">Enter player names or leave as default numbers</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reserveNamesContainer">BENCH PLAYERS</label>
+                            <div id="reserveNamesContainer" class="player-names-container">
+                                <!-- Inputs will be dynamically generated here -->
+                            </div>
+                            <span class="field-note">Reserve players available for substitution</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="form-actions">
+                        <button type="button" id="confirmSetupButton" class="confirm-button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            START BASKETBALL GAME
+                        </button>
+                    </div>
+
+                    <!-- Error Display -->
+                    <div id="setupError" class="error-message hidden"></div>
+                </form>
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- Include the basketball setup JavaScript -->
+    <script src="constants.js"></script>
+    <script src="setup-and-reset.js"></script>
+    <script>
+        // Initialize the setup screen
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate player name inputs based on configuration
+            function updatePlayerInputs() {
+                const numOnCourt = parseInt(document.getElementById('numOnCourt').value);
+                const numReserves = parseInt(document.getElementById('numReserves').value);
+                
+                // Update starting players
+                const starterContainer = document.getElementById('starterNamesContainer');
+                starterContainer.innerHTML = '';
+                for (let i = 1; i <= numOnCourt; i++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = `Player ${i}`;
+                    input.className = 'player-name-input';
+                    starterContainer.appendChild(input);
+                }
+                
+                // Update reserves
+                const reserveContainer = document.getElementById('reserveNamesContainer');
+                reserveContainer.innerHTML = '';
+                for (let i = 1; i <= numReserves; i++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = `Reserve ${i}`;
+                    input.className = 'player-name-input';
+                    reserveContainer.appendChild(input);
+                }
+            }
+
+            // Initialize inputs
+            updatePlayerInputs();
+
+            // Update inputs when configuration changes
+            document.getElementById('numOnCourt').addEventListener('change', updatePlayerInputs);
+            document.getElementById('numReserves').addEventListener('change', updatePlayerInputs);
+
+            // Preliminary plan button
+            document.getElementById('getPlanButton').addEventListener('click', function() {
+                const output = document.getElementById('preliminaryPlanOutput');
+                if (output.classList.contains('hidden')) {
+                    output.classList.remove('hidden');
+                    output.innerHTML = `
+                        <div class="plan-preview">
+                            <h4>SUBSTITUTION SCHEDULE PREVIEW</h4>
+                            <div class="plan-item">
+                                <span class="plan-time">05:00</span>
+                                <span class="plan-action">Player 1 ↔ Reserve 1</span>
+                            </div>
+                            <div class="plan-item">
+                                <span class="plan-time">10:00</span>
+                                <span class="plan-action">Player 2 ↔ Reserve 2</span>
+                            </div>
+                            <div class="plan-item">
+                                <span class="plan-time">15:00</span>
+                                <span class="plan-action">Player 3 ↔ Reserve 3</span>
+                            </div>
+                            <div class="balance-projection">
+                                <strong>PROJECTED BALANCE:</strong> Perfect (0 second variance)
+                            </div>
+                        </div>
+                    `;
+                    this.textContent = 'HIDE PRELIMINARY PLAN';
+                } else {
+                    output.classList.add('hidden');
+                    this.innerHTML = `
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                        </svg>
+                        SHOW PRELIMINARY SUBSTITUTION PLAN
+                    `;
+                }
+            });
+
+            // Setup confirmation
+            document.getElementById('confirmSetupButton').addEventListener('click', function() {
+                // For now, redirect to the dashboard
+                window.location.href = 'basketball-ui-test.html';
+            });
+        });
+    </script>
+</body>
+</html>

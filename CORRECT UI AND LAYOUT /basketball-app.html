@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BenchBalancers - Professional Basketball Team Management">
+    <meta name="theme-color" content="#1a1a1a">
+    
+    <title>Bench Balancers - Basketball Team Management</title>
+    
+    <!-- Core Scripts -->
+    <script src="constants.js?v=basketball"></script>
+    <script src="dom-elements.js?v=basketball"></script>
+    <script src="game-state.js?v=basketball"></script>
+    <script src="utility-functions.js?v=basketball"></script>
+    <script src="team-config.js?v=basketball"></script>
+    <script src="missing-functions.js?v=basketball"></script>
+    <script src="variance-tracker.js?v=basketball"></script>
+    <script src="lineup-generators.js?v=basketball"></script>
+    <script src="substitution-logic.js?v=basketball"></script>
+    <script src="dynamic-perfect-algorithm.js?v=basketball"></script>
+    <script src="ui-updates.js?v=basketball"></script>
+    <script src="modal-handlers.js?v=basketball"></script>
+    <script src="timer-and-gameplay.js?v=basketball"></script>
+    <script src="setup-and-reset.js?v=basketball"></script>
+    <script src="event-listeners.js?v=basketball"></script>
+    
+    <!-- Basketball UI Styles -->
+    <link rel="stylesheet" href="basketball-styles-updated.css?v=2">
+    
+    <!-- Audio files will be loaded dynamically when needed -->
+</head>
+<body class="basketball-app">
+    <!-- Main App Container -->
+    <div id="basketball-app" class="app-container">
+        
+        <!-- Header with Branding -->
+        <header class="app-header">
+            <div class="header-left">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiBmaWxsPSIjMDEyMjY5Ii8+CjxyZWN0IHg9IjEzLjMzMzMiIHk9IjAiIHdpZHRoPSIxMy4zMzMzIiBoZWlnaHQ9IjI0IiBmaWxsPSJ3aGl0ZSIvPgo8cmVjdCB4PSIyNi42NjY3IiB5PSIwIiB3aWR0aD0iMTMuMzMzMyIgaGVpZ2h0PSIyNCIgZmlsbD0iI0NFMTEyNiIvPgo8L3N2Zz4K" alt="UK Flag" class="flag-icon">
+            </div>
+            <div class="header-center">
+                <h1 class="app-title">Bench Balancers.</h1>
+            </div>
+            <div class="header-right">
+                <button class="settings-btn" id="settingsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="m12 1 2 2-2 2-2-2 2-2zM21 12l-2 2-2-2 2-2 2 2zM12 21l-2-2 2-2 2 2-2 2zM3 12l2-2 2 2-2 2-2-2z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Coach Welcome Bar -->
+        <div class="coach-welcome">
+            <div class="welcome-text">
+                <span class="welcome-label">WELCOME BACK,</span>
+                <span class="coach-name" id="coachName">COACH BOB</span>
+            </div>
+            <div class="games-info">
+                <span class="games-label">GAMES PLAYED: <span id="gamesPlayed">24</span></span>
+                <div class="team-selector" id="teamSelector">
+                    <span class="team-name">WEBBERS WARRIORS</span>
+                    <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                        <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="app-main" id="appMain">
+            
+            <!-- HOME SCREEN (Dashboard) -->
+            <section id="homeScreen" class="screen active">
+                <div class="dashboard-grid">
+                    
+                    <!-- Bench Balance Card -->
+                    <div class="stats-card bench-balance-card">
+                        <h2 class="card-title">BENCH BALANCE</h2>
+                        <div class="player-stats-list" id="benchBalanceList">
+                            <div class="player-stat">
+                                <span class="player-name">BEN</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">TIM</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">RONALDO</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">FELIX</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">CHRIS</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">GLEN</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">MARCUS</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">HARRY</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Players Card -->
+                    <div class="stats-card top-players-card">
+                        <h2 class="card-title">TOP PLAYERS</h2>
+                        <div class="player-stats-list" id="topPlayersList">
+                            <div class="player-stat">
+                                <span class="player-name">BEN</span>
+                                <span class="stat-value">25P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">TIM</span>
+                                <span class="stat-value">10P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">RONALDO</span>
+                                <span class="stat-value">6P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">FELIX</span>
+                                <span class="stat-value">4P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">CHRIS</span>
+                                <span class="stat-value">3P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">GLEN</span>
+                                <span class="stat-value">2P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">MARCUS</span>
+                                <span class="stat-value">1P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">HARRY</span>
+                                <span class="stat-value">1P/G</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Start Game Hero Card -->
+                    <div class="hero-card start-game-card">
+                        <h2 class="hero-title">START GAME</h2>
+                        <button class="play-btn" id="startGameBtn">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                <circle cx="20" cy="20" r="20" fill="white"/>
+                                <polygon points="16,12 16,28 28,20" fill="#1a1a1a"/>
+                            </svg>
+                        </button>
+                        <div class="hero-image">
+                            <!-- Basketball player silhouette will be added via CSS -->
+                        </div>
+                    </div>
+
+                    <!-- Team Season Stats -->
+                    <div class="stats-card season-stats-card">
+                        <h2 class="card-title">TEAM SEASON STATS</h2>
+                        <div class="season-stats" id="seasonStats">
+                            <div class="stat-row">
+                                <span class="stat-label">POINTS SCORED</span>
+                                <span class="stat-value">1255</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">POINTS CONCEDED</span>
+                                <span class="stat-value">925</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">+/-</span>
+                                <span class="stat-value positive">330</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">WINS</span>
+                                <span class="stat-value">20</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Coaches -->
+                    <div class="stats-card coaches-card">
+                        <h2 class="card-title">TOP COACHES</h2>
+                        <div class="coaches-list" id="coachesList">
+                            <div class="coach-stat">
+                                <span class="coach-rank">1.</span>
+                                <span class="coach-name">COACH BOB</span>
+                                <span class="coach-games">22 GAMES</span>
+                            </div>
+                            <div class="coach-stat">
+                                <span class="coach-rank">2.</span>
+                                <span class="coach-name">COACH TIM</span>
+                                <span class="coach-games">1 GAME</span>
+                            </div>
+                            <div class="coach-stat">
+                                <span class="coach-rank">3.</span>
+                                <span class="coach-name">COACH STEPH</span>
+                                <span class="coach-games">1 GAME</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TEAMS SCREEN (Formation) -->
+            <section id="teamsScreen" class="screen">
+                <div class="teams-container">
+                    <div class="team-header">
+                        <div class="team-name-display">WEBBERS WARRIORS</div>
+                        <div class="formation-selector">
+                            <select id="formationSelect">
+                                <option value="formation">FORMATION</option>
+                                <option value="1-2-1-1">1-2-1-1</option>
+                                <option value="2-1-2">2-1-2</option>
+                                <option value="1-3-1">1-3-1</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Basketball Court -->
+                    <div class="basketball-court" id="basketballCourt">
+                        <div class="court-svg">
+                            <!-- Court will be rendered here -->
+                        </div>
+                        <div class="player-positions" id="playerPositions">
+                            <!-- Player positions will be dynamically generated -->
+                        </div>
+                    </div>
+
+                    <!-- Bench Section -->
+                    <div class="bench-section">
+                        <h3 class="bench-title">BENCH</h3>
+                        <div class="bench-players" id="benchPlayers">
+                            <!-- Bench players will be dynamically generated -->
+                        </div>
+                    </div>
+
+                    <!-- Edit Team Button -->
+                    <button class="edit-team-btn" id="editTeamBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="m18.5 2.5-10 10v4h4l10-10a1.5 1.5 0 0 0 0-2l-2-2a1.5 1.5 0 0 0-2 0z"/>
+                        </svg>
+                        EDIT TEAM
+                    </button>
+                </div>
+            </section>
+
+            <!-- START SCREEN (Live Game) -->
+            <section id="startScreen" class="screen">
+                <div class="live-game-container">
+                    <div class="game-header">
+                        <div class="team-name-display">WEBBERS WARRIORS</div>
+                        <div class="game-info">
+                            <div class="game-number">GAME <span id="currentGameNumber">25</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Game Timer -->
+                    <div class="game-timer" id="gameTimer">
+                        <div class="period-indicator" id="periodIndicator">H2</div>
+                        <div class="timer-display" id="timerDisplay">13:56</div>
+                    </div>
+
+                    <!-- Basketball Court Live View -->
+                    <div class="basketball-court live-court" id="liveBasketballCourt">
+                        <!-- Court and live player positions -->
+                    </div>
+
+                    <!-- Game Controls -->
+                    <div class="game-controls-section">
+                        <div class="bench-live">
+                            <h3 class="section-title">BENCH</h3>
+                            <div class="bench-players-live" id="benchPlayersLive">
+                                <!-- Live bench players with timers -->
+                            </div>
+                        </div>
+
+                        <div class="out-players">
+                            <h3 class="section-title">OUT</h3>
+                            <div class="out-players-list" id="outPlayersList">
+                                <!-- Players who are out -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Score -->
+                    <div class="live-score" id="liveScore">
+                        <span class="period">H2</span>
+                        <span class="score">48-20</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STATS SCREEN -->
+            <section id="statsScreen" class="screen">
+                <div class="stats-container">
+                    <!-- Live Stats for Current Game -->
+                    <div class="live-stats-header">
+                        <div class="current-score">48-20</div>
+                        <h2 class="section-title">LIVE STATS</h2>
+                        <div class="game-indicator">GAME 25</div>
+                    </div>
+
+                    <!-- Score Management -->
+                    <div class="score-section">
+                        <h3 class="subsection-title">SCORE</h3>
+                        <div class="team-tabs">
+                            <button class="team-tab active" id="myTeamTab">MY TEAM</button>
+                            <button class="team-tab" id="opponentTab">OPPONENT</button>
+                        </div>
+                        
+                        <div class="players-scoring" id="playersScoring">
+                            <!-- Player scoring controls will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Historical Stats -->
+                    <div class="historical-stats">
+                        <div class="stats-grid">
+                            <!-- Games List -->
+                            <div class="stats-card games-card">
+                                <h3 class="card-title">GAMES</h3>
+                                <div class="games-list" id="gamesList">
+                                    <!-- Games history will be populated -->
+                                </div>
+                            </div>
+
+                            <!-- Coaches Stats -->
+                            <div class="stats-card coaches-stats-card">
+                                <h3 class="card-title">COACHES</h3>
+                                <div class="coaches-stats" id="coachesStats">
+                                    <div class="coach-stat">
+                                        <span class="coach-info">1.COACH BOB</span>
+                                        <span class="coach-games">22 GAMES</span>
+                                        <span class="coach-percentage">90%</span>
+                                    </div>
+                                    <div class="coach-stat">
+                                        <span class="coach-info">2.COACH TIM</span>
+                                        <span class="coach-games">1 GAME</span>
+                                        <span class="coach-percentage">0%</span>
+                                    </div>
+                                    <div class="coach-stat">
+                                        <span class="coach-info">3.COACH STEPH</span>
+                                        <span class="coach-games">1 GAME</span>
+                                        <span class="coach-percentage">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Team Season Stats -->
+                            <div class="stats-card team-season-card">
+                                <h3 class="card-title">TEAM SEASON STATS</h3>
+                                <div class="team-season-stats">
+                                    <div class="stat-row">
+                                        <span class="stat-label">POINTS SCORED</span>
+                                        <span class="stat-value">1255</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">POINTS CONCEDED</span>
+                                        <span class="stat-value">925</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">+/-</span>
+                                        <span class="stat-value positive">330</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">WINS</span>
+                                        <span class="stat-value">20</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">LOSSES</span>
+                                        <span class="stat-value">4</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">DRAWS</span>
+                                        <span class="stat-value">0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bench Balance History -->
+                            <div class="stats-card bench-balance-history-card">
+                                <h3 class="card-title">BENCH BALANCE</h3>
+                                <div class="player-stats-list">
+                                    <div class="player-stat">
+                                        <span class="player-name">BEN</span>
+                                        <span class="stat-value">23mins/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">TIM</span>
+                                        <span class="stat-value">23mins/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">RONALDO</span>
+                                        <span class="stat-value">23mins/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">FELIX</span>
+                                        <span class="stat-value">23mins/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">CHRIS</span>
+                                        <span class="stat-value">23mins/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">GLEN</span>
+                                        <span class="stat-value">23mins/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">MARCUS</span>
+                                        <span class="stat-value">23mins/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">HARRY</span>
+                                        <span class="stat-value">23mins/G</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Top Players History -->
+                            <div class="stats-card top-players-history-card">
+                                <h3 class="card-title">TOP PLAYERS</h3>
+                                <div class="player-stats-list">
+                                    <div class="player-stat">
+                                        <span class="player-name">BEN</span>
+                                        <span class="stat-value">25P/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">TIM</span>
+                                        <span class="stat-value">10P/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">RONALDO</span>
+                                        <span class="stat-value">6P/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">FELIX</span>
+                                        <span class="stat-value">4P/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">CHRIS</span>
+                                        <span class="stat-value">3P/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">GLEN</span>
+                                        <span class="stat-value">2P/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">MARCUS</span>
+                                        <span class="stat-value">1P/G</span>
+                                    </div>
+                                    <div class="player-stat">
+                                        <span class="player-name">HARRY</span>
+                                        <span class="stat-value">1P/G</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COACHES SCREEN -->
+            <section id="coachesScreen" class="screen">
+                <div class="coaches-container">
+                    <!-- All Coaches Section -->
+                    <div class="all-coaches-section">
+                        <div class="section-header">
+                            <h2 class="section-title">ALL COACHES</h2>
+                            <button class="edit-coaches-btn" id="editCoachesBtn">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="m18.5 2.5-10 10v4h4l10-10a1.5 1.5 0 0 0 0-2l-2-2a1.5 1.5 0 0 0-2 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="coaches-list-section">
+                            <div class="coach-item">
+                                <span class="coach-info">1.COACH BOB (ADMIN)</span>
+                                <input type="checkbox" class="coach-checkbox" checked>
+                            </div>
+                            <div class="coach-item">
+                                <span class="coach-info">2.COACH TIM</span>
+                                <input type="checkbox" class="coach-checkbox">
+                            </div>
+                            <div class="coach-item">
+                                <span class="coach-info">3.COACH STEPH</span>
+                                <input type="checkbox" class="coach-checkbox">
+                            </div>
+                        </div>
+
+                        <div class="coach-actions">
+                            <button class="action-btn primary" id="selectNextCoachBtn">SELECT NEXT GAMES COACH</button>
+                            <button class="action-btn secondary" id="inviteMoreBtn">INVITE MORE</button>
+                        </div>
+                    </div>
+
+                    <!-- Coaching Stats -->
+                    <div class="coaching-stats-section">
+                        <h2 class="section-title">COACHING STATS</h2>
+                        <div class="coaching-stats">
+                            <div class="coach-stat-item">
+                                <span class="coach-name">1.COACH BOB</span>
+                                <span class="games-count">22 GAMES</span>
+                                <span class="win-percentage">90%</span>
+                            </div>
+                            <div class="coach-stat-item">
+                                <span class="coach-name">2.COACH TIM</span>
+                                <span class="games-count">1 GAME</span>
+                                <span class="win-percentage">0%</span>
+                            </div>
+                            <div class="coach-stat-item">
+                                <span class="coach-name">3.COACH STEPH</span>
+                                <span class="games-count">1 GAME</span>
+                                <span class="win-percentage">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="nav-item active" data-screen="home" id="homeNavBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+                <span>HOME</span>
+            </button>
+            <button class="nav-item" data-screen="teams" id="teamsNavBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="m22 21-2-2"/>
+                    <path d="M22 13c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2z"/>
+                </svg>
+                <span>TEAMS</span>
+            </button>
+            <button class="nav-item start-nav" data-screen="start" id="startNavBtn">
+                <div class="start-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="16" fill="currentColor"/>
+                        <polygon points="12,10 12,22 22,16" fill="white"/>
+                    </svg>
+                </div>
+                <span>START</span>
+            </button>
+            <button class="nav-item" data-screen="stats" id="statsNavBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18"/>
+                    <path d="m19 9-5 5-4-4-3 3"/>
+                </svg>
+                <span>STATS</span>
+            </button>
+            <button class="nav-item" data-screen="coaches" id="coachesNavBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>COACHES</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- Basketball App Enhanced JavaScript -->
+    <script src="basketball-app.js?v=1"></script>
+</body>
+</html>

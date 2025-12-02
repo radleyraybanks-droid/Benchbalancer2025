@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BenchBalancer - Oztag Setup</title>
+
+    <!-- Supabase CDN for authentication and database -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@500;700&display=swap');
+
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #08101a;
+            --bg-850: #0e1625;
+            --bg-800: rgba(18, 28, 45, 0.75);
+            --bg-700: rgba(24, 34, 53, 0.65);
+            --bg-card: rgba(23, 34, 58, 0.85);
+            --border-strong: rgba(0, 255, 224, 0.35);
+            --border-soft: rgba(0, 255, 224, 0.18);
+            --accent-cyan: #00ffe0;
+            --accent-success: #4be9a6;
+            --accent-danger: #ff5f6d;
+            --text-primary: #f5fbff;
+            --text-secondary: #9fb7d6;
+            --text-muted: #6f829e;
+            --radius-lg: 28px;
+            --radius-md: 20px;
+            --radius-sm: 12px;
+            --transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                        radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.08), transparent 50%),
+                        linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #setup {
+            max-width: 520px;
+            margin: 36px auto 48px;
+            padding: 0 20px;
+        }
+
+        #setup h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            letter-spacing: 0.12em;
+            margin: 32px 0 18px;
+            color: var(--text-primary);
+        }
+
+        #setup h2:first-child {
+            margin-top: 0;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: opacity 0.2s;
+        }
+
+        .back-link:hover {
+            opacity: 0.8;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group select,
+        .form-group input[type="number"],
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: border-color var(--transition), background var(--transition);
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239fb7d6'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+
+        .small-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 6px 0 0;
+        }
+
+        #starterNamesContainer,
+        #reserveNamesContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        #starterNamesContainer input,
+        #reserveNamesContainer input {
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: border-color var(--transition);
+        }
+
+        #starterNamesContainer input:focus,
+        #reserveNamesContainer input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        #starterNamesContainer input::placeholder,
+        #reserveNamesContainer input::placeholder {
+            color: var(--text-muted);
+        }
+
+        #confirmSetupButton {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.95) 0%, rgba(0, 205, 184, 0.95) 100%);
+            border: none;
+            border-radius: var(--radius-md);
+            color: #041018;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            transition: transform var(--transition), box-shadow var(--transition);
+            margin-top: 24px;
+        }
+
+        #confirmSetupButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 40px -24px rgba(0, 255, 224, 0.75);
+        }
+
+        #confirmSetupButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #setupError {
+            margin-top: 12px;
+            text-align: center;
+            color: var(--accent-danger);
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: rgba(0, 255, 224, 0.08);
+            border: 1px solid rgba(0, 255, 224, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .roster-indicator {
+            color: var(--accent-cyan);
+            font-weight: normal;
+        }
+
+        @media (max-width: 600px) {
+            #setup {
+                padding: 0 14px;
+            }
+
+            #starterNamesContainer,
+            #reserveNamesContainer {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="setup">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="index.html" class="back-link" style="margin-bottom: 0;">← Back to Sports</a>
+            <div id="authContainer" style="display: flex; gap: 10px; align-items: center;">
+                <button id="signInButton" onclick="if(typeof showEmailAuthModal === 'function') showEmailAuthModal(); else alert('Auth system loading...');"
+                    style="background: linear-gradient(45deg, #00FFE0, #4A90E2); color: #1a1a1f; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; transition: transform 0.2s;">
+                    Sign In
+                </button>
+            </div>
+        </div>
+
+        <h2>🏉 Oztag Game Setup</h2>
+
+        <div class="info-box">
+            <p>Oztag: 8 players on field at any time. Up to 6 reserves allowed (14 max roster). Rolling substitutions with equal playing time distribution.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="gameFormat">Game Format:</label>
+            <select id="gameFormat">
+                <option value="junior">Junior (2 x 15 min halves)</option>
+                <option value="standard" selected>Standard (2 x 20 min halves)</option>
+                <option value="competitive">Competitive (2 x 25 min halves)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="minsPerHalf">Minutes per Half:</label>
+            <input type="number" id="minsPerHalf" min="5" max="45" value="20">
+        </div>
+
+        <div class="form-group">
+            <label for="numOnField">Players on Field:</label>
+            <select id="numOnField" disabled>
+                <option value="8" selected>8</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="numReserves">Number of Reserves: <span id="rosterSizeIndicator" class="roster-indicator">(Total Roster: 8)</span></label>
+            <select id="numReserves">
+                <option value="0">0 (no subs)</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4" selected>4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+            <p class="small-note">Players available for substitution during the match.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="subsPerRotation">Subs Per Rotation:</label>
+            <select id="subsPerRotation">
+                <option value="1">1 player</option>
+                <option value="2" selected>2 players</option>
+                <option value="3">3 players</option>
+            </select>
+            <p class="small-note">How many players rotate at each substitution event.</p>
+        </div>
+
+        <h2>🏉 Player Names</h2>
+
+        <div class="form-group">
+            <label>Starting Players (8 on field):</label>
+            <div id="starterNamesContainer">
+                <!-- Inputs will be dynamically generated here -->
+            </div>
+            <p class="small-note">Leave blank to use default names (Player 1, Player 2, etc.)</p>
+        </div>
+
+        <div class="form-group" id="reserveNamesSection">
+            <label>Reserve Players:</label>
+            <div id="reserveNamesContainer">
+                <!-- Inputs will be dynamically generated here -->
+            </div>
+            <p class="small-note">Leave blank to use default names.</p>
+        </div>
+
+        <button id="confirmSetupButton">🏉 Start Oztag Game</button>
+        <p id="setupError"></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gameFormatSelect = document.getElementById('gameFormat');
+            const minsPerHalfInput = document.getElementById('minsPerHalf');
+            const numReservesSelect = document.getElementById('numReserves');
+            const subsPerRotationSelect = document.getElementById('subsPerRotation');
+            const starterNamesContainer = document.getElementById('starterNamesContainer');
+            const reserveNamesContainer = document.getElementById('reserveNamesContainer');
+            const reserveNamesSection = document.getElementById('reserveNamesSection');
+            const rosterSizeIndicator = document.getElementById('rosterSizeIndicator');
+            const confirmButton = document.getElementById('confirmSetupButton');
+            const setupError = document.getElementById('setupError');
+
+            const PLAYERS_ON_FIELD = 8;
+
+            // Preset configurations
+            const presets = {
+                junior: 15,
+                standard: 20,
+                competitive: 25
+            };
+
+            // Generate starter name inputs (always 8)
+            function generateStarterInputs() {
+                starterNamesContainer.innerHTML = '';
+                for (let i = 1; i <= PLAYERS_ON_FIELD; i++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = `Player ${i}`;
+                    input.dataset.index = i;
+                    starterNamesContainer.appendChild(input);
+                }
+            }
+
+            // Generate reserve name inputs based on selection
+            function generateReserveInputs() {
+                const numReserves = parseInt(numReservesSelect.value);
+                reserveNamesContainer.innerHTML = '';
+
+                if (numReserves === 0) {
+                    reserveNamesSection.style.display = 'none';
+                    return;
+                }
+
+                reserveNamesSection.style.display = 'block';
+
+                for (let i = 1; i <= numReserves; i++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    const playerNum = PLAYERS_ON_FIELD + i;
+                    input.placeholder = `Player ${playerNum}`;
+                    input.dataset.index = playerNum;
+                    reserveNamesContainer.appendChild(input);
+                }
+            }
+
+            // Update roster size indicator
+            function updateRosterIndicator() {
+                const numReserves = parseInt(numReservesSelect.value);
+                const totalRoster = PLAYERS_ON_FIELD + numReserves;
+                rosterSizeIndicator.textContent = `(Total Roster: ${totalRoster})`;
+            }
+
+            // Handle game format change
+            gameFormatSelect.addEventListener('change', () => {
+                const preset = gameFormatSelect.value;
+                if (presets[preset]) {
+                    minsPerHalfInput.value = presets[preset];
+                }
+            });
+
+            // Handle reserves change
+            numReservesSelect.addEventListener('change', () => {
+                generateReserveInputs();
+                updateRosterIndicator();
+            });
+
+            // Handle start game
+            confirmButton.addEventListener('click', () => {
+                setupError.textContent = '';
+
+                const numReserves = parseInt(numReservesSelect.value);
+                const totalPlayers = PLAYERS_ON_FIELD + numReserves;
+                const playerNames = [];
+
+                // Collect starter names
+                const starterInputs = starterNamesContainer.querySelectorAll('input');
+                starterInputs.forEach((input, idx) => {
+                    const name = input.value.trim() || `Player ${idx + 1}`;
+                    playerNames.push(name);
+                });
+
+                // Collect reserve names
+                if (numReserves > 0) {
+                    const reserveInputs = reserveNamesContainer.querySelectorAll('input');
+                    reserveInputs.forEach((input, idx) => {
+                        const playerNum = PLAYERS_ON_FIELD + idx + 1;
+                        const name = input.value.trim() || `Player ${playerNum}`;
+                        playerNames.push(name);
+                    });
+                }
+
+                // Validate we have exactly the right number of players
+                if (playerNames.length !== totalPlayers) {
+                    setupError.textContent = 'Error: Player count mismatch. Please refresh and try again.';
+                    return;
+                }
+
+                // Build game setup
+                const gameSetup = {
+                    playerNames: playerNames,
+                    halfLength: parseInt(minsPerHalfInput.value) * 60,
+                    numHalves: 2,
+                    playersOnField: PLAYERS_ON_FIELD,
+                    rotationsPerChange: parseInt(subsPerRotationSelect.value),
+                    autoConfirm: false,
+                    teamName: 'Home',
+                    oppositionName: 'Opposition'
+                };
+
+                // Store in sessionStorage
+                sessionStorage.setItem('oztagGameSetup', JSON.stringify(gameSetup));
+
+                // Navigate to game page
+                window.location.href = 'oztag-game.html';
+            });
+
+            // Initialize
+            generateStarterInputs();
+            generateReserveInputs();
+            updateRosterIndicator();
+        });
+    </script>
+
+    <!-- Authentication and Database Integration -->
+    <script src="config/supabase-config.js"></script>
+    <script src="auth/auth-manager.js"></script>
+    <script src="config/simple-supabase.js"></script>
+</body>
+</html>

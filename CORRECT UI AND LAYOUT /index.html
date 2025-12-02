@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bench Balancer - Professional Sports Team Management for Soccer and Basketball">
+    <meta name="theme-color" content="#1a1a1a">
+    
+    <title>Bench Balancer - Sports Team Management</title>
+    
+    <!-- Landing Page Styles -->
+    <link rel="stylesheet" href="landing-styles.css?v=1">
+    
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="landing-app">
+    <!-- Main App Container -->
+    <div id="landing-app" class="app-container">
+        
+        <!-- Header with Branding -->
+        <header class="app-header">
+            <div class="header-left">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiBmaWxsPSIjMDEyMjY5Ii8+CjxyZWN0IHg9IjEzLjMzMzMiIHk9IjAiIHdpZHRoPSIxMy4zMzMzIiBoZWlnaHQ9IjI0IiBmaWxsPSJ3aGl0ZSIvPgo8cmVjdCB4PSIyNi42NjY3IiB5PSIwIiB3aWR0aD0iMTMuMzMzMyIgaGVpZ2h0PSIyNCIgZmlsbD0iI0NFMTEyNiIvPgo8L3N2Zz4K" alt="UK Flag" class="flag-icon">
+            </div>
+            <div class="header-center">
+                <h1 class="app-title">Bench Balancer.</h1>
+            </div>
+            <div class="header-right">
+                <button class="settings-btn" id="settingsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="m12 1 2 2-2 2-2-2 2-2zM21 12l-2 2-2-2 2-2 2 2zM12 21l-2-2 2-2 2 2-2 2zM3 12l2-2 2 2-2 2-2-2z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        Professional Sports
+                        <span class="gradient-text">Team Management</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Intelligent substitution management for coaches. Take the stress out of managing playing time with our advanced algorithms that ensure every player gets fair field time.
+                    </p>
+                </div>
+                
+                <!-- Sport Selection Cards -->
+                <div class="sports-grid">
+                    
+                    <!-- Soccer Tile -->
+                    <div class="sport-card soccer-card" id="soccerCard">
+                        <div class="sport-icon">
+                            <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+                                <!-- Soccer Ball SVG -->
+                                <circle cx="50" cy="50" r="45" fill="white" stroke="currentColor" stroke-width="3"/>
+                                <polygon points="50,15 60,35 45,35" fill="currentColor"/>
+                                <polygon points="50,85 40,65 55,65" fill="currentColor"/>
+                                <polygon points="20,40 35,50 25,60" fill="currentColor"/>
+                                <polygon points="80,60 65,50 75,40" fill="currentColor"/>
+                                <polygon points="35,25 50,30 40,40" fill="currentColor"/>
+                                <polygon points="65,75 50,70 60,60" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <div class="sport-content">
+                            <h2 class="sport-title">Soccer</h2>
+                            <p class="sport-description">
+                                Advanced substitution management for football teams. Perfect for youth leagues, clubs, and professional teams.
+                            </p>
+                            <div class="sport-features">
+                                <div class="feature">⚽ Field positioning</div>
+                                <div class="feature">🔄 Smart rotations</div>
+                                <div class="feature">⏱️ Equal playing time</div>
+                                <div class="feature">🥅 Goalkeeper management</div>
+                            </div>
+                        </div>
+                        <div class="sport-action">
+                            <button class="sport-btn" data-sport="soccer">
+                                <span>Launch Soccer App</span>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="m9 18 6-6-6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="sport-badge">Original</div>
+                    </div>
+
+                    <!-- Basketball Tile -->
+                    <div class="sport-card basketball-card" id="basketballCard">
+                        <div class="sport-icon">
+                            <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+                                <!-- Basketball SVG -->
+                                <circle cx="50" cy="50" r="45" fill="#d4941e" stroke="currentColor" stroke-width="3"/>
+                                <path d="M50 5 C25 5, 5 25, 5 50 C5 75, 25 95, 50 95" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <path d="M50 5 C75 5, 95 25, 95 50 C95 75, 75 95, 50 95" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <line x1="5" y1="50" x2="95" y2="50" stroke="currentColor" stroke-width="2"/>
+                                <path d="M50 5 C50 25, 25 35, 25 50 C25 65, 50 75, 50 95" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <path d="M50 5 C50 25, 75 35, 75 50 C75 65, 50 75, 50 95" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                        <div class="sport-content">
+                            <h2 class="sport-title">Basketball</h2>
+                            <p class="sport-description">
+                                Modern court management with real-time statistics. Built for competitive basketball teams and leagues.
+                            </p>
+                            <div class="sport-features">
+                                <div class="feature">🏀 Court positioning</div>
+                                <div class="feature">📊 Live statistics</div>
+                                <div class="feature">🔥 Real-time scoring</div>
+                                <div class="feature">👥 Coach management</div>
+                            </div>
+                        </div>
+                        <div class="sport-action">
+                            <button class="sport-btn" data-sport="basketball">
+                                <span>Launch Basketball App</span>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="m9 18 6-6-6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="sport-badge new">New</div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="features-container">
+                <h2 class="features-title">Why Choose Bench Balancer?</h2>
+                <div class="features-grid">
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 12l2 2 4-4"/>
+                                <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.5 0 4.74 1.02 6.36 2.64"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Fair Play Guaranteed</h3>
+                        <p class="feature-text">
+                            Advanced algorithms ensure every player gets equitable playing time, reducing parent complaints and keeping everyone happy.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12,6 12,12 16,14"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Real-Time Management</h3>
+                        <p class="feature-text">
+                            Live game timer with automatic substitution alerts. Focus on coaching while the app handles player rotations seamlessly.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Sideline Ready</h3>
+                        <p class="feature-text">
+                            Mobile-optimized interface with audio alerts. No need to constantly watch the screen during intense game moments.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Smart Analytics</h3>
+                        <p class="feature-text">
+                            Track player performance, analyze playing time distribution, and get insights to improve team balance over time.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Team Flexibility</h3>
+                        <p class="feature-text">
+                            Works with any team size and supports 1-3 substitutions per change. Emergency substitution system for injuries.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <path d="M9 12l2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">Zero Setup Hassle</h3>
+                        <p class="feature-text">
+                            No accounts, no downloads required. Enter your team details and start managing games immediately in your browser.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to Transform Your Team Management?</h2>
+                <p class="cta-subtitle">
+                    Join thousands of coaches who trust Bench Balancer for fair, efficient, and stress-free game management.
+                </p>
+                <div class="cta-buttons">
+                    <button class="cta-btn primary" data-sport="soccer">
+                        <span>Try Soccer Version</span>
+                        <span>⚽</span>
+                    </button>
+                    <button class="cta-btn secondary" data-sport="basketball">
+                        <span>Try Basketball Version</span>
+                        <span>🏀</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <h3 class="footer-title">Bench Balancer</h3>
+                    <p class="footer-text">Professional sports team management made simple.</p>
+                </div>
+                
+                <div class="footer-center">
+                    <div class="footer-links">
+                        <a href="#features" class="footer-link">Features</a>
+                        <a href="#about" class="footer-link">About</a>
+                        <a href="#support" class="footer-link">Support</a>
+                        <a href="#contact" class="footer-link">Contact</a>
+                    </div>
+                </div>
+                
+                <div class="footer-right">
+                    <div class="sponsor-info">
+                        <p class="sponsor-label">Proudly Supported By</p>
+                        <a href="https://binnsypropertymaintenance.com.au/" target="_blank" rel="noopener noreferrer" class="sponsor-link">
+                            Binnsy's Property Maintenance
+                        </a>
+                    </div>
+                    <div class="developer-info">
+                        <p class="developer-text">
+                            App by <strong>Greenshoots Media</strong><br>
+                            Custom web applications for your business needs
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Bench Balancer – Making Youth Sports Fair for Everyone</p>
+                <a href="https://1kwebsites.com.au" class="powered-link" target="_blank" rel="noopener">
+                    Powered by 1kwebsites.com.au
+                </a>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Landing Page JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Bench Balancer Landing Page Loaded');
+            
+            // Sport selection functionality
+            const sportButtons = document.querySelectorAll('[data-sport]');
+            const sportCards = document.querySelectorAll('.sport-card');
+            
+            // Add click handlers for sport selection
+            sportButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const sport = button.getAttribute('data-sport');
+                    navigateToSport(sport);
+                });
+            });
+            
+            // Add hover effects for sport cards
+            sportCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0) scale(1)';
+                });
+                
+                card.addEventListener('click', () => {
+                    const sportBtn = card.querySelector('[data-sport]');
+                    if (sportBtn) {
+                        const sport = sportBtn.getAttribute('data-sport');
+                        navigateToSport(sport);
+                    }
+                });
+            });
+            
+            // Navigation function
+            function navigateToSport(sport) {
+                console.log(`Navigating to ${sport} app...`);
+                
+                // Show loading state
+                showLoadingState(sport);
+                
+                // Navigate after brief delay for UX
+                setTimeout(() => {
+                    if (sport === 'soccer') {
+                        window.location.href = 'app.html'; // Original soccer app
+                    } else if (sport === 'basketball') {
+                        window.location.href = 'basketball-standalone.html'; // New basketball app
+                    }
+                }, 500);
+            }
+            
+            function showLoadingState(sport) {
+                const sportCard = document.getElementById(sport + 'Card');
+                const sportBtn = sportCard.querySelector('[data-sport]');
+                
+                if (sportBtn) {
+                    const originalText = sportBtn.querySelector('span').textContent;
+                    sportBtn.querySelector('span').textContent = 'Loading...';
+                    sportBtn.style.opacity = '0.7';
+                    
+                    // Reset after navigation
+                    setTimeout(() => {
+                        sportBtn.querySelector('span').textContent = originalText;
+                        sportBtn.style.opacity = '1';
+                    }, 1000);
+                }
+            }
+            
+            // Settings button functionality
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', () => {
+                    console.log('Settings clicked');
+                    // Could open a settings modal or preferences page
+                });
+            }
+            
+            // Smooth scrolling for internal links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Add animation on scroll for feature cards
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe feature cards
+            document.querySelectorAll('.feature-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+            
+            console.log('Landing page ready! Select your sport to begin.');
+        });
+    </script>
+</body>
+</html>

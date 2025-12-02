@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bench Balancer - Soccer</title>
+
+    <!-- Supabase CDN for authentication and database -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Modern Dark Theme Variables - Matching Basketball UI */
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #060b14;
+            --bg-850: #08101a;
+            --bg-secondary: #0a1220;
+            --bg-card: #0d1626;
+            --bg-overlay: rgba(4, 7, 13, 0.75);
+
+            --border-strong: rgba(255, 255, 255, 0.18);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --border-faint: rgba(255, 255, 255, 0.06);
+
+            --accent-cyan: #00ffe0;
+            --accent-cyan-strong: #00cdb8;
+            --accent-green: #1dd1a1;
+            --accent-red: #ff5f6d;
+            --accent-orange: #ff9966;
+
+            --text-primary: #f5fbff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.5);
+            --shadow-strong: 0 20px 40px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 30px rgba(0, 255, 224, 0.3);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                        radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
+                        linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header Section */
+        #appHeader {
+            background: linear-gradient(180deg, rgba(0, 255, 224, 0.08) 0%, rgba(6, 12, 22, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-faint);
+            padding: 24px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #appHeader::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        #mastheadLogo {
+            display: none; /* Hide logo if not needed */
+        }
+
+        .app-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(42px, 8vw, 64px);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 30px rgba(0, 255, 224, 0.6);
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.3em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Setup Section */
+        #setup {
+            background: var(--bg-card);
+            border: 1px solid var(--border-faint);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-strong);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #setup::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.05), transparent 60%);
+            pointer-events: none;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        h2 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 20px;
+            color: var(--text-primary);
+            margin: 24px 0 16px;
+            letter-spacing: 0.08em;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group input.player-name-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            transition: all var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            background: rgba(0, 255, 224, 0.05);
+            box-shadow: 0 0 20px rgba(0, 255, 224, 0.15);
+        }
+
+        /* Player Names Section */
+        #playerNames {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .player-name-input {
+            background: rgba(0, 255, 224, 0.03) !important;
+        }
+
+        /* Buttons */
+        button {
+            font-family: 'Russo One', sans-serif;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        #getPlanButton {
+            background: rgba(0, 255, 224, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+            margin-right: 12px;
+        }
+
+        #getPlanButton:hover {
+            background: rgba(0, 255, 224, 0.2);
+            box-shadow: 0 0 25px rgba(0, 255, 224, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #confirmSetupButton {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-cyan-strong) 100%);
+            color: #041018;
+            box-shadow: 0 10px 30px rgba(0, 255, 224, 0.3);
+        }
+
+        #confirmSetupButton:hover {
+            box-shadow: 0 15px 40px rgba(0, 255, 224, 0.4);
+            transform: translateY(-2px);
+        }
+
+        #confirmSetupButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Game Container */
+        #game-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-strong);
+        }
+
+        /* Game Info Section */
+        #game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .info-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-faint);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.08), transparent 60%);
+            pointer-events: none;
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .info-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 28px;
+            color: var(--text-primary);
+            letter-spacing: 0.05em;
+        }
+
+        /* Timer Box Special Styling */
+        .timer-box {
+            grid-column: span 2;
+            text-align: center;
+            background: linear-gradient(135deg, var(--bg-card), rgba(0, 255, 224, 0.05));
+        }
+
+        #game-timer {
+            font-family: 'Russo One', sans-serif;
+            font-size: clamp(48px, 10vw, 72px);
+            color: var(--accent-cyan);
+            text-shadow: 0 0 30px rgba(0, 255, 224, 0.5);
+            letter-spacing: 0.1em;
+        }
+
+        #period-timer {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            letter-spacing: 0.1em;
+        }
+
+        /* Start/Stop Button */
+        #startStopButton {
+            width: 100%;
+            margin-top: 20px;
+            padding: 16px;
+            font-size: 14px;
+        }
+
+        #startStopButton.start {
+            background: linear-gradient(135deg, var(--accent-green), #10ac84);
+            color: #01231d;
+            box-shadow: 0 10px 30px rgba(29, 209, 161, 0.3);
+        }
+
+        #startStopButton.stop {
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+            color: #041018;
+            box-shadow: 0 10px 30px rgba(255, 95, 109, 0.3);
+        }
+
+        #startStopButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0, 255, 224, 0.4);
+        }
+
+
+        /* Player Positions */
+        .field-player {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: #041018;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+                        0 0 20px rgba(0, 255, 224, 0.4);
+            transition: all var(--transition);
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .field-player:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5),
+                        0 0 30px rgba(0, 255, 224, 0.6);
+        }
+
+        .field-player.goalkeeper {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+                        0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Player Lists */
+        #player-lists {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .player-list-section {
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* On Field Section - Green Field */
+        #onFieldContainer {
+            background: linear-gradient(135deg, #2a5434, #1e3a26);
+            border: 2px solid #3a6844;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(42, 84, 52, 0.4);
+        }
+
+        #onFieldContainer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.02) 10px,
+                rgba(255, 255, 255, 0.02) 20px
+            );
+            pointer-events: none;
+        }
+
+        /* On Bench Section - Brown Bench */
+        #onBenchContainer {
+            background: linear-gradient(135deg, #5a3e2b, #3e2a1f);
+            border: 2px solid #6b4839;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4), 0 4px 20px rgba(90, 62, 43, 0.3);
+        }
+
+        #onBenchContainer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 15px,
+                rgba(0, 0, 0, 0.1) 15px,
+                rgba(0, 0, 0, 0.1) 16px
+            );
+            pointer-events: none;
+        }
+
+        .player-list-section h3 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 18px;
+            color: #ffffff;
+            margin-bottom: 16px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #onFieldContainer h3 {
+            color: #a8ff78;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        #onBenchContainer h3 {
+            color: #ffb578;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        #onFieldList,
+        #onBenchList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #onFieldList li,
+        #onBenchList li {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition);
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+        }
+
+        #onFieldList li {
+            border: 1px solid rgba(168, 255, 120, 0.3);
+            color: #e8ffda;
+            background: rgba(168, 255, 120, 0.08);
+        }
+
+        #onFieldList li:hover {
+            background: rgba(168, 255, 120, 0.15);
+            border-color: rgba(168, 255, 120, 0.5);
+            transform: translateX(4px);
+        }
+
+        #onBenchList li {
+            border: 1px solid rgba(255, 181, 120, 0.3);
+            color: #ffe8da;
+            background: rgba(139, 69, 19, 0.2);
+        }
+
+        #onBenchList li:hover {
+            background: rgba(139, 69, 19, 0.35);
+            border-color: rgba(255, 181, 120, 0.5);
+            transform: translateX(4px);
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .player-time {
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Control Buttons Section */
+        #game-controls {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+
+        .control-button {
+            padding: 12px 24px;
+            font-size: 13px;
+        }
+
+        #emergencySubButton {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            color: white;
+        }
+
+        #manageGKButton {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a1a;
+        }
+
+        #resetButton {
+            background: rgba(255, 95, 109, 0.1);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        #resetButton:hover {
+            background: rgba(255, 95, 109, 0.2);
+            box-shadow: 0 0 25px rgba(255, 95, 109, 0.3);
+        }
+
+        /* Status Messages */
+        #statusMessage {
+            text-align: center;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            background: rgba(0, 255, 224, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 24px;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Substitution Box */
+        #nextSubBox {
+            background: linear-gradient(135deg, var(--bg-card), rgba(0, 255, 224, 0.05));
+            border: 1px solid var(--accent-cyan);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 224, 0.2);
+        }
+
+        #nextSubBox h3 {
+            font-family: 'Russo One', sans-serif;
+            color: var(--accent-cyan);
+            font-size: 18px;
+            margin-bottom: 16px;
+            letter-spacing: 0.1em;
+        }
+
+        #confirmSubButton {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong));
+            color: #041018;
+            padding: 14px 32px;
+            margin-top: 16px;
+            font-size: 14px;
+            box-shadow: 0 10px 30px rgba(0, 255, 224, 0.4);
+        }
+
+        #confirmSubButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 255, 224, 0.5);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            max-width: 500px;
+            margin: 100px auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-content h2 {
+            color: var(--accent-cyan);
+            margin-bottom: 24px;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 28px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color var(--transition);
+        }
+
+        .close:hover {
+            color: var(--accent-red);
+        }
+
+        /* Halftime Screen */
+        #halftimeScreen {
+            background: linear-gradient(135deg, var(--bg-card), rgba(0, 255, 224, 0.08));
+            border: 2px solid var(--accent-cyan);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 255, 224, 0.3);
+        }
+
+        #halftimeScreen h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 30px rgba(0, 255, 224, 0.6);
+            letter-spacing: 0.2em;
+            margin-bottom: 24px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 20px 10px;
+            }
+
+            #setup {
+                padding: 24px;
+            }
+
+            #game-info {
+                grid-template-columns: 1fr;
+            }
+
+            .timer-box {
+                grid-column: span 1;
+            }
+
+            #player-lists {
+                grid-template-columns: 1fr;
+            }
+
+
+            .app-title {
+                letter-spacing: 0.1em;
+            }
+        }
+
+        /* Error Messages */
+        .error-message {
+            background: rgba(255, 95, 109, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--accent-cyan);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-cyan);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-cyan-strong);
+        }
+
+        /* Warning Sound Toggle */
+        #warning-sound-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-faint);
+        }
+
+        #warning-sound-toggle-container label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        #warningSoundToggle {
+            width: 48px;
+            height: 24px;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            position: relative;
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+
+        #warningSoundToggle::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            top: 2px;
+            left: 2px;
+            transition: all var(--transition);
+        }
+
+        #warningSoundToggle:checked {
+            background: var(--accent-cyan);
+        }
+
+        #warningSoundToggle:checked::before {
+            left: 26px;
+            background: #041018;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="appHeader">
+        <div class="app-title">BENCH BALANCER</div>
+        <div class="app-subtitle">Soccer Team Management</div>
+        <div id="authContainer" style="position: absolute; top: 15px; right: 20px; display: flex; gap: 10px; align-items: center;">
+            <button id="signInButton" onclick="if(typeof showEmailAuthModal === 'function') showEmailAuthModal(); else alert('Auth system loading...');"
+                style="background: linear-gradient(45deg, #00FFE0, #4A90E2); color: #1a1a1f; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; transition: transform 0.2s;">
+                Sign In
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Setup Section -->
+        <div id="setup">
+            <h1>Game Setup</h1>
+
+            <div class="form-group">
+                <label for="minsPerPeriod">Minutes per Half:</label>
+                <input type="number" id="minsPerPeriod" min="1" max="90" value="20">
+            </div>
+
+            <div class="form-group">
+                <label for="numOnField">Total Players on Field (incl. GK):</label>
+                <select id="numOnField" style="width: 100%; padding: 8px; background: var(--bg-800); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;">
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9" selected>9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="numGoalkeepers">Initial Number of Goalkeepers:</label>
+                <select id="numGoalkeepers" style="width: 100%; padding: 8px; background: var(--bg-800); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;">
+                    <option value="0">0</option>
+                    <option value="1" selected>1</option>
+                </select>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Set the number of goalkeepers starting on the field. The first name listed in "Starting Players" will be marked as GK if set to 1.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="numReserves">Number of Reserves:</label>
+                <select id="numReserves" style="width: 100%; padding: 8px; background: var(--bg-800); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3 (DEFAULT)</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Players available for substitution.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="subsPerChange">Substitutions per Change (Non-GKs):</label>
+                <select id="subsPerChange">
+                    <option value="0">0 (Manual Only)</option>
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">How many non-goalkeeper players swap simultaneously during automatic substitutions. Cannot exceed available non-GK field spots or non-GK reserves.</p>
+            </div>
+
+            <h2>Player Names</h2>
+
+            <!-- Starter Names Container -->
+            <div class="form-group">
+                <label for="starterNamesContainer">Starting Players (one per line):</label>
+                <div id="starterNamesContainer" style="margin-top: 10px;">
+                    <!-- Player name inputs will be dynamically added here -->
+                </div>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Enter names or leave as default. Empty fields will use default numbers.</p>
+            </div>
+
+            <!-- Reserve Names Container -->
+            <div class="form-group">
+                <label for="reserveNamesContainer">Reserve Players (one per line):</label>
+                <div id="reserveNamesContainer" style="margin-top: 10px;">
+                    <!-- Reserve name inputs will be dynamically added here -->
+                </div>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Enter names or leave as default. Empty fields will use default numbers.</p>
+            </div>
+
+            <div id="warning-sound-toggle-container" style="margin: 20px 0;">
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="warningSoundToggle" checked>
+                    <span>Enable 10-second sub warning sound</span>
+                </label>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; margin-left: 28px;">Plays a short beep 10 seconds before an automatic substitution is due.</p>
+            </div>
+
+            <div style="margin-top: 32px; text-align: center;">
+                <button id="getPlanButton" type="button">Show Preliminary Sub Plan</button>
+                <button id="confirmSetupButton" type="button">Confirm Setup & Start Game</button>
+            </div>
+
+            <p id="setupError" class="error-message hidden"></p>
+            <div id="preliminaryPlanOutput" style="margin-top: 24px;"></div>
+        </div>
+
+        <!-- Game Container -->
+        <div id="game-container" class="hidden">
+            <!-- Game Info Section -->
+            <div id="game-info">
+                <div class="info-box timer-box">
+                    <div id="gameTimer">00:00</div>
+                    <div id="periodTimer">(Period: 00:00)</div>
+                    <div id="periodDisplay" style="color: var(--accent-cyan); font-size: 14px;">Period 1</div>
+                    <button id="startStopButton" class="start">START</button>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-label">Period</div>
+                    <div id="period-display" class="info-value">1/2</div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-label">Next Sub</div>
+                    <div id="next-sub-time" class="info-value">--:--</div>
+                </div>
+            </div>
+
+            <!-- Status Message -->
+            <div id="statusMessage" class="hidden"></div>
+
+            <!-- Next Substitution Box -->
+            <div id="nextSubBox" class="hidden">
+                <h3>Next Substitution</h3>
+                <div id="nextSubCountdown" style="font-size: 20px; color: var(--accent-cyan); margin-bottom: 10px;">00:00</div>
+                <div id="nextSubInfo" style="margin-bottom: 10px;">
+                    <strong>Coming Off:</strong> <span id="playersComingOff">-</span>
+                </div>
+                <div id="pendingSubInfo">
+                    <strong>Coming On:</strong> <span id="playersComingOn">-</span>
+                </div>
+                <button id="confirmSubButton" type="button">Confirm Substitution</button>
+            </div>
+
+            <!-- Player Lists -->
+            <div id="player-lists">
+                <div class="player-list-section" id="onFieldContainer">
+                    <h3>On Field (<span id="onFieldCount">0</span>)</h3>
+                    <ul id="onFieldList"></ul>
+                </div>
+                <div class="player-list-section" id="onBenchContainer">
+                    <h3>On Bench (<span id="onBenchCount">0</span>)</h3>
+                    <ul id="onBenchList"></ul>
+                </div>
+            </div>
+
+            <!-- Control Buttons -->
+            <div id="game-controls">
+                <button id="emergencySubButton" class="control-button">Emergency Sub</button>
+                <button id="manageGKButton" class="control-button">Manage GK</button>
+                <button id="resetButton" class="control-button">Reset Game</button>
+            </div>
+
+            <!-- End of Period Actions -->
+            <div id="endOfPeriodActionsContainer" class="hidden">
+                <button id="proceedToHalftimeButton" class="control-button">Proceed to Halftime</button>
+            </div>
+        </div>
+
+        <!-- Halftime Screen -->
+        <div id="halftimeScreen" class="hidden">
+            <h2>HALFTIME</h2>
+            <p>Take a break and prepare for the second half!</p>
+            <button id="prepareSecondHalfButton" type="button">Prepare for 2nd Half</button>
+        </div>
+
+        <!-- Emergency Sub Modal -->
+        <div id="emergencySubModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Emergency Substitution</h2>
+                <div>
+                    <label for="subOutPlayer">Player Coming Off:</label>
+                    <select id="subOutPlayer"></select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label for="subInPlayer">Player Coming On:</label>
+                    <select id="subInPlayer"></select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>What happens to the injured player?</label>
+                    <div>
+                        <input type="radio" id="injuredOutForGame" name="injuredFate" value="out" checked>
+                        <label for="injuredOutForGame">Out for the game</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="injuredToReserve" name="injuredFate" value="reserve">
+                        <label for="injuredToReserve">To reserve bench</label>
+                    </div>
+                </div>
+                <button id="confirmEmergencySubButton" style="margin-top: 15px;">Confirm</button>
+                <button id="cancelEmergencySubButton" style="margin-top: 15px; margin-left: 10px;">Cancel</button>
+                <p id="emergencySubError" class="error-message hidden"></p>
+            </div>
+        </div>
+
+        <!-- Manage GK Modal -->
+        <div id="manageGKModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Manage Goalkeepers</h2>
+                <div id="gkPlayerList"></div>
+                <button id="confirmManageGKButton" style="margin-top: 15px;">Confirm</button>
+                <button id="cancelManageGKButton" style="margin-top: 15px; margin-left: 10px;">Cancel</button>
+                <p id="manageGKError" class="error-message hidden"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Soccer Game Scripts -->
+    <script src="soccer-constants.js"></script>
+    <script src="soccer-dom-elements.js"></script>
+    <script src="soccer-game-state.js"></script>
+    <script src="soccer-utility-functions.js"></script>
+    <script src="soccer-lineup-generators.js"></script>
+    <script src="soccer-ui-updates.js"></script>
+    <script src="soccer-substitution-logic.js"></script>
+    <script src="soccer-modal-handlers.js"></script>
+    <script src="soccer-timer-and-gameplay.js"></script>
+    <script src="soccer-setup-and-reset.js"></script>
+    <script src="soccer-event-listeners.js"></script>
+
+    <!-- Authentication and Database Integration -->
+    <script src="config/supabase-config.js"></script>
+    <script src="auth/auth-manager.js"></script>
+    <script src="config/simple-supabase.js"></script>
+</body>
+</html>

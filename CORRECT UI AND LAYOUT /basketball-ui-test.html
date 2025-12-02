@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BenchBalancers - Professional Basketball Team Management">
+    <meta name="theme-color" content="#2a2a2a">
+    
+    <title>Bench Balancers - Basketball Team Management</title>
+    
+    <!-- Basketball UI Styles -->
+    <link rel="stylesheet" href="basketball-styles-updated.css?v=2">
+    
+    <!-- Add Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="basketball-app">
+    <!-- Main App Container -->
+    <div id="basketball-app" class="app-container">
+        
+        <!-- Header with Branding -->
+        <header class="app-header">
+            <div class="header-left">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiBmaWxsPSIjMDEyMjY5Ii8+CjxyZWN0IHg9IjEzLjMzMzMiIHk9IjAiIHdpZHRoPSIxMy4zMzMzIiBoZWlnaHQ9IjI0IiBmaWxsPSJ3aGl0ZSIvPgo8cmVjdCB4PSIyNi42NjY3IiB5PSIwIiB3aWR0aD0iMTMuMzMzMyIgaGVpZ2h0PSIyNCIgZmlsbD0iI0NFMTEyNiIvPgo8L3N2Zz4K" alt="UK Flag" class="flag-icon">
+            </div>
+            <div class="header-center">
+                <h1 class="app-title">BenchBalancers.</h1>
+            </div>
+            <div class="header-right">
+                <button class="settings-btn" id="settingsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.56 12a7.56 7.56 0 0 0-.16-1.57l1.68-1.32a.4.4 0 0 0 .1-.51l-1.6-2.77a.4.4 0 0 0-.49-.18l-1.99.8a5.8 5.8 0 0 0-1.36-.79l-.3-2.12a.4.4 0 0 0-.4-.34h-3.2a.4.4 0 0 0-.4.34l-.3 2.12a5.8 5.8 0 0 0-1.36.79l-1.99-.8a.4.4 0 0 0-.49.18l-1.6 2.77a.4.4 0 0 0 .1.51l1.68 1.32a7.56 7.56 0 0 0 0 3.14l-1.68 1.32a.4.4 0 0 0-.1.51l1.6 2.77a.4.4 0 0 0 .49.18l1.99-.8a5.8 5.8 0 0 0 1.36.79l.3 2.12a.4.4 0 0 0 .4.34h3.2a.4.4 0 0 0 .4-.34l.3-2.12a5.8 5.8 0 0 0 1.36-.79l1.99.8a.4.4 0 0 0 .49-.18l1.6-2.77a.4.4 0 0 0-.1-.51l-1.68-1.32a7.56 7.56 0 0 0 .16-1.57z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Coach Welcome Bar - SIGNED IN VERSION -->
+        <div class="coach-welcome">
+            <div class="welcome-text">
+                <span class="welcome-label">WELCOME BACK,</span>
+                <span class="coach-name" id="coachName">COACH BOB</span>
+            </div>
+            <div class="games-info">
+                <span class="games-label">GAMES PLAYED: <span id="gamesPlayed">24</span></span>
+                <div class="team-selector" id="teamSelector">
+                    <span class="team-name">WEBBERS WARRIORS</span>
+                    <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                        <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="app-main" id="appMain">
+            
+            <!-- HOME SCREEN (Dashboard) -->
+            <section id="homeScreen" class="screen active">
+                <div class="dashboard-grid">
+                    
+                    <!-- Bench Balance Card -->
+                    <div class="stats-card bench-balance-card">
+                        <h2 class="card-title">BENCH BALANCE</h2>
+                        <div class="player-stats-list" id="benchBalanceList">
+                            <div class="player-stat">
+                                <span class="player-name">BEN</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">TIM</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">RONALDO</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">FELIX</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">CHRIS</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">GLEN</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">MARCUS</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">HARRY</span>
+                                <span class="stat-value">23mins/G</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Players Card -->
+                    <div class="stats-card top-players-card">
+                        <h2 class="card-title">TOP PLAYERS</h2>
+                        <div class="player-stats-list" id="topPlayersList">
+                            <div class="player-stat">
+                                <span class="player-name">BEN</span>
+                                <span class="stat-value">25P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">TIM</span>
+                                <span class="stat-value">10P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">RONALDO</span>
+                                <span class="stat-value">6P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">FELIX</span>
+                                <span class="stat-value">4P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">CHRIS</span>
+                                <span class="stat-value">3P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">GLEN</span>
+                                <span class="stat-value">2P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">MARCUS</span>
+                                <span class="stat-value">1P/G</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">HARRY</span>
+                                <span class="stat-value">1P/G</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Start Game Card -->
+                    <div class="start-game-card">
+                        <h2 class="start-game-text">START GAME</h2>
+                        <div class="play-button">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Team Season Stats -->
+                    <div class="stats-card team-stats-card">
+                        <h2 class="card-title">TEAM SEASON STATS</h2>
+                        <div class="team-stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">POINTS SCORED</span>
+                                <span class="stat-number">1255</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">POINTS CONCEDED</span>
+                                <span class="stat-number">925</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">+/-</span>
+                                <span class="stat-number">330</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">WINS</span>
+                                <span class="stat-number">20</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Coaches -->
+                    <div class="stats-card coaches-card">
+                        <h2 class="card-title">TOP COACHES</h2>
+                        <div class="player-stats-list">
+                            <div class="player-stat">
+                                <span class="player-name">1. COACH BOB</span>
+                                <span class="stat-value">22 GAMES</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">2. COACH TIM</span>
+                                <span class="stat-value">1 GAME</span>
+                            </div>
+                            <div class="player-stat">
+                                <span class="player-name">3. COACH STEPH</span>
+                                <span class="stat-value">1 GAME</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#home" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                <span class="nav-label">HOME</span>
+            </a>
+            <a href="#teams" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span class="nav-label">TEAMS</span>
+            </a>
+            <a href="#start" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <span class="nav-label">START</span>
+            </a>
+            <a href="#stats" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                </svg>
+                <span class="nav-label">STATS</span>
+            </a>
+            <a href="#coaches" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                </svg>
+                <span class="nav-label">COACHES</span>
+            </a>
+        </nav>
+
+    </div>
+</body>
+</html>

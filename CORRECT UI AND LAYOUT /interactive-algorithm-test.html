@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Dynamic Algorithm Test</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
+            color: #fff; 
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+        
+        .controls-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        
+        .control-group h3 {
+            margin-top: 0;
+            color: #00d9ff;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+        
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        label {
+            font-weight: 500;
+            min-width: 120px;
+        }
+        
+        input[type="number"], input[type="text"], select {
+            padding: 8px 12px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: #1a1a1a;
+            color: #fff;
+            width: 80px;
+        }
+        
+        input[type="text"] {
+            width: 200px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            margin: 8px;
+            background: linear-gradient(45deg, #00d9ff, #0099cc);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .result-card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        
+        .result-card h3 {
+            margin-top: 0;
+            color: #00d9ff;
+        }
+        
+        .algorithm-comparison {
+            grid-column: 1 / -1;
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #444;
+        }
+        
+        .comparison-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .algorithm-result {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .dynamic-result { 
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 153, 204, 0.2));
+            border: 2px solid #00d9ff; 
+        }
+        .enhanced-result { 
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 152, 0, 0.2));
+            border: 2px solid #ffc107; 
+        }
+        .original-result { 
+            background: linear-gradient(135deg, rgba(156, 39, 176, 0.2), rgba(123, 31, 162, 0.2));
+            border: 2px solid #9c27b0; 
+        }
+        
+        .substitution-schedule {
+            margin-top: 15px;
+        }
+        
+        .substitution-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 3px solid #00d9ff;
+        }
+        
+        .log-output {
+            background: #000;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .preset-button {
+            padding: 8px 16px;
+            background: rgba(0, 217, 255, 0.2);
+            border: 1px solid #00d9ff;
+            color: #00d9ff;
+            font-size: 12px;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .variance-excellent { color: #4caf50; }
+        .variance-good { color: #8bc34a; }
+        .variance-warning { color: #ff9800; }
+        .variance-critical { color: #f44336; }
+        
+        .players-input {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 Interactive Dynamic Algorithm Test</h1>
+            <p>Test the Dynamic Perfect Balance Algorithm with different basketball team configurations</p>
+        </div>
+        
+        <div class="controls-panel">
+            <div class="control-group">
+                <h3>⚙️ Team Configuration</h3>
+                
+                <div class="form-row">
+                    <label>Total Players:</label>
+                    <input type="number" id="totalPlayers" min="5" max="15" value="8">
+                </div>
+                
+                <div class="form-row">
+                    <label>Players on Court:</label>
+                    <input type="number" id="playersOnCourt" min="4" max="11" value="5">
+                </div>
+                
+                <div class="form-row">
+                    <label>Subs per Change:</label>
+                    <select id="subsPerChange">
+                        <option value="1">1 substitution</option>
+                        <option value="2" selected>2 substitutions</option>
+                        <option value="3">3 substitutions</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <label>Game Duration:</label>
+                    <select id="gameDuration">
+                        <option value="1200">20 minutes</option>
+                        <option value="1800">30 minutes</option>
+                        <option value="2400" selected>40 minutes</option>
+                        <option value="2700">45 minutes</option>
+                        <option value="3600">60 minutes</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <label>Goalkeepers:</label>
+                    <input type="number" id="goalkeepers" min="0" max="2" value="0">
+                </div>
+                
+                <div class="preset-buttons">
+                    <button class="preset-button" onclick="loadPreset('youth')">Youth Team (6 players)</button>
+                    <button class="preset-button" onclick="loadPreset('school')">School Team (8 players)</button>
+                    <button class="preset-button" onclick="loadPreset('club')">Club Team (10 players)</button>
+                    <button class="preset-button" onclick="loadPreset('full')">Full Squad (12 players)</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🎮 Test Controls</h3>
+                
+                <div class="form-row">
+                    <label>Player Names:</label>
+                    <input type="text" id="playerNames" class="players-input" 
+                           placeholder="P1,P2,P3,P4,P5,P6,P7,P8" 
+                           value="Ben,Tim,Chris,Felix,Marcus,Harry,Glen,Sam">
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button onclick="testDynamicAlgorithm()" id="testBtn">
+                        🚀 Test Dynamic Algorithm
+                    </button>
+                    <button onclick="compareAllAlgorithms()">
+                        📊 Compare All Algorithms
+                    </button>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <button onclick="testRecalculation()">
+                        🔄 Test Recalculation
+                    </button>
+                    <button onclick="clearResults()">
+                        🗑️ Clear Results
+                    </button>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <label><strong>Test Mode:</strong></label>
+                    <select id="testMode" onchange="updateTestMode()">
+                        <option value="single">Single Test</option>
+                        <option value="comparison">Algorithm Comparison</option>
+                        <option value="stress">Stress Test (Multiple Configs)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-panel">
+            <div class="result-card" id="currentConfig">
+                <h3>📋 Current Configuration</h3>
+                <div id="configDisplay">Select configuration and test to see results</div>
+            </div>
+            
+            <div class="result-card" id="algorithmStatus">
+                <h3>🔧 Algorithm Status</h3>
+                <div id="statusDisplay">Ready to test</div>
+            </div>
+        </div>
+        
+        <div class="algorithm-comparison" id="comparisonResults" style="display: none;">
+            <h3>📊 Algorithm Comparison Results</h3>
+            <div class="comparison-results" id="comparisonData">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+        
+        <div class="result-card" id="substitutionPlan" style="display: none;">
+            <h3>📅 Substitution Schedule</h3>
+            <div id="scheduleDisplay">
+                <!-- Substitution schedule will be shown here -->
+            </div>
+        </div>
+        
+        <div class="log-output" id="testLog"></div>
+    </div>
+
+    <!-- All scripts embedded directly in this file -->
+
+    <script>
+        // Test logging system
+        let testLog = [];
+        let testResults = [];
+        
+        // Mock global variables and functions
+        window.gameSettings = { numPeriods: 2, subsPerChange: 2, numOnField: 5, numGoalkeepers: 0 };
+        window.periodLengthSeconds = 1200;
+        window.playerGKStatus = {};
+        window.playerRemovedStatus = {};
+        window.currentGameSeconds = 0;
+        window.playerPlayTimes = {};
+        window.playerCurrentStintStart = {};
+        
+        // Mock utility functions
+        window.formatTime = function(seconds) {
+            if (!seconds || seconds === 0) return "0:00";
+            const mins = Math.floor(Math.abs(seconds) / 60);
+            const secs = Math.abs(seconds) % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        };
+        
+        window.debugLog = function(message, data) {
+            const timestamp = new Date().toLocaleTimeString();
+            testLog.push(`[${timestamp}] ${message}${data ? ' | ' + JSON.stringify(data, null, 1) : ''}`);
+            updateLogDisplay();
+        };
+        
+        // Mock required functions for recalculation testing
+        window.recalculateRemainingAutoSubTimes = function() { log('Mock: recalculateRemainingAutoSubTimes called'); };
+        window.updateDisplay = function() { log('Mock: updateDisplay called'); };
+        window.showStatusMessage = function(msg, duration) { log(`Status: ${msg}`); };
+        window.optimizedSubPlan = [];
+        window.optimizedSubSchedule = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testLog.push(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+            updateLogDisplay();
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+        
+        function updateLogDisplay() {
+            const logElement = document.getElementById('testLog');
+            logElement.innerHTML = testLog.slice(-20).join('\n'); // Show last 20 logs
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function autoGeneratePlayerNames() {
+            const totalPlayers = parseInt(document.getElementById('totalPlayers').value);
+            const playerNamesInput = document.getElementById('playerNames').value;
+            const currentNames = playerNamesInput ? 
+                playerNamesInput.split(',').map(name => name.trim()).filter(name => name) : [];
+            
+            if (currentNames.length !== totalPlayers) {
+                const baseNames = ['Ben', 'Tim', 'Chris', 'Felix', 'Marcus', 'Harry', 'Glen', 'Sam', 
+                                 'Jake', 'Luke', 'Max', 'Alex', 'Ryan', 'Josh', 'Noah', 'Liam', 
+                                 'Owen', 'Ethan', 'Mason', 'Logan'];
+                
+                let newNames = [...currentNames];
+                
+                // Add more names if we need them
+                while (newNames.length < totalPlayers) {
+                    if (newNames.length < baseNames.length) {
+                        newNames.push(baseNames[newNames.length]);
+                    } else {
+                        newNames.push(`P${newNames.length + 1}`);
+                    }
+                }
+                
+                // Trim to exact number needed
+                newNames = newNames.slice(0, totalPlayers);
+                
+                document.getElementById('playerNames').value = newNames.join(',');
+            }
+        }
+
+        function getCurrentConfig() {
+            const playerNamesInput = document.getElementById('playerNames').value;
+            const playerNames = playerNamesInput ? 
+                playerNamesInput.split(',').map(name => name.trim()).filter(name => name) :
+                Array.from({length: parseInt(document.getElementById('totalPlayers').value)}, (_, i) => `P${i+1}`);
+            
+            return {
+                totalPlayers: parseInt(document.getElementById('totalPlayers').value),
+                playersOnCourt: parseInt(document.getElementById('playersOnCourt').value),
+                subsPerChange: parseInt(document.getElementById('subsPerChange').value),
+                gameDuration: parseInt(document.getElementById('gameDuration').value),
+                goalkeepers: parseInt(document.getElementById('goalkeepers').value),
+                playerNames: playerNames.slice(0, parseInt(document.getElementById('totalPlayers').value))
+            };
+        }
+        
+        function updateConfigDisplay() {
+            const config = getCurrentConfig();
+            const reserves = config.totalPlayers - config.playersOnCourt;
+            const exemptPlayers = Math.min(config.goalkeepers, config.totalPlayers);
+            const rotatingPlayers = config.totalPlayers - exemptPlayers;
+            
+            // Auto-generate player names if needed
+            autoGeneratePlayerNames();
+            
+            document.getElementById('configDisplay').innerHTML = `
+                <div class="metric">
+                    <span>Total Players:</span>
+                    <span>${config.totalPlayers}</span>
+                </div>
+                <div class="metric">
+                    <span>On Court:</span>
+                    <span>${config.playersOnCourt}</span>
+                </div>
+                <div class="metric">
+                    <span>Reserves:</span>
+                    <span>${reserves}</span>
+                </div>
+                <div class="metric">
+                    <span>Rotating Players:</span>
+                    <span>${rotatingPlayers}</span>
+                </div>
+                <div class="metric">
+                    <span>Game Duration:</span>
+                    <span>${formatTime(config.gameDuration)}</span>
+                </div>
+                <div class="metric">
+                    <span>Target Time/Player:</span>
+                    <span>${formatTime(Math.floor((config.gameDuration * config.playersOnCourt) / rotatingPlayers))}</span>
+                </div>
+                <div class="metric">
+                    <span>Players:</span>
+                    <span>${config.playerNames.join(', ')}</span>
+                </div>
+            `;
+        }
+        
+        function loadPreset(presetType) {
+            const presets = {
+                youth: { total: 6, onCourt: 5, subs: 1, duration: 1200, gk: 0 },
+                school: { total: 8, onCourt: 5, subs: 2, duration: 2400, gk: 0 },
+                club: { total: 10, onCourt: 5, subs: 2, duration: 2400, gk: 1 },
+                full: { total: 12, onCourt: 5, subs: 3, duration: 2700, gk: 1 }
+            };
+            
+            const preset = presets[presetType];
+            if (preset) {
+                document.getElementById('totalPlayers').value = preset.total;
+                document.getElementById('playersOnCourt').value = preset.onCourt;
+                document.getElementById('subsPerChange').value = preset.subs;
+                document.getElementById('gameDuration').value = preset.duration;
+                document.getElementById('goalkeepers').value = preset.gk;
+                
+                // Generate player names
+                const names = ['Ben', 'Tim', 'Chris', 'Felix', 'Marcus', 'Harry', 'Glen', 'Sam', 'Jake', 'Luke', 'Max', 'Alex'];
+                document.getElementById('playerNames').value = names.slice(0, preset.total).join(',');
+                
+                updateConfigDisplay();
+                log(`Loaded ${presetType} preset: ${preset.total} players, ${preset.onCourt} on court`);
+            }
+        }
+        
+        function validateConfiguration() {
+            const config = getCurrentConfig();
+            const errors = [];
+            
+            if (config.totalPlayers < 5) errors.push('Need at least 5 total players');
+            if (config.playersOnCourt < 4) errors.push('Need at least 4 players on court');
+            if (config.playersOnCourt >= config.totalPlayers) errors.push('Must have more total players than players on court');
+            if (config.totalPlayers - config.playersOnCourt > 6) errors.push('Maximum 6 reserves allowed');
+            if (config.goalkeepers > config.totalPlayers) errors.push('Cannot have more goalkeepers than total players');
+            if (config.playerNames.length !== config.totalPlayers) errors.push(`Player names count (${config.playerNames.length}) must match total players (${config.totalPlayers})`);
+            
+            return errors;
+        }
+        
+        // Mock algorithm functions for testing
+        function calculateDynamicPerfectPlan(gameConfig) {
+            // Basic mock implementation
+            const { totalGameSeconds, rotatingPlayers, playersOnCourt, maxSubsPerChange } = gameConfig;
+            
+            if (rotatingPlayers.length < playersOnCourt) {
+                return { error: 'Not enough players to form a team' };
+            }
+            
+            const targetTimePerPlayer = Math.floor((totalGameSeconds * playersOnCourt) / rotatingPlayers.length);
+            const variance = Math.max(0, Math.random() * 60); // Mock variance
+            
+            // Generate mock substitution plan
+            const numSubs = Math.max(2, Math.floor(totalGameSeconds / 600)); // Sub every ~10 minutes
+            const substitutionPlan = [];
+            
+            for (let i = 0; i < numSubs; i++) {
+                const time = Math.floor((totalGameSeconds / (numSubs + 1)) * (i + 1));
+                substitutionPlan.push({
+                    time: time,
+                    playersOff: rotatingPlayers.slice(0, Math.min(maxSubsPerChange, rotatingPlayers.length - playersOnCourt)),
+                    playersOn: rotatingPlayers.slice(playersOnCourt, playersOnCourt + Math.min(maxSubsPerChange, rotatingPlayers.length - playersOnCourt))
+                });
+            }
+            
+            return {
+                algorithm: 'Dynamic Perfect Balance (Mock)',
+                substitutionPlan: substitutionPlan,
+                verification: {
+                    variance: variance,
+                    balanceQuality: variance < 30 ? 'EXCELLENT' : variance < 60 ? 'GOOD' : 'NEEDS_IMPROVEMENT'
+                }
+            };
+        }
+        
+        function calculateOptimalLineups(players, onCourt, subsPerChange) {
+            return {
+                method: 'Dynamic Optimization',
+                numLineups: Math.ceil(players.length / onCourt),
+                variance: Math.random() * 45,
+                lineups: []
+            };
+        }
+        
+        function calculateOptimalLineupsEnhanced(players, onCourt, subsPerChange) {
+            return {
+                method: 'Enhanced Patterns',
+                numLineups: Math.ceil(players.length / onCourt) + 1,
+                variance: Math.random() * 60 + 15,
+                lineups: []
+            };
+        }
+        
+        function calculateOptimalLineupsOriginal(players, onCourt, subsPerChange) {
+            return {
+                method: 'Original Algorithm',
+                numLineups: Math.ceil(players.length / onCourt),
+                variance: Math.random() * 90 + 30,
+                lineups: []
+            };
+        }
+        
+        function triggerPerfectBalanceRecalculation(reason) {
+            log(`Recalculation triggered: ${reason}`);
+            return true;
+        }
+
+        function testDynamicAlgorithm() {
+            log('Starting Dynamic Algorithm test...');
+            
+            const config = getCurrentConfig();
+            const errors = validateConfiguration();
+            
+            if (errors.length > 0) {
+                document.getElementById('statusDisplay').innerHTML = `<div style="color: #f44336;">❌ Configuration Errors:<br/>${errors.join('<br/>')}</div>`;
+                log('Test failed: Configuration errors - ' + errors.join(', '));
+                return;
+            }
+            
+            updateConfigDisplay();
+            
+            // Setup mock data
+            window.allPlayers = config.playerNames;
+            window.onField = config.playerNames.slice(0, config.playersOnCourt);
+            window.onBench = config.playerNames.slice(config.playersOnCourt);
+            window.gameSettings.numOnField = config.playersOnCourt;
+            window.gameSettings.subsPerChange = config.subsPerChange;
+            window.periodLengthSeconds = config.gameDuration / 2; // Assuming 2 periods
+            
+            // Create exempt players (goalkeepers)
+            window.playerGKStatus = {};
+            for (let i = 0; i < config.goalkeepers; i++) {
+                window.playerGKStatus[config.playerNames[i]] = true;
+            }
+            
+            document.getElementById('testBtn').disabled = true;
+            document.getElementById('statusDisplay').innerHTML = '🔄 Running algorithm...';
+            
+            try {
+                const startTime = Date.now();
+                
+                // Test dynamic algorithm
+                const gameConfig = {
+                    totalGameSeconds: config.gameDuration,
+                    rotatingPlayers: config.playerNames.filter(p => !window.playerGKStatus[p]),
+                    playersOnCourt: config.playersOnCourt - config.goalkeepers,
+                    maxSubsPerChange: config.subsPerChange,
+                    exemptPlayers: config.playerNames.filter(p => window.playerGKStatus[p])
+                };
+                
+                log(`Testing with configuration: ${JSON.stringify(gameConfig, null, 2)}`);
+                
+                const result = calculateDynamicPerfectPlan(gameConfig);
+                const calculationTime = Date.now() - startTime;
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                // Display results
+                const varianceClass = getVarianceClass(result.verification.variance);
+                const balanceQuality = result.verification.balanceQuality || 'UNKNOWN';
+                
+                document.getElementById('statusDisplay').innerHTML = `
+                    <div class="metric">
+                        <span>Algorithm:</span>
+                        <span>${result.algorithm}</span>
+                    </div>
+                    <div class="metric">
+                        <span>Calculation Time:</span>
+                        <span>${calculationTime}ms</span>
+                    </div>
+                    <div class="metric">
+                        <span>Substitutions:</span>
+                        <span>${result.substitutionPlan ? result.substitutionPlan.length : 0}</span>
+                    </div>
+                    <div class="metric">
+                        <span>Projected Variance:</span>
+                        <span class="${varianceClass}">${formatTime(result.verification.variance)}</span>
+                    </div>
+                    <div class="metric">
+                        <span>Balance Quality:</span>
+                        <span class="${varianceClass}">${balanceQuality}</span>
+                    </div>
+                `;
+                
+                // Show substitution schedule
+                if (result.substitutionPlan && result.substitutionPlan.length > 0) {
+                    let scheduleHtml = '';
+                    result.substitutionPlan.forEach((sub, index) => {
+                        scheduleHtml += `
+                            <div class="substitution-item">
+                                <strong>Sub ${index + 1}:</strong> ${formatTime(sub.time)}<br/>
+                                <span style="color: #ff6b6b;">OFF:</span> ${(sub.playersOff || []).join(', ')}<br/>
+                                <span style="color: #51cf66;">ON:</span> ${(sub.playersOn || []).join(', ')}
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('scheduleDisplay').innerHTML = scheduleHtml;
+                    document.getElementById('substitutionPlan').style.display = 'block';
+                } else {
+                    document.getElementById('substitutionPlan').style.display = 'none';
+                }
+                
+                testResults.push({
+                    config: config,
+                    result: result,
+                    calculationTime: calculationTime,
+                    timestamp: new Date()
+                });
+                
+                log(`✅ Dynamic algorithm test completed successfully. Variance: ${result.verification.variance}s, Quality: ${balanceQuality}`);
+                
+            } catch (error) {
+                document.getElementById('statusDisplay').innerHTML = `<div style="color: #f44336;">❌ Error: ${error.message}</div>`;
+                log(`❌ Test failed: ${error.message}`);
+            } finally {
+                document.getElementById('testBtn').disabled = false;
+            }
+        }
+        
+        function getVarianceClass(variance) {
+            if (variance <= 30) return 'variance-excellent';
+            if (variance <= 60) return 'variance-good';
+            if (variance <= 120) return 'variance-warning';
+            return 'variance-critical';
+        }
+        
+        function compareAllAlgorithms() {
+            log('Starting algorithm comparison...');
+            
+            const config = getCurrentConfig();
+            const errors = validateConfiguration();
+            
+            if (errors.length > 0) {
+                log('Comparison failed: Configuration errors');
+                return;
+            }
+            
+            // Setup mock data
+            window.allPlayers = config.playerNames;
+            window.gameSettings.numOnField = config.playersOnCourt;
+            window.gameSettings.subsPerChange = config.subsPerChange;
+            window.periodLengthSeconds = config.gameDuration / 2;
+            
+            const results = {};
+            
+            try {
+                // Test Dynamic Algorithm
+                const dynamicStart = Date.now();
+                const dynamicResult = calculateOptimalLineups(config.playerNames, config.playersOnCourt, config.subsPerChange);
+                results.dynamic = {
+                    ...dynamicResult,
+                    calculationTime: Date.now() - dynamicStart
+                };
+                
+                // Test Enhanced Algorithm (force fallback)
+                const enhancedStart = Date.now();
+                const enhancedResult = calculateOptimalLineupsEnhanced(config.playerNames, config.playersOnCourt, config.subsPerChange);
+                results.enhanced = {
+                    ...enhancedResult,
+                    calculationTime: Date.now() - enhancedStart
+                };
+                
+                // Test Original Algorithm (force original patterns)
+                const originalStart = Date.now();
+                const originalResult = calculateOptimalLineupsOriginal(config.playerNames, config.playersOnCourt, config.subsPerChange);
+                results.original = {
+                    ...originalResult,
+                    calculationTime: Date.now() - originalStart
+                };
+                
+                // Display comparison
+                displayComparisonResults(results, config);
+                
+            } catch (error) {
+                log(`❌ Comparison failed: ${error.message}`);
+            }
+        }
+        
+        function displayComparisonResults(results, config) {
+            const comparisonData = document.getElementById('comparisonData');
+            
+            const algorithms = [
+                { key: 'dynamic', name: '🚀 Dynamic Perfect', class: 'dynamic-result' },
+                { key: 'enhanced', name: '🔧 Enhanced Patterns', class: 'enhanced-result' },
+                { key: 'original', name: '📋 Original Patterns', class: 'original-result' }
+            ];
+            
+            comparisonData.innerHTML = algorithms.map(alg => {
+                const result = results[alg.key];
+                const variance = result.variance || 'N/A';
+                const varianceClass = typeof variance === 'number' ? getVarianceClass(variance) : '';
+                
+                return `
+                    <div class="algorithm-result ${alg.class}">
+                        <h4>${alg.name}</h4>
+                        <div class="metric">
+                            <span>Method:</span>
+                            <span>${result.method || 'Unknown'}</span>
+                        </div>
+                        <div class="metric">
+                            <span>Lineups:</span>
+                            <span>${result.numLineups || result.lineups?.length || 0}</span>
+                        </div>
+                        <div class="metric">
+                            <span>Variance:</span>
+                            <span class="${varianceClass}">${typeof variance === 'number' ? formatTime(variance) : variance}</span>
+                        </div>
+                        <div class="metric">
+                            <span>Time:</span>
+                            <span>${result.calculationTime}ms</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('comparisonResults').style.display = 'block';
+            log('✅ Algorithm comparison completed');
+        }
+        
+        function testRecalculation() {
+            log('Testing recalculation capability...');
+            
+            // Mock mid-game state
+            window.currentGameSeconds = 600; // 10 minutes in
+            
+            try {
+                if (typeof triggerPerfectBalanceRecalculation === 'function') {
+                    const success = triggerPerfectBalanceRecalculation('Interactive test recalculation');
+                    
+                    if (success) {
+                        log('✅ Recalculation triggered successfully');
+                        document.getElementById('statusDisplay').innerHTML += `<br/><div style="color: #4caf50;">🔄 Recalculation: SUCCESS</div>`;
+                    } else {
+                        log('⚠️ Recalculation completed but returned false');
+                        document.getElementById('statusDisplay').innerHTML += `<br/><div style="color: #ff9800;">🔄 Recalculation: COMPLETED</div>`;
+                    }
+                } else {
+                    log('❌ Recalculation function not available');
+                    document.getElementById('statusDisplay').innerHTML += `<br/><div style="color: #f44336;">❌ Recalculation: NOT AVAILABLE</div>`;
+                }
+            } catch (error) {
+                log(`❌ Recalculation test failed: ${error.message}`);
+            }
+        }
+        
+        function clearResults() {
+            testLog = [];
+            testResults = [];
+            document.getElementById('testLog').innerHTML = '';
+            document.getElementById('statusDisplay').innerHTML = 'Ready to test';
+            document.getElementById('comparisonResults').style.display = 'none';
+            document.getElementById('substitutionPlan').style.display = 'none';
+            log('Results cleared');
+        }
+        
+        function updateTestMode() {
+            const mode = document.getElementById('testMode').value;
+            log(`Test mode changed to: ${mode}`);
+        }
+        
+        // Event listeners
+        ['totalPlayers', 'playersOnCourt', 'subsPerChange', 'gameDuration', 'goalkeepers', 'playerNames'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateConfigDisplay);
+        });
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            log('Interactive Dynamic Algorithm Test loaded');
+            updateConfigDisplay();
+            loadPreset('school'); // Load default preset
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BenchBalancer - Smart substitution management for equal playing time">
+    <meta name="theme-color" content="#3498db">
+    
+    <title>BenchBalancer - Smart Sub Rotation</title>
+    
+    <!-- Cache Busting System -->
+    <script>
+        // Automatic cache busting for development (change every reload)
+        window.APP_VERSION = Date.now();
+        
+        // For production, use a fixed version number like:
+        // window.APP_VERSION = '2.0.4';
+    </script>
+    
+    <!-- Fixed Script Loading (Enhanced with Dynamic Algorithm) -->
+    <script src="constants.js?v=4"></script>
+    <script src="dom-elements.js?v=4"></script>
+    <script src="game-state.js?v=4"></script>
+    <script src="utility-functions.js?v=4"></script>
+    <script src="variance-tracker.js?v=4"></script>
+    <script src="balance-display-component.js?v=4"></script>
+    
+    <!-- DYNAMIC PERFECT BALANCE ALGORITHM - Load before other algorithms -->
+    <script src="dynamic-perfect-algorithm.js?v=4"></script>
+    
+    <script src="lineup-generators.js?v=4"></script>
+    <script src="substitution-logic.js?v=4"></script>
+    <script src="ui-updates.js?v=4"></script>
+    <script src="modal-handlers.js?v=4"></script>
+    <script src="timer-and-gameplay.js?v=4"></script>
+    <script src="setup-and-reset.js?v=4"></script>
+    <script src="event-listeners.js?v=4"></script>
+    
+    <!-- Fixed CSS Loading -->
+    <link rel="stylesheet" href="styles-modern.css?v=4">
+    <link rel="manifest" href="manifest.json?v=4">
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="beep-warning.wav" as="fetch" type="audio/wav" crossorigin>
+    <link rel="preload" href="startingwhistle.wav" as="fetch" type="audio/wav" crossorigin>
+</head>
+<body>
+    <!-- Modern App Shell -->
+    <div id="app" class="app-container">
+        
+        <!-- Header with Sponsor -->
+        <header class="app-header">
+            <div class="sponsor-banner">
+                Powered by <a href="https://binnsypropertymaintenance.com.au/" target="_blank" rel="noopener noreferrer">Binnsy's Property Maintenance</a>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            
+            <!-- Setup Screen (Modern Form) -->
+            <section id="setup" class="setup-screen">
+                <div class="setup-container">
+                    <h1 class="app-title">
+                        <span class="title-icon">⚽</span>
+                        BenchBalancer
+                        <span class="title-version">v2.0</span>
+                    </h1>
+                    
+                    <div id="setupForm" class="modern-form">
+                        <!-- Game Configuration Card -->
+                        <div class="form-card">
+                            <h2 class="card-title">Game Configuration</h2>
+                            
+                            <div class="form-grid">
+                                <div class="form-field">
+                                    <label for="minsPerPeriod">Minutes per Half</label>
+                                    <input type="number" id="minsPerPeriod" min="1" max="90" value="20" required>
+                                    <span class="field-hint">1-90 minutes</span>
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="numOnField">Players on Field</label>
+                                    <input type="number" id="numOnField" min="1" max="15" value="9" required>
+                                    <span class="field-hint">Including goalkeeper</span>
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="numGoalkeepers">Goalkeepers</label>
+                                    <input type="number" id="numGoalkeepers" min="0" max="2" value="1" required>
+                                    <span class="field-hint">Fixed position players</span>
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="numReserves">Reserve Players</label>
+                                    <input type="number" id="numReserves" min="0" max="15" value="0" required>
+                                    <span class="field-hint">Bench players</span>
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="subsPerChange">Subs per Change</label>
+                                    <select id="subsPerChange" required>
+                                        <option value="1">1 Player</option>
+                                        <option value="2" selected>2 Players</option>
+                                        <option value="3">3 Players</option>
+                                        <option value="4">4 Players</option>
+                                        <option value="5">5 Players</option>
+                                    </select>
+                                    <span class="field-hint">Can be overridden for balance</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Player Names Card -->
+                        <div class="form-card">
+                            <h2 class="card-title">Player Names</h2>
+                            
+                            <div class="players-input-section">
+                                <div class="players-group">
+                                    <label class="group-label">Starting Players</label>
+                                    <div id="starterNamesContainer" class="player-inputs-grid"></div>
+                                </div>
+                                
+                                <div class="players-group">
+                                    <label class="group-label">Reserve Players</label>
+                                    <div id="reserveNamesContainer" class="player-inputs-grid"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Card -->
+                        <div class="form-card">
+                            <h2 class="card-title">Settings</h2>
+                            
+                            <div class="settings-grid">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="warningSoundToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Warning Sounds</span>
+                                </label>
+                                
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoBalanceToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Auto Balance</span>
+                                </label>
+                                
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="varianceTrackingToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Track Variance</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Preliminary Plan Preview -->
+                        <div class="form-card">
+                            <h2 class="card-title">Substitution Preview</h2>
+                            <button type="button" id="getPlanButton" class="secondary-btn">
+                                Show Preliminary Plan
+                            </button>
+                            <div id="preliminaryPlanOutput" class="plan-preview"></div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-actions">
+                            <button type="button" id="confirmSetupButton" class="primary-btn">
+                                Start Game
+                            </button>
+                        </div>
+                        
+                        <div id="setupError" class="error-message"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Game Screen (Hidden Initially) -->
+            <section id="game-container" class="game-screen hidden">
+                
+                <!-- Game Header with Timer -->
+                <div class="game-header">
+                    <div class="timer-display">
+                        <div class="timer-main">
+                            <span id="gameTimer" class="timer-value">00:00</span>
+                            <span id="periodTimer" class="timer-sub">(Total: 00:00)</span>
+                        </div>
+                        <div class="timer-info">
+                            <span id="periodDisplay" class="period-badge">1/2</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Message (moved to header for prominence) -->
+                    <div id="statusMessage" class="status-message"></div>
+                </div>
+
+                <!-- Balance Display Component (Web Component) -->
+                <balance-display id="balanceTracker" class="balance-component"></balance-display>
+
+                <!-- End of Period Actions -->
+                <div id="endOfPeriodActionsContainer" class="period-actions hidden">
+                    <button id="proceedToHalftimeButton" class="halftime-btn">
+                        Proceed to Halftime
+                    </button>
+                </div>
+
+                <!-- Halftime Screen -->
+                <div id="halftimeScreen" class="halftime-screen hidden">
+                    <div class="halftime-content">
+                        <h2 class="halftime-title">Halftime</h2>
+                        <p class="halftime-sponsor">
+                            Brought to you by 
+                            <a href="https://binnsypropertymaintenance.com.au/" target="_blank" rel="noopener noreferrer">
+                                Binnsy's Property Maintenance
+                            </a>
+                        </p>
+                        <div class="halftime-controls">
+                            <button id="stopHalftimeMusicButton" class="music-btn">🔇 Mute</button>
+                            <button id="resumeHalftimeMusicButton" class="music-btn hidden">🔊 Play</button>
+                            <button id="prepareSecondHalfButton" class="action-btn">Prepare for 2nd Half</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Substitution Box -->
+                <div id="nextSubBox" class="sub-info-card">
+                    <h3 class="card-header">Next Substitution</h3>
+                    
+                    <div class="sub-countdown">
+                        <span id="nextSubCountdown" class="countdown-value">--:--</span>
+                    </div>
+                    
+                    <div class="sub-players-display">
+                        <div class="players-off">
+                            <h4>Coming OFF</h4>
+                            <div id="playersComingOff" class="player-names"></div>
+                        </div>
+                        
+                        <div class="sub-arrow">→</div>
+                        
+                        <div class="players-on">
+                            <h4>Coming ON</h4>
+                            <div id="playersComingOn" class="player-names"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="nextSubInfo" class="sub-info-text"></div>
+                    <div id="pendingSubInfo" class="pending-info hidden"></div>
+                    
+                    <button id="confirmSubButton" class="confirm-btn hidden">
+                        CONFIRM SUBSTITUTION
+                    </button>
+                </div>
+
+                <!-- Player Lists -->
+                <div id="player-lists" class="player-lists-container">
+                    <div id="onFieldContainer" class="player-list-card field">
+                        <h3 class="list-header">
+                            On Field 
+                            <span class="player-count" id="onFieldCount">0</span>
+                        </h3>
+                        <ul id="onFieldList" class="player-list"></ul>
+                    </div>
+                    
+                    <div id="onBenchContainer" class="player-list-card bench">
+                        <h3 class="list-header">
+                            Bench/Removed 
+                            <span class="player-count" id="onBenchCount">0</span>
+                        </h3>
+                        <ul id="onBenchList" class="player-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Game Controls -->
+                <div id="game-controls" class="game-controls">
+                    <button id="startStopButton" class="timer-control-btn start">
+                        START
+                    </button>
+                    
+                    <button id="emergencySubButton" class="control-btn emergency">
+                        Emergency Sub
+                    </button>
+                    
+                    <button id="manageGKButton" class="control-btn manage">
+                        Manage GK
+                    </button>
+                    
+                    <button id="resetButton" class="control-btn reset">
+                        Reset Game
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modern Modals -->
+        <!-- Emergency Sub Modal -->
+        <div id="emergencySubModal" class="modal hidden">
+            <div class="modal-content">
+                <h3 class="modal-title">Emergency Substitution</h3>
+                
+                <div class="modal-body">
+                    <div class="form-field">
+                        <label for="subOutPlayer">Player Coming OFF</label>
+                        <select id="subOutPlayer" class="modal-select"></select>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="subInPlayer">Player Coming ON</label>
+                        <select id="subInPlayer" class="modal-select"></select>
+                    </div>
+                    
+                    <fieldset class="radio-group">
+                        <legend>What happens to the player coming off?</legend>
+                        <label class="radio-option">
+                            <input type="radio" name="injuredFate" value="bench" checked>
+                            <span>Return to Bench</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="injuredFate" value="remove">
+                            <span>Remove from Game</span>
+                        </label>
+                    </fieldset>
+                    
+                    <div id="emergencySubError" class="error-message"></div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button id="confirmEmergencySubButton" class="modal-btn confirm">
+                        Confirm
+                    </button>
+                    <button id="cancelEmergencySubButton" class="modal-btn cancel">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage GK Modal -->
+        <div id="manageGKModal" class="modal hidden">
+            <div class="modal-content">
+                <h3 class="modal-title">Manage Goalkeepers</h3>
+                
+                <div class="modal-body">
+                    <p class="modal-description">
+                        Select players who are goalkeepers. They won't be included in automatic rotations.
+                    </p>
+                    
+                    <div id="gkPlayerList" class="checkbox-list"></div>
+                    
+                    <div id="manageGKError" class="error-message"></div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button id="confirmManageGKButton" class="modal-btn confirm">
+                        Update
+                    </button>
+                    <button id="cancelManageGKButton" class="modal-btn cancel">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script>
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Register service worker for PWA (temporarily disabled)
+            /*
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(err => 
+                    console.log('Service Worker registration failed:', err)
+                );
+            }
+            */
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bench Balancer - Soccer Game</title>
+    <style>
+/* game-styles.css - Styles for the Bench Balancer Game Application (soccer-game.html) */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    line-height: 1.6;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+body a { color: #007bff; text-decoration: none; }
+body a:hover { text-decoration: underline; }
+body a:visited { color: #0056b3; }
+
+#appHeader {
+    background-color: #004080;
+    color: #ffffff;
+    padding: 10px 20px;
+    text-align: center;
+    border-bottom: 3px solid #002f5e;
+}
+
+#mastheadLogo {
+    width: 100%;
+    max-height: 80px;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 5px auto 10px auto;
+}
+
+#topSponsorBanner {
+    background-color: #e9ecef;
+    color: #004080;
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 0 0 8px 8px;
+    margin: 0 auto 15px auto;
+    max-width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    line-height: 1.4;
+}
+#topSponsorBanner a {
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: bold;
+}
+#topSponsorBanner a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    text-align: center;
+    color: #004080;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    font-family: "Poppins", sans-serif;
+}
+
+h2, h3 { text-align: center; color: #1f3a5f; font-family: "Poppins", sans-serif; }
+h2 { margin-top: 20px; margin-bottom: 20px; font-size: 1.6rem; }
+h3 { font-size: 1.25rem; margin-bottom: 15px; }
+.small-note { font-size: 0.85rem; color: #5a6268; margin-top: 5px; margin-bottom: 0; }
+
+#setup {
+    background-color: #ffffff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-width: 550px;
+    margin: 25px auto;
+}
+.form-group { margin-bottom: 18px; }
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #343a40;
+    font-size: 0.95rem;
+}
+.form-group input[type="number"],
+.form-group select,
+.form-group input.player-name-input
+{
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    background-color: #f8f9fa;
+    color: #495057;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#starterNamesContainer input.player-name-input,
+#reserveNamesContainer input.player-name-input {
+    margin-bottom: 6px;
+}
+
+.form-group input[type="number"]:focus,
+.form-group select:focus,
+.form-group input.player-name-input:focus
+{
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    background-color: #fff;
+}
+
+.form-group.radio-group label { display: inline-block; margin-right: 15px; font-weight: normal; }
+.form-group.radio-group input[type="radio"] { margin-right: 4px; vertical-align: middle; }
+
+.preliminary-plan-section {
+    margin-top: 25px;
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #007bff;
+    border-radius: 8px;
+    background-color: #e7f3ff;
+}
+#getPlanButton {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-bottom: 15px;
+}
+#getPlanButton:hover {
+    background-color: #138496;
+}
+#preliminaryPlanOutput {
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px dashed #17a2b8;
+    border-radius: 6px;
+    min-height: 40px;
+    font-size: 0.9rem;
+    color: #333;
+}
+#preliminaryPlanOutput h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #138496;
+    font-size: 1rem;
+    font-weight: 600;
+}
+#preliminaryPlanOutput p { margin-bottom: 4px; line-height: 1.5; }
+#preliminaryPlanOutput ul { list-style-type: disc; margin-left: 20px; padding-left: 0; }
+#preliminaryPlanOutput li { margin-bottom: 3px; }
+#preliminaryPlanOutput .error-message { color: #dc3545; font-weight: bold; }
+#preliminaryPlanOutput em { color: #6c757d; }
+
+#confirmSetupButton {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-top: 25px;
+}
+#confirmSetupButton:hover { background-color: #0056b3; transform: translateY(-1px); }
+.error-message { color: #dc3545; font-weight: bold; margin-top: 10px; text-align: center; }
+
+#game-container { background-color: #f8f9fa; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 800px; margin: 20px auto; display: flex; flex-direction: column; gap: 15px; }
+#game-header { display: flex; flex-direction: column; gap: 8px; }
+#game-info { background-color: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.07); display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px; }
+.info-box { text-align: center; padding: 5px 10px; flex-grow: 1; flex-basis: auto; display: flex; flex-direction: column; justify-content: center; }
+.info-box h3 { margin: 0 0 4px 0; font-size: 0.85rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
+.info-box p { margin: 0; font-size: 1.3rem; font-weight: 600; color: #004080; }
+.timer-box { display: flex; flex-direction: column; align-items: center; flex-basis: 180px; flex-grow: 2; }
+.timer-box p#gameTimer { font-size: 3rem; color: #004080; margin: 0; line-height: 1; font-weight: 700; }
+.timer-box p#periodTimer { font-size: 0.9rem; color: #495057; font-weight: normal; margin: 2px 0 8px 0; }
+.timer-box #startStopButton {
+    padding: 10px 18px; font-size: 1rem; border-radius: 6px; margin-top: 8px; width: 130px; font-weight: 500; border: none; color: white; cursor: pointer;
+}
+.timer-box #startStopButton.start { background-color: #28a745; }
+.timer-box #startStopButton.stop { background-color: #dc3545; }
+.timer-box #startStopButton:hover { opacity: 0.85; }
+.timer-box #startStopButton:active { transform: scale(0.96); }
+.timer-box #startStopButton.pending-sub-warning { border: 3px solid #ffc107; box-shadow: 0 0 8px rgba(255, 193, 7, 0.5); }
+
+.game-status-top {
+    font-weight: 600; color: #007bff; min-height: 1.2em; width: 100%;
+    text-align: center; margin-top: 0; margin-bottom: 0; font-size: 1rem;
+    padding: 8px 0; background-color: #e7f3ff; border-radius: 6px;
+}
+
+.screen-sponsor-banner {
+    background-color: #f0f4f8;
+    color: #003366;
+    padding: 6px 10px;
+    text-align: center;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    margin: 8px auto 0 auto;
+    max-width: 85%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid #dde8f0;
+}
+.screen-sponsor-banner a {
+    color: #0056b3;
+    font-weight: 500;
+    text-decoration: none;
+}
+.screen-sponsor-banner a:hover {
+    text-decoration: underline;
+}
+
+button:disabled, input[type="button"]:disabled, input[type="submit"]:disabled,
+#startStopButton:disabled, #emergencySubButton:disabled, #manageGKButton:disabled,
+.modal-actions button:disabled, #game-controls #resetButton:disabled, .halftime-controls button:disabled,
+#nextSubBox #confirmSubButton:disabled, #getPlanButton:disabled {
+    background-color: #adb5bd !important;
+    border-color: #adb5bd !important;
+    color: #495057 !important;
+    cursor: not-allowed !important;
+    opacity: 0.65 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+#halftimeScreen { border: 3px solid #17a2b8; padding: 25px; border-radius: 10px; background-color: #e3f2fd; text-align: center; box-shadow: 0 3px 10px rgba(23, 162, 184, 0.2); }
+#halftimeScreen h2 { color: #138496; margin-top: 0; margin-bottom: 15px; font-size: 1.6rem; text-transform: uppercase; }
+.halftime-sponsor { font-size: 1.1rem; color: #004080; margin-bottom: 20px; }
+.halftime-sponsor a { font-weight: bold; color: #0056b3; }
+.halftime-controls { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+.halftime-controls button { padding: 10px 20px; font-size: 1rem; border-radius: 6px; font-weight: 500; border: none; color: white; cursor: pointer; background-color: #007bff; }
+
+#nextSubBox { border: 3px solid #fd7e14; padding: 20px; border-radius: 10px; background-color: #fff3e0; text-align: center; box-shadow: 0 3px 10px rgba(253, 126, 20, 0.2); }
+#nextSubBox h3 { color: #e85d04; margin-top: 0; margin-bottom: 8px; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.next-sub-countdown { margin-bottom: 12px; }
+#nextSubCountdown { color: #d9534f; font-size: 2.75rem; font-weight: 700; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+.sub-players-container { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 18px 0; }
+.sub-player-box { flex: 1; padding: 12px; border-radius: 8px; min-height: 85px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
+.sub-player-box h4 { margin: 0 0 8px 0; font-size: 1.05rem; text-align: center; font-weight: 600; }
+#playersComingOff, #playersComingOn { font-size: 1.6rem; font-weight: bold; text-align: center; min-height: 32px; word-wrap: break-word; line-height: 1.3; }
+.sub-arrows { font-size: 2rem; align-self: center; color: #555; }
+.sub-message { margin: 12px 0 0 0; font-size: 0.9rem; color: #6c757d; font-style: italic; }
+.pending-sub-message { font-size: 1.15rem !important; color: #d9534f !important; font-weight: bold !important; margin-top: 12px; }
+#nextSubBox #confirmSubButton { background-color: #fd7e14; font-weight: 500; padding: 12px 24px; border: none; color: white; border-radius: 6px; cursor: pointer; font-size: 1.1rem; }
+
+#onFieldContainer, #onBenchContainer { padding: 20px; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.1); overflow: hidden; position: relative; }
+#onFieldContainer { background-color: #d4edda; border: 2px solid #28a745; margin-bottom: 20px; }
+#onFieldContainer h3 { color: #155724; border-bottom-color: rgba(39, 174, 96, 0.5); }
+#onFieldContainer li { color: #155724; border-bottom-color: rgba(39, 174, 96, 0.4); }
+#onFieldContainer li span { color: #155724; }
+#onFieldContainer li span.player-times { color: #10431c; }
+#onFieldContainer li span.player-name.is-gk { color: #0b2c13 !important; font-weight: 700 !important; }
+
+#onBenchContainer { background-color: #f8d7da; border: 2px solid #dc3545; }
+#onBenchContainer h3 { color: #721c24; border-bottom-color: rgba(220, 53, 69, 0.5); }
+#onBenchContainer li { color: #721c24; border-bottom-color: rgba(220, 53, 69, 0.4); }
+#onBenchContainer li span { color: #721c24; }
+#onBenchContainer li span.player-times { color: #5a161c; }
+#onBenchContainer li span.player-name.is-gk { color: #491217 !important; font-weight: 700 !important; }
+
+#onFieldContainer ul, #onBenchContainer ul { list-style-type: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; position: relative; z-index: 1; }
+#onFieldContainer h3, #onBenchContainer h3 { font-weight: 600; position: relative; z-index: 1; margin-top: 0; padding-bottom: 10px; text-align: center; font-size: 1.15rem;}
+#onFieldContainer li, #onBenchContainer li { font-weight: 500; position: relative; z-index: 1; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; border-bottom: 1px solid rgba(0,0,0,0.1); }
+#onFieldContainer li:last-child, #onBenchContainer li:last-child { border-bottom: none; }
+#onFieldContainer li span.player-name, #onBenchContainer li span.player-name { flex-grow: 1; margin-right: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#onFieldContainer li span.player-times, #onBenchContainer li span.player-times { font-size: 0.85rem; flex-shrink: 0; white-space: nowrap; }
+#onFieldContainer li span.player-name.is-removed, #onBenchContainer li span.player-name.is-removed { text-decoration: line-through; font-style: italic; opacity: 0.7;}
+
+#game-controls { text-align: center; display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 25px; }
+#emergencySubButton, #manageGKButton, #game-controls #resetButton { padding: 10px 18px; font-size: 1rem; border-radius: 6px; font-weight: 500; border: none; color: white; cursor: pointer; }
+#emergencySubButton { background-color: #ffc107; color: #000; }
+#manageGKButton { background-color: #17a2b8; }
+#game-controls #resetButton { background-color: #dc3545; }
+
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+.modal-content { background-color: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+.modal-content h3 { font-size: 1.5rem; color: #004080; margin-top: 0; margin-bottom: 20px; text-align: center; }
+.modal-actions { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+.modal-actions button { padding: 10px 15px; font-size: 0.95rem; border-radius: 6px; font-weight: 500; border: none; cursor: pointer; }
+#confirmEmergencySubButton, #confirmManageGKButton { background-color: #007bff; color:white; }
+#confirmEmergencySubButton:hover, #confirmManageGKButton:hover { background-color: #0056b3; }
+#cancelEmergencySubButton, #cancelManageGKButton { background-color: #6c757d; color: white; }
+#cancelEmergencySubButton:hover, #cancelManageGKButton:hover { background-color: #5a6268; }
+#gkPlayerList div { margin-bottom: 8px; }
+#gkPlayerList label { display: flex; align-items: center; justify-content: space-between; }
+#gkPlayerList input[type="checkbox"] { margin-left: 10px; transform: scale(1.2); }
+
+.hidden { display: none !important; }
+
+@media (max-width: 768px) {
+    #appHeader { padding: 8px 15px; }
+    #mastheadLogo { max-height: 70px; margin-bottom: 5px; }
+    #topSponsorBanner { font-size: 0.9rem; padding: 8px 10px; }
+    h2 { font-size: 1.4rem; }
+    h3 { font-size: 1.15rem; }
+
+    #setup { padding: 20px; max-width: 95%; margin: 20px auto; }
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group input.player-name-input { padding: 10px; }
+
+    .preliminary-plan-section { padding: 12px; }
+    #getPlanButton { font-size: 0.95rem; padding: 9px 12px; }
+    #preliminaryPlanOutput { font-size: 0.85rem; padding: 8px; }
+
+    #game-container { padding: 10px; gap: 12px; max-width: 95%; }
+    #game-info { padding: 10px; gap: 10px; flex-direction: column; }
+    .info-box { flex-basis: 100%; }
+    .timer-box { order: -1; padding-bottom: 10px; margin-bottom: 10px; width: 100%; }
+    .timer-box p#gameTimer { font-size: 2.5rem; }
+    .timer-box p#periodTimer { font-size: 0.85rem; }
+    .timer-box #startStopButton { width: 110px; padding: 9px 15px; font-size: 0.95rem; }
+    .game-status-top { font-size: 0.9rem; padding: 6px 0; }
+    .screen-sponsor-banner { font-size: 0.75rem; padding: 5px 8px; max-width: 90%; margin-top: 6px;}
+
+    #halftimeScreen { padding: 20px; } #halftimeScreen h2 { font-size: 1.4rem; }
+    #nextSubBox { padding: 15px; } #nextSubBox h3 { font-size: 1.15rem; }
+    #nextSubCountdown { font-size: 2.25rem; }
+    .sub-player-box { min-height: 75px; padding: 10px; }
+    #playersComingOff, #playersComingOn { font-size: 1.3rem; }
+    .sub-arrows { font-size: 1.7rem; }
+    #nextSubBox #confirmSubButton { font-size: 1.1rem; padding: 10px; }
+
+    #onFieldContainer, #onBenchContainer { padding: 15px; }
+    #onFieldContainer h3, #onBenchContainer h3 { font-size: 1.05rem; }
+    #onFieldContainer li, #onBenchContainer li { padding: 7px 8px; }
+    #onFieldContainer li span.player-times, #onBenchContainer li span.player-times { font-size: 0.8rem; }
+
+    #game-controls { gap: 10px; margin-top: 20px;}
+    #game-controls button { font-size: 0.9rem; min-width: 100px; padding: 9px 15px; }
+    .modal-content { padding: 20px; max-height: 85vh; }
+    .modal-content h3 { font-size: 1.3rem; }
+    .modal-actions button { font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {
+    #mastheadLogo { max-height: 60px; }
+    #topSponsorBanner { font-size: 0.8rem; }
+    h2 { font-size: 1.25rem; } h3 { font-size: 1.05rem; } .small-note { font-size: 0.8rem;}
+    #setup { padding: 15px; }
+    #confirmSetupButton { font-size: 1rem; padding: 10px 15px;}
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group input.player-name-input { padding: 9px 12px; font-size: 0.95rem; }
+
+    #getPlanButton { font-size: 0.9rem; }
+    #preliminaryPlanOutput { font-size: 0.8rem; }
+    .screen-sponsor-banner { font-size: 0.7rem; padding: 4px 6px;}
+
+    .timer-box p#gameTimer { font-size: 2.2rem; }
+    .timer-box p#periodTimer { font-size: 0.8rem; }
+    .info-box p { font-size: 1.1rem; }
+    .game-status-top { font-size: 0.85rem; }
+
+    #nextSubCountdown { font-size: 2rem; }
+    #playersComingOff, #playersComingOn { font-size: 1.1rem; }
+    #nextSubBox #confirmSubButton { font-size: 1rem; padding: 9px; }
+
+    #onFieldContainer h3, #onBenchContainer h3 { font-size: 1rem; }
+    #onFieldContainer li span.player-times, #onBenchContainer li span.player-times { font-size: 0.75rem; }
+     #game-controls button { font-size: 0.85rem; min-width: 90px; padding: 8px 12px; }
+
+    .modal-content h3 { font-size: 1.2rem; }
+}
+    </style>
+</head>
+<body>
+    <div id="appHeader">
+        <img src="balancer.png" alt="Bench Balancer Logo" id="mastheadLogo">
+    </div>
+    <div id="topSponsorBanner">
+        Brought to you by: <a href="https://binnsypropertymaintenance.com.au/" target="_blank" rel="noopener noreferrer">Binnsy's Property Maintenance</a>
+    </div>
+
+    <!-- Setup Section -->
+    <div id="setup">
+        <h2>Game Setup</h2>
+        <div class="form-group">
+            <label for="minsPerPeriod">Minutes per Half:</label>
+            <input type="number" id="minsPerPeriod" min="1" value="20">
+        </div>
+        <div class="form-group">
+            <label for="numOnField">Total Players on Field (incl. GK):</label>
+            <select id="numOnField">
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9" selected>9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="numGoalkeepers">Initial Number of Goalkeepers:</label>
+            <select id="numGoalkeepers">
+                <option value="0">0</option>
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+            </select>
+            <p class="small-note">Set the number of goalkeepers starting on the field. The first name(s) listed in "Starting Players" will be marked as GK. Cannot exceed total players on field.</p>
+        </div>
+        <div class="form-group">
+            <label for="numReserves">Number of Reserves:</label>
+            <select id="numReserves">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+            <p class="small-note">Players available for substitution.</p>
+        </div>
+        <div class="form-group">
+            <label for="subsPerChange">Substitutions per Change (Non-GKs):</label>
+            <select id="subsPerChange">
+                <option value="0">0 (Manual Only)</option>
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+            <p class="small-note">How many non-goalkeeper players swap simultaneously during automatic substitutions. Cannot exceed available non-GK field spots or non-GK reserves.</p>
+        </div>
+        <div class="form-group" id="warningSoundToggleContainer">
+            <label for="warningSoundToggle">
+                <input type="checkbox" id="warningSoundToggle" checked>
+                Enable 10-second sub warning sound
+            </label>
+            <p class="small-note">Plays a short beep 10 seconds before an automatic substitution is due.</p>
+        </div>
+
+        <div class="preliminary-plan-section">
+            <button id="getPlanButton">Show Preliminary Sub Plan</button>
+            <div id="preliminaryPlanOutput">
+                <!-- Plan details will appear here -->
+            </div>
+        </div>
+
+        <h2>Player Names</h2>
+        <div class="form-group">
+            <label for="starterNamesContainer">Starting Players (one per line):</label>
+            <div id="starterNamesContainer">
+                <!-- Inputs will be dynamically generated here -->
+            </div>
+            <p class="small-note">Enter names or leave as default. Empty fields will use default numbers.</p>
+        </div>
+        <div class="form-group">
+            <label for="reserveNamesContainer">Reserve Players (one per line):</label>
+            <div id="reserveNamesContainer">
+                <!-- Inputs will be dynamically generated here -->
+            </div>
+            <p class="small-note">Enter names or leave as default. Empty fields will use default numbers.</p>
+        </div>
+        <button id="confirmSetupButton">Confirm Setup & Start Game</button>
+        <p id="setupError" class="error-message"></p>
+    </div>
+
+    <!-- Game Display Section (Initially Hidden) -->
+    <div id="game-container" class="hidden">
+        <div id="game-header">
+            <div id="game-info" class="info-section">
+                <div class="info-box">
+                    <h3>Half</h3>
+                    <p id="periodDisplay">-/-</p>
+                </div>
+                <div class="info-box timer-box">
+                    <p id="gameTimer">00:00</p>
+                    <p id="periodTimer">(Total: 00:00)</p>
+                    <button id="startStopButton" class="start">START</button>
+                </div>
+            </div>
+            <p id="statusMessage" class="game-status-top"></p>
+            <div id="gameScreenSponsor" class="screen-sponsor-banner">
+                Supported by: <a href="https://binnsypropertymaintenance.com.au/" target="_blank" rel="noopener noreferrer">Binnsy's Property Maintenance</a>
+            </div>
+        </div>
+
+        <div id="endOfPeriodActionsContainer" class="hidden" style="text-align: center; padding: 20px; margin-top: 15px;">
+            <button id="proceedToHalftimeButton" style="padding: 15px 30px; font-size: 1.2rem; background-color: #5cb85c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Proceed to Halftime
+            </button>
+        </div>
+
+        <div id="halftimeScreen" class="info-section hidden">
+            <h2>Halftime</h2>
+            <p class="halftime-sponsor">Brought to you by: <a href="https://binnsypropertymaintenance.com.au/" target="_blank" rel="noopener noreferrer">Binnsys Property Maintenance</a></p>
+            <div class="halftime-controls">
+                <button id="stopHalftimeMusicButton">Mute Music</button>
+                <button id="resumeHalftimeMusicButton" class="hidden">Play Music</button>
+                <button id="prepareSecondHalfButton">Prepare for 2nd Half</button>
+            </div>
+        </div>
+
+        <div id="nextSubBox" class="info-section">
+            <h3>Next Automatic Sub</h3>
+            <div class="next-sub-countdown">
+                <p id="nextSubCountdown">--:--</p>
+            </div>
+            <div class="sub-players-container">
+                <div class="sub-player-box off">
+                    <h4>OFF</h4>
+                    <div id="playersComingOff"></div>
+                </div>
+                <div class="sub-arrows">↔️</div>
+                <div class="sub-player-box on">
+                    <h4>ON</h4>
+                    <div id="playersComingOn"></div>
+                </div>
+            </div>
+            <p id="nextSubInfo" class="sub-message"></p>
+            <p id="pendingSubInfo" class="hidden pending-sub-message"></p>
+            <button id="confirmSubButton" class="confirm-sub hidden">CONFIRM SUB</button>
+        </div>
+
+        <div id="player-lists">
+            <div class="player-list info-section" id="onFieldContainer">
+                <h3>On Field (<span id="onFieldCount">0</span>)</h3>
+                <ul id="onFieldList"></ul>
+            </div>
+            <div class="player-list info-section" id="onBenchContainer">
+                <h3>Bench/Removed (<span id="onBenchCount">0</span>)</h3>
+                <ul id="onBenchList"></ul>
+            </div>
+        </div>
+
+        <div id="game-controls">
+            <button id="emergencySubButton" class="emergency-sub">EMERGENCY SUB</button>
+            <button id="manageGKButton" class="manage-gk">MANAGE GK</button>
+            <button id="resetButton">Reset Game</button>
+        </div>
+
+        <div id="emergencySubModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3>Emergency Substitution</h3>
+                <p>Select players for emergency swap.</p>
+                <div class="form-group">
+                    <label for="subOutPlayer">Player to Come OFF (from Field):</label>
+                    <select id="subOutPlayer"></select>
+                </div>
+                <div class="form-group">
+                    <label for="subInPlayer">Player to Come ON (from Bench/Eligible Reserves):</label>
+                    <select id="subInPlayer"></select>
+                    <p class="small-note">Only non-Goalkeepers and players not permanently removed are listed here.</p>
+                </div>
+                <h4>What happens to the player coming OFF?</h4>
+                <div class="form-group radio-group">
+                    <label>
+                        <input type="radio" name="injuredFate" value="bench" checked> Return to Bench Rotation
+                    </label>
+                    <label>
+                        <input type="radio" name="injuredFate" value="remove"> Remove from Game
+                    </label>
+                </div>
+                <p id="emergencySubError" class="error-message"></p>
+                <div class="modal-actions">
+                    <button id="confirmEmergencySubButton">Confirm Swap</button>
+                    <button id="cancelEmergencySubButton" class="cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="manageGKModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3>Manage Goalkeeper Status</h3>
+                <p>Mark players who are goalkeepers. Goalkeepers are excluded from automatic rotation...</p>
+                <div id="gkPlayerList"></div>
+                <p id="manageGKError" class="error-message"></p>
+                <div class="modal-actions">
+                    <button id="confirmManageGKButton">Update Goalkeepers</button>
+                    <button id="cancelManageGKButton" class="cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="soccer-constants.js"></script>
+    <script src="soccer-dom-elements.js"></script>
+    <script src="soccer-game-state.js"></script>
+    <script src="soccer-utility-functions.js"></script>
+    <script src="soccer-lineup-generators.js"></script>
+    <script src="soccer-substitution-logic.js"></script>
+    <script src="soccer-ui-updates.js"></script>
+    <script src="soccer-modal-handlers.js"></script>
+    <script src="soccer-timer-and-gameplay.js"></script>
+    <script src="soccer-setup-and-reset.js"></script>
+    <script src="soccer-event-listeners.js"></script>
+</body>
+</html>

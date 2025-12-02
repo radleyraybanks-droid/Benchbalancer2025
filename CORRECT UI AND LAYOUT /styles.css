@@ -1,0 +1,458 @@
+/* styles.css - FOR LANDING PAGE (index.html) */
+
+/* ... (Keep all existing Global Reset, Typography, Hero Banner, Hero Section, Features, How It Works, Benefits styles as they are) ... */
+
+/* ============================================
+   GLOBAL RESET / TYPOGRAPHY / UTILITY CLASSES
+   ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  font-family: "Inter", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 16px; /* Base font size for better scaling */
+  line-height: 1.7; /* Increased for readability */
+  color: #374151; /* gray-700, slightly softer than gray-800 */
+  background-color: #f9fafb; /* gray-50, very light background */
+}
+.container {
+  width: 90%;
+  max-width: 1100px; /* Slightly reduced for better focus */
+  margin: 0 auto;
+  padding: 0 15px; /* Add horizontal padding to container */
+}
+a {
+  text-decoration: none;
+  color: #4f46e5; /* Indigo-600 */
+}
+a:hover {
+  color: #4338ca; /* Indigo-700 */
+  text-decoration: underline;
+}
+.btn {
+  display: inline-block;
+  text-align: center;
+  border: none;
+  border-radius: 8px; /* Slightly more rounded */
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  font-weight: 600;
+}
+.section-heading {
+  font-size: 2rem; /* ~32px */
+  font-weight: 700;
+  margin-bottom: 48px;
+  color: #1f2937; /* gray-800 */
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+
+
+/* ============================================
+   HERO BANNER IMAGE
+   ============================================ */
+.hero-banner {
+  width: 100%;
+  overflow: hidden;
+  background-color: #e5e7eb; /* gray-200 fallback */
+  display: flex;
+  justify-content: center;
+}
+.banner-img {
+  width: 100%;
+  max-width: 1200px;
+  height: auto;
+  object-fit: cover;
+  display: block; /* Remove extra space below image */
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero {
+  background-color: #ffffff;
+  text-align: center;
+  padding: 50px 0 60px; /* Increased padding */
+}
+.hero .hero-content {
+  background-color: #ffffff;
+  padding: 40px 24px; /* Adjusted padding */
+  border-radius: 12px; /* More rounded */
+  max-width: 768px; /* Max width for content block */
+  margin: -60px auto 40px; /* Adjusted overlap */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.07), 0 20px 40px -20px rgba(0, 0, 0, 0.1); /* Softer, layered shadow */
+  position: relative; /* For z-index if needed */
+  z-index: 10;
+}
+.hero-title {
+  font-size: 2.25rem; /* ~36px, slightly larger */
+  font-weight: 700;
+  color: #111827; /* gray-900, darker for title */
+  margin-bottom: 20px;
+  font-family: "Poppins", sans-serif;
+}
+.hero-subtitle {
+  font-size: 1.125rem; /* ~18px */
+  font-weight: 400;
+  color: #4b5563; /* gray-600 */
+  margin-bottom: 32px; /* More space before button */
+  line-height: 1.75;
+  max-width: 600px; /* Keep subtitle readable */
+  margin-left: auto;
+  margin-right: auto;
+}
+.btn-primary.btn-hero-cta { /* Specific class for hero button */
+  background: linear-gradient(to right, #34d399, #22c55e); /* Emerald gradient */
+  color: #ffffff;
+  font-size: 1.25rem; /* ~20px, larger button text */
+  font-weight: 600;
+  padding: 18px 40px; /* Larger padding */
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.btn-primary.btn-hero-cta:hover {
+  background: linear-gradient(to right, #2bb889, #1f9d50);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(52, 211, 153, 0.4);
+}
+
+/* ============================================
+   FEATURE CARDS SECTION
+   ============================================ */
+.features {
+  padding: 60px 0 80px; /* Adjusted padding */
+  background-color: #f3f4f6; /* gray-100, lighter than lavender */
+}
+.features .container .feature-card { /* Target more specifically */
+  background-color: #ffffff;
+  padding: 28px 24px; /* Adjusted padding */
+  border-radius: 10px; /* More rounded */
+  text-align: center;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  display: flex; /* For icon alignment */
+  flex-direction: column; /* Stack icon and text */
+  align-items: center; /* Center items */
+}
+.features .container .feature-card:hover {
+  box-shadow: 0 10px 20px -5px rgba(0,0,0, 0.06), 0 4px 6px -2px rgba(0,0,0, 0.05); /* Tailwind-like shadow */
+  transform: translateY(-5px);
+}
+.features .container .feature-card .icon {
+  margin-bottom: 20px;
+  font-size: 2.75rem;
+  line-height: 1;
+  color: #34d399; /* Emerald */
+}
+.feature-title {
+  font-size: 1.2rem; /* ~19px */
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 10px;
+  font-family: "Poppins", sans-serif;
+}
+.feature-text {
+  font-size: 0.95rem; /* ~15px */
+  font-weight: 400;
+  color: #4b5563;
+  line-height: 1.6;
+}
+.features .container { /* This applies to the grid container */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjust minmax for better fit */
+  gap: 28px; /* Slightly reduced gap */
+}
+
+/* ============================================
+   HOW IT WORKS SECTION
+   ============================================ */
+.how-it-works {
+  padding: 80px 0;
+  background-color: #ffffff;
+  text-align: center;
+}
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px; /* Adjusted gap */
+  margin-top: 24px;
+}
+.step {
+  text-align: center;
+  padding: 20px;
+}
+.step-number {
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  border-radius: 50%;
+  background-color: #ede9fe; /* Violet-100 */
+  color: #7c3aed; /* Violet-600 */
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 auto 20px;
+  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.2);
+}
+.step-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #1f2937;
+  font-family: "Poppins", sans-serif;
+}
+.step-text {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* ============================================
+   WHY COACHES LOVE SECTION (BENEFITS)
+   ============================================ */
+.benefits {
+  padding: 80px 0;
+  background-color: #f3f4f6; /* gray-100 */
+  text-align: center;
+}
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 28px;
+}
+.benefit-card {
+  background-color: #ffffff;
+  padding: 28px 24px;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  border-left: 4px solid #34d399; /* Accent border */
+  border-radius: 8px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  text-align: left;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+}
+.benefit-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+.benefit-card .icon {
+  margin-bottom: 12px;
+  font-size: 1.75rem;
+  color: #34d399; /* Emerald */
+  line-height: 1;
+}
+.benefit-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+  font-family: "Poppins", sans-serif;
+}
+.benefit-text {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* ====== NEW SPONSOR SECTION STYLES ====== */
+.sponsor-section {
+    padding: 40px 0; /* More padding for prominence */
+    text-align: center;
+    background-color: #eef2ff; /* Lighter Indigo variant - tasteful */
+    border-top: 1px solid #e0e7ff;
+    border-bottom: 1px solid #e0e7ff;
+}
+.sponsor-heading {
+    font-size: 1rem; /* Slightly larger */
+    color: #4b5563; /* gray-600 */
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 500;
+}
+.sponsor-link {
+    font-size: 1.25rem; /* More prominent */
+    font-weight: 600; /* Bold */
+    color: #4338ca; /* Indigo-700 - strong but tasteful */
+    text-decoration: none;
+    display: inline-block; /* Allows for potential padding/margin if a logo was used */
+    transition: color 0.2s ease;
+}
+.sponsor-link:hover {
+    color: #3730a3; /* Indigo-800 */
+    text-decoration: underline;
+}
+
+
+/* ====== UPDATED CREDIT SECTION STYLES ====== */
+.credit-section {
+  max-width: 640px; /* Slightly adjusted */
+  margin: 60px auto 60px; /* Adjusted margin */
+  padding: 32px 28px; /* Adjusted padding */
+  background-color: #ffffff;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05); /* Softer shadow */
+}
+.credit-section h4 {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.3rem; /* Adjusted */
+  font-weight: 600;
+  color: #1f2937; /* gray-800 */
+  margin-bottom: 10px;
+}
+.credit-section p {
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  color: #4b5563; /* gray-600 */
+  margin-bottom: 24px;
+  line-height: 1.65;
+}
+.credit-form {
+    margin-top: 16px;
+}
+.credit-form textarea {
+  width: 100%;
+  max-width: 450px;
+  height: 100px; /* Slightly shorter */
+  padding: 12px 14px;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 8px; /* More rounded */
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem; /* Slightly smaller text */
+  line-height: 1.6;
+  color: #1f2937;
+  resize: vertical;
+  margin-bottom: 16px;
+  background-color: #f9fafb; /* gray-50 */
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.credit-form textarea:focus {
+  outline: none;
+  border-color: #34d399; /* Emerald to match CTA */
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25), inset 0 1px 2px rgba(0,0,0,0.04);
+}
+.btn.btn-credit-send { /* More specific selector for this button */
+  background: linear-gradient(to right, #34d399, #22c55e); /* Emerald to match hero CTA */
+  color: #ffffff;
+  border: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  font-weight: 600; /* Bolder */
+  padding: 12px 30px; /* Good padding */
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.25);
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn.btn-credit-send:hover {
+  background: linear-gradient(to right, #2bb889, #1f9d50); /* Darker emerald */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  background-color: #111827; /* gray-900, dark footer */
+  padding: 32px 0; /* More padding */
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  color: #9ca3af; /* gray-400, light text on dark */
+}
+.footer .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.footer p {
+  margin: 0 0 8px 0; /* Space between paragraphs */
+  font-size: 0.9rem;
+}
+.footer .powered-link {
+  font-size: 0.9rem;
+  color: #60a5fa; /* Sky-400, lighter blue for dark bg */
+}
+.footer .powered-link:hover {
+  color: #93c5fd; /* Sky-300 */
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+@media (max-width: 768px) {
+  html {
+    font-size: 15px; /* Slightly adjust base for mobile */
+  }
+  .container {
+    width: 92%; /* More consistent width */
+  }
+  .section-heading {
+    font-size: 1.75rem;
+    margin-bottom: 32px;
+  }
+  .hero .hero-content {
+    margin: -40px auto 30px;
+    padding: 32px 20px;
+  }
+  .hero-title {
+    font-size: 1.85rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  .btn-primary.btn-hero-cta {
+    font-size: 1.1rem;
+    padding: 16px 32px;
+  }
+  .features, .how-it-works, .benefits, .sponsor-section { /* Added sponsor-section */
+    padding: 50px 0; /* Adjusted padding */
+  }
+  .features .container,
+  .steps-grid,
+  .benefits-grid {
+    grid-template-columns: 1fr; /* Stack to single column on mobile */
+    gap: 24px;
+  }
+  .feature-card .icon, .benefit-card .icon {
+    font-size: 2.25rem; /* Slightly smaller icons on mobile */
+  }
+  .credit-section {
+    margin: 50px auto 40px; /* Adjusted margin */
+    padding: 24px;
+  }
+  .sponsor-heading { font-size: 0.9rem; }
+  .sponsor-link { font-size: 1.15rem; }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.6rem;
+  }
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+  .btn-primary.btn-hero-cta {
+    font-size: 1rem;
+    padding: 14px 28px;
+  }
+  .section-heading {
+    font-size: 1.5rem;
+  }
+  .feature-title, .step-title, .benefit-title {
+    font-size: 1.1rem;
+  }
+  .feature-text, .step-text, .benefit-text, .credit-section p, .footer p, .footer .powered-link {
+    font-size: 0.9rem;
+  }
+  .credit-form textarea { font-size: 0.9rem; }
+  .btn.btn-credit-send { font-size: 0.95rem; padding: 10px 24px; }
+  .sponsor-heading { font-size: 0.85rem; }
+  .sponsor-link { font-size: 1.05rem; }
+}
