@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bench Balancer - Pro Squad Management</title>
+
+    <!-- Supabase CDN for authentication and database -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Modern Dark Theme Variables */
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #060b14;
+            --bg-850: #08101a;
+            --bg-secondary: #0a1220;
+            --bg-card: #0d1626;
+            --bg-overlay: rgba(4, 7, 13, 0.85);
+
+            --border-strong: rgba(255, 255, 255, 0.18);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --border-faint: rgba(255, 255, 255, 0.06);
+
+            --accent-cyan: #00ffe0;
+            --accent-cyan-strong: #00cdb8;
+            --accent-green: #1dd1a1;
+            --accent-red: #ff5f6d;
+            --accent-orange: #ff9966;
+
+            --text-primary: #f5fbff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.5);
+            --shadow-strong: 0 20px 40px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 30px rgba(0, 255, 224, 0.3);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header Section */
+        #appHeader {
+            background: linear-gradient(180deg, rgba(0, 255, 224, 0.08) 0%, rgba(6, 12, 22, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-faint);
+            padding: 24px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #appHeader::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .header-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .app-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 20px rgba(0, 255, 224, 0.4);
+            line-height: 1;
+        }
+
+        .app-subtitle {
+            font-family: 'Russo One', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-medium);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Section Title */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        /* Squad Grid */
+        .squad-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        /* Player Card */
+        .player-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-faint);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            position: relative;
+            transition: var(--transition);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .player-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--border-medium);
+        }
+
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-cyan);
+            opacity: 0.5;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .player-name {
+            font-family: 'Russo One', sans-serif;
+            font-size: 18px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .player-position {
+            font-size: 12px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: rgba(0, 255, 224, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .player-details {
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: rgba(29, 209, 161, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(29, 209, 161, 0.3);
+        }
+
+        .badge-warning {
+            background: rgba(255, 153, 102, 0.15);
+            color: var(--accent-orange);
+            border: 1px solid rgba(255, 153, 102, 0.3);
+        }
+
+        /* Add Player Card */
+        .add-player-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px dashed var(--border-medium);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .add-player-card:hover {
+            background: rgba(0, 255, 224, 0.05);
+            border-color: var(--accent-cyan);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .add-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            color: var(--bg-900);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            box-shadow: 0 0 15px rgba(0, 255, 224, 0.4);
+        }
+
+        .add-text {
+            font-family: 'Russo One', sans-serif;
+            color: var(--text-secondary);
+            font-size: 14px;
+            letter-spacing: 0.1em;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-strong);
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-faint);
+            padding-bottom: 16px;
+        }
+
+        .modal-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            color: var(--accent-red);
+        }
+
+        /* Form Styling */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            background: rgba(0, 255, 224, 0.05);
+            box-shadow: 0 0 15px rgba(0, 255, 224, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Toggle Switch */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-faint);
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-850);
+            border: 1px solid var(--border-medium);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: var(--text-muted);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: rgba(29, 209, 161, 0.2);
+            border-color: var(--accent-green);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            background-color: var(--accent-green);
+        }
+
+        /* Parent Section */
+        .parent-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-faint);
+        }
+
+        .parent-header {
+            font-size: 12px;
+            color: var(--accent-cyan);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Action Buttons */
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-cyan-strong) 100%);
+            color: var(--bg-900);
+            box-shadow: 0 4px 15px rgba(0, 255, 224, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 224, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Checkbox Custom */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .whatsapp-check {
+            accent-color: #25D366;
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header id="appHeader">
+        <div class="header-brand">
+            <div class="app-title">
+                <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" style="height: 36px; width: auto;">
+            </div>
+            <div class="app-subtitle">Pro Coach Dashboard</div>
+        </div>
+        <div class="header-actions">
+            <a href="index.html" class="btn-nav">Back to Home</a>
+            <button id="logoutBtn" class="btn-nav"
+                style="border-color: var(--accent-red); color: var(--accent-red);">Sign Out</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="section-header">
+            <h1>Squad Management</h1>
+            <div class="filter-controls">
+                <!-- Potential filter dropdowns here -->
+            </div>
+        </div>
+
+        <div class="squad-grid" id="squadGrid">
+            <!-- Player Cards will be injected here via JS -->
+        </div>
+    </div>
+
+    <!-- Add/Edit Player Modal -->
+    <div class="modal-overlay" id="playerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Player Profile</h2>
+                <button class="close-btn" onclick="closePlayerModal()">&times;</button>
+            </div>
+
+            <form id="playerForm" onsubmit="handleSavePlayer(event)">
+                <input type="hidden" id="playerId">
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Full Name</label>
+                        <input type="text" id="playerName" class="form-control" placeholder="e.g. Michael Jordan"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Position</label>
+                        <select id="playerPosition" class="form-control">
+                            <option value="Guard">Guard</option>
+                            <option value="Forward">Forward</option>
+                            <option value="Center">Center</option>
+                            <option value="Striker">Striker</option>
+                            <option value="Midfield">Midfield</option>
+                            <option value="Defender">Defender</option>
+                            <option value="Keeper">Keeper</option>
+                            <option value="Middle">Middle (Oztag)</option>
+                            <option value="Link">Link (Oztag)</option>
+                            <option value="Winger">Winger (Oztag)</option>
+                            <option value="Fullback">Fullback (Oztag)</option>
+                            <option value="Utility">Utility</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="playerDob" class="form-control">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Address</label>
+                        <input type="text" id="playerAddress" class="form-control" placeholder="Street Address, Suburb">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="toggle-wrapper">
+                            <span class="toggle-label">Parental Consent (Publish Name)</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="parentalConsent">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Parent 1 -->
+                    <div class="parent-section full-width">
+                        <div class="parent-header">Parent / Guardian 1</div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" id="parent1Name" class="form-control" placeholder="Name">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="parent1Phone" class="form-control" placeholder="0400...">
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" id="parent1Whatsapp" class="whatsapp-check">
+                                    <span style="font-size: 13px; color: var(--text-secondary);">Add to WhatsApp
+                                        Group</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parent 2 -->
+                    <div class="parent-section full-width">
+                        <div class="parent-header">Parent / Guardian 2 (Optional)</div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" id="parent2Name" class="form-control" placeholder="Name">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="parent2Phone" class="form-control" placeholder="0400...">
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" id="parent2Whatsapp" class="whatsapp-check">
+                                    <span style="font-size: 13px; color: var(--text-secondary);">Add to WhatsApp
+                                        Group</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Coach Notes</label>
+                        <textarea id="playerNotes" class="form-control"
+                            placeholder="Strengths, weaknesses, medical info..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closePlayerModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Player</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config/supabase-config.js"></script>
+    <script src="auth/auth-manager.js"></script>
+    <script src="config/simple-supabase.js"></script>
+
+    <script>
+        // Pro Squad Manager Logic
+
+        // State
+        let players = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            checkAuth();
+            loadPlayers();
+        });
+
+        async function checkAuth() {
+            // Simple check to ensure user is logged in
+            // In a real app, we'd verify the session with Supabase
+            const session = localStorage.getItem('sb-pomcalscfnwsqlscunxf-auth-token'); // Supabase default key pattern
+            // For now, we'll rely on our simple-supabase.js checkCurrentUser logic if possible, 
+            // but since we want to be robust, we'll just assume if they got here via the link they might be okay, 
+            // or we redirect if no user found in window.benchBalancerSupabase later.
+        }
+
+        function loadPlayers() {
+            // Try to load from localStorage first for speed/offline
+            const saved = localStorage.getItem('benchbalancer_pro_squad');
+            if (saved) {
+                players = JSON.parse(saved);
+            }
+
+            // Always render, even if empty (so the Add button shows)
+            renderSquad();
+
+            // TODO: Sync with Supabase here
+        }
+
+        function savePlayers() {
+            localStorage.setItem('benchbalancer_pro_squad', JSON.stringify(players));
+            renderSquad();
+
+            // TODO: Sync with Supabase here
+            // syncWithSupabase();
+        }
+
+        function renderSquad() {
+            const grid = document.getElementById('squadGrid');
+            grid.innerHTML = '';
+
+            // Sort players alphabetically by name
+            const sortedPlayers = [...players].sort((a, b) => a.name.localeCompare(b.name));
+
+            sortedPlayers.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                card.onclick = () => editPlayer(player.id);
+
+                const consentBadge = player.consent ?
+                    `<span class="badge badge-success">Consent Given</span>` :
+                    `<span class="badge badge-warning">No Consent</span>`;
+
+                card.innerHTML = `
+                    <div class="player-header">
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-position">${player.position}</div>
+                    </div>
+                    <div class="player-details">
+                        <div class="detail-row">
+                            <span>📞</span> ${player.parent1Phone || 'No Phone'}
+                        </div>
+                        <div class="detail-row">
+                            <span>📍</span> ${player.address ? 'Address on file' : 'No Address'}
+                        </div>
+                    </div>
+                    <div class="status-badges">
+                        ${consentBadge}
+                        ${player.parent1Whatsapp || player.parent2Whatsapp ? '<span class="badge badge-success">WhatsApp</span>' : ''}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Add Player Card (Always Last)
+            const addCard = document.createElement('div');
+            addCard.className = 'add-player-card';
+            addCard.onclick = openPlayerModal;
+            addCard.innerHTML = `
+                <div class="add-icon">+</div>
+                <div class="add-text">Add New Player</div>
+            `;
+            grid.appendChild(addCard);
+        }
+
+        // Modal Functions
+        const modal = document.getElementById('playerModal');
+        const form = document.getElementById('playerForm');
+
+        function openPlayerModal() {
+            form.reset();
+            document.getElementById('playerId').value = '';
+            modal.classList.add('active');
+        }
+
+        function closePlayerModal() {
+            modal.classList.remove('active');
+        }
+
+        function editPlayer(id) {
+            const player = players.find(p => p.id === id);
+            if (!player) return;
+
+            document.getElementById('playerId').value = player.id;
+            document.getElementById('playerName').value = player.name;
+            document.getElementById('playerPosition').value = player.position;
+            document.getElementById('playerDob').value = player.dob || '';
+            document.getElementById('playerAddress').value = player.address || '';
+            document.getElementById('parentalConsent').checked = player.consent;
+            document.getElementById('playerNotes').value = player.notes || '';
+
+            // Parent 1
+            document.getElementById('parent1Name').value = player.parent1Name || '';
+            document.getElementById('parent1Phone').value = player.parent1Phone || '';
+            document.getElementById('parent1Whatsapp').checked = player.parent1Whatsapp;
+
+            // Parent 2
+            document.getElementById('parent2Name').value = player.parent2Name || '';
+            document.getElementById('parent2Phone').value = player.parent2Phone || '';
+            document.getElementById('parent2Whatsapp').checked = player.parent2Whatsapp;
+
+            modal.classList.add('active');
+        }
+
+        function handleSavePlayer(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('playerId').value || Date.now().toString();
+
+            const playerData = {
+                id: id,
+                name: document.getElementById('playerName').value,
+                position: document.getElementById('playerPosition').value,
+                dob: document.getElementById('playerDob').value,
+                address: document.getElementById('playerAddress').value,
+                consent: document.getElementById('parentalConsent').checked,
+                notes: document.getElementById('playerNotes').value,
+
+                parent1Name: document.getElementById('parent1Name').value,
+                parent1Phone: document.getElementById('parent1Phone').value,
+                parent1Whatsapp: document.getElementById('parent1Whatsapp').checked,
+
+                parent2Name: document.getElementById('parent2Name').value,
+                parent2Phone: document.getElementById('parent2Phone').value,
+                parent2Whatsapp: document.getElementById('parent2Whatsapp').checked,
+            };
+
+            const existingIndex = players.findIndex(p => p.id === id);
+            if (existingIndex >= 0) {
+                players[existingIndex] = playerData;
+            } else {
+                players.push(playerData);
+            }
+
+            savePlayers();
+            closePlayerModal();
+
+            // Show success animation or toast?
+            // alert('Player saved!'); 
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').onclick = async () => {
+            if (confirm('Sign out?')) {
+                if (window.benchBalancerSupabase) {
+                    await window.benchBalancerSupabase.auth.signOut();
+                }
+                window.location.href = 'index.html';
+            }
+        }
+
+    </script>
+</body>
+
+</html>

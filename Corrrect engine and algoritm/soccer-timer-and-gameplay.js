@@ -1,6 +1,8 @@
-// Timer and Gameplay Functions
+var warningPlayedForCurrentSub = false;
+
 function applyMissedTime(secondsMissed) {
     if (secondsMissed <= 0) return;
+
     debugLog(`Applying ${formatTime(secondsMissed)} of missed time.`);
 
     const totalGameDuration = periodLengthSeconds * gameSettings.numPeriods;
@@ -13,7 +15,7 @@ function applyMissedTime(secondsMissed) {
 
     onField.forEach(p => { playerPlayTimes[p] = (playerPlayTimes[p] || 0) + secondsMissed; });
     onBench.forEach(p => { playerBenchTimes[p] = (playerBenchTimes[p] || 0) + secondsMissed; });
-    
+
     currentGameSeconds += secondsMissed;
     periodElapsedSeconds += secondsMissed;
 
@@ -21,11 +23,11 @@ function applyMissedTime(secondsMissed) {
 
     while (periodLengthSeconds > 0 && periodElapsedSeconds >= periodLengthSeconds && currentPeriod <= gameSettings.numPeriods) {
         const timeOverPeriod = periodElapsedSeconds - periodLengthSeconds;
-        currentGameSeconds = currentPeriod * periodLengthSeconds + timeOverPeriod; 
-        
+        currentGameSeconds = currentPeriod * periodLengthSeconds + timeOverPeriod;
+
         debugLog(`Missed time caused period ${currentPeriod} to end. Time over: ${formatTime(timeOverPeriod)}`);
 
-        if (isRunning) { 
+        if (isRunning) {
             clearInterval(timerIntervalId);
             timerIntervalId = null;
         }
@@ -35,31 +37,31 @@ function applyMissedTime(secondsMissed) {
 
         if (isFirstHalfEndingNow) {
             debugLog("Missed time crossed halftime. Setting up halftime.");
-            if (endOfPeriodActionsContainer) endOfPeriodActionsContainer.classList.add('hidden'); 
+            if (endOfPeriodActionsContainer) endOfPeriodActionsContainer.classList.add('hidden');
             isHalftimeScreenActive = true;
             if (halftimeScreenDiv) halftimeScreenDiv.classList.remove('hidden');
             if (nextSubBox) nextSubBox.classList.add('hidden');
             if (playerLists) playerLists.classList.add('hidden');
             if (gameControls) gameControls.classList.add('hidden');
             showStatusMessage("HALFTIME (Resumed after pause)", 0);
-            currentPeriod++; 
-            periodElapsedSeconds = timeOverPeriod; 
+            currentPeriod++;
+            periodElapsedSeconds = timeOverPeriod;
             recalculateRemainingAutoSubTimes();
             updateDisplay();
-            return; 
+            return;
         } else if (isFinalPeriodNow) {
             debugLog("Missed time caused game to end.");
-            currentGameSeconds = totalGameDuration; 
+            currentGameSeconds = totalGameDuration;
             periodElapsedSeconds = periodLengthSeconds;
-            endGame(); 
-            return; 
+            endGame();
+            return;
         } else {
             debugLog(`Missed time advanced to end of period ${currentPeriod}. Moving to period ${currentPeriod + 1}.`);
             currentPeriod++;
-            periodElapsedSeconds = timeOverPeriod; 
+            periodElapsedSeconds = timeOverPeriod;
         }
     }
-    recalculateRemainingAutoSubTimes(); 
+    recalculateRemainingAutoSubTimes();
 }
 
 
@@ -72,12 +74,12 @@ function handleVisibilityChange() {
         if (isRunning) {
             debugLog("Page hidden, timer was running. Storing timestamp and stopping interval.");
             lastVisibleTimestamp = Date.now();
-            wasRunningWhenHidden = true; 
+            wasRunningWhenHidden = true;
             clearInterval(timerIntervalId);
             timerIntervalId = null;
         } else {
             debugLog("Page hidden, timer was not running.");
-            wasRunningWhenHidden = false; 
+            wasRunningWhenHidden = false;
         }
     } else {
         debugLog("Page became visible.");
@@ -97,30 +99,30 @@ function handleVisibilityChange() {
             if (elapsedWhileHidden > 0) {
                 applyMissedTime(elapsedWhileHidden);
             }
-            lastVisibleTimestamp = null; 
+            lastVisibleTimestamp = null;
             const newIsGameOver = totalGameDuration > 0 && currentGameSeconds >= totalGameDuration;
             if (!newIsGameOver && !isHalftimeScreenActive) {
-                startTimer(true); 
+                startTimer(true);
             } else {
-                isRunning = false; 
+                isRunning = false;
                 wasRunningWhenHidden = false;
-                updateDisplay(); 
+                updateDisplay();
             }
         } else {
             if (isGameOver) debugLog("Page visible, but game is over.");
             if (isSetupScreenVisible) debugLog("Page visible, but on setup screen.");
             if (isHalftimeScreenActive) debugLog("Page visible, but halftime screen active.");
             if (!wasRunningWhenHidden) debugLog("Page visible, but timer was not set to run when hidden.");
-            lastVisibleTimestamp = null; 
-            wasRunningWhenHidden = false; 
-            updateDisplay(); 
+            lastVisibleTimestamp = null;
+            wasRunningWhenHidden = false;
+            updateDisplay();
         }
     }
 }
 
 
 function gameLoop() {
-    if (!isRunning) return; 
+    if (!isRunning) return;
 
     onField.forEach(p => { playerPlayTimes[p] = (playerPlayTimes[p] || 0) + 1; });
     onBench.forEach(p => { playerBenchTimes[p] = (playerBenchTimes[p] || 0) + 1; });
@@ -128,9 +130,26 @@ function gameLoop() {
     periodElapsedSeconds++;
 
     if (isWarningSoundEnabled && !subIsPending && !isModalOpen && nextSubTimeInPeriod !== Infinity &&
-        (nextSubTimeInPeriod - currentGameSeconds) === 10 && warningBeepSound) {
-        debugLog("Playing 10-second warning beep.");
-        warningBeepSound.play().catch(e => console.warn("Beep warning sound playback error:", e));
+        (nextSubTimeInPeriod - currentGameSeconds) <= 10 && (nextSubTimeInPeriod - currentGameSeconds) > 0) {
+
+        if (!warningPlayedForCurrentSub) {
+            debugLog("Attempting to play 10-second warning beep.");
+            if (!warningBeepSound) {
+                try { warningBeepSound = new Audio('beep-warning.wav'); }
+                catch (e) { console.error("Could not create warning sound", e); }
+            }
+            if (warningBeepSound) {
+                try {
+                    warningBeepSound.volume = 1.0;
+                    warningBeepSound.currentTime = 0;
+                    warningBeepSound.play().catch(e => console.warn("Beep warning sound playback error:", e));
+                } catch (e) { console.error("Sound play critical error:", e); }
+                warningPlayedForCurrentSub = true;
+            }
+        }
+    } else if (nextSubTimeInPeriod !== Infinity && (nextSubTimeInPeriod - currentGameSeconds) > 12) {
+        // Reset if we are far away (e.g. schedule changed)
+        warningPlayedForCurrentSub = false;
     }
 
     if (!subIsPending && !isModalOpen && nextSubTimeInPeriod !== Infinity && currentGameSeconds >= nextSubTimeInPeriod) {
@@ -172,7 +191,7 @@ function gameLoop() {
 
     if (periodLengthSeconds > 0 && periodElapsedSeconds >= periodLengthSeconds) {
         const wasRunningBeforePeriodEnd = isRunning;
-        stopTimer(); 
+        stopTimer();
         currentGameSeconds = currentPeriod * periodLengthSeconds;
         periodElapsedSeconds = periodLengthSeconds;
 
@@ -190,7 +209,7 @@ function gameLoop() {
         } else if (isFinalPeriod) {
             endGame();
         } else {
-            handlePeriodEnd(); 
+            handlePeriodEnd();
         }
         updateDisplay();
         return;
@@ -217,17 +236,22 @@ function startTimer(isResume = false) {
         showStatusMessage("Click 'Prepare for 2nd Half' on the halftime screen first.", 3000); return;
     }
     if (endOfPeriodActionsContainer && !endOfPeriodActionsContainer.classList.contains('hidden')) {
-        showStatusMessage("Click 'Proceed to Halftime' first.", 3000); return;
+        if (!isHalftimeScreenActive) {
+            console.warn("startTimer: Auto-hiding stray endOfPeriodActionsContainer.");
+            endOfPeriodActionsContainer.classList.add('hidden');
+        } else {
+            showStatusMessage("Click 'Proceed to Halftime' first.", 3000); return;
+        }
     }
     if (!isResume && (!startStopButton || isModalOpen || allPlayers.length === 0 || isSetupScreenVisible || isGameOver)) {
-        debugLog("Start timer conditions not met (non-resume):", {isRunning, isModalOpen, allPlayersLength: allPlayers.length, isSetupScreenVisible, isGameOver});
-        if(isGameOver) showStatusMessage("Game is already over.", 3000);
-        else if(isModalOpen) showStatusMessage("Close modal before starting timer.", 3000);
-        else if(isSetupScreenVisible) showStatusMessage("Complete setup first.", 3000);
-        else if(allPlayers.length === 0) showStatusMessage("No players setup.", 3000);
+        debugLog("Start timer conditions not met (non-resume):", { isRunning, isModalOpen, allPlayersLength: allPlayers.length, isSetupScreenVisible, isGameOver });
+        if (isGameOver) showStatusMessage("Game is already over.", 3000);
+        else if (isModalOpen) showStatusMessage("Close modal before starting timer.", 3000);
+        else if (isSetupScreenVisible) showStatusMessage("Complete setup first.", 3000);
+        else if (allPlayers.length === 0) showStatusMessage("No players setup.", 3000);
         return;
     }
-     if (isGameOver && !isResume) {
+    if (isGameOver && !isResume) {
         showStatusMessage("Game is already over.", 3000);
         return;
     }
@@ -246,11 +270,11 @@ function startTimer(isResume = false) {
         } else {
             debugLog("Starting whistle sound object not available for immediate play.");
             // Attempt to create and play, though this might have latency
-             try {
+            try {
                 let tempWhistle = new Audio('startingwhistle.wav');
-                tempWhistle.play().then(()=> startingWhistleSoundPlayed = true).catch(e => console.warn("Temp whistle play error:", e));
+                tempWhistle.play().then(() => startingWhistleSoundPlayed = true).catch(e => console.warn("Temp whistle play error:", e));
                 startingWhistleSound = tempWhistle; // Assign if created successfully
-            } catch(e) { console.error("Failed to create temp whistle:", e);}
+            } catch (e) { console.error("Failed to create temp whistle:", e); }
         }
     }
 
@@ -289,8 +313,8 @@ function stopTimer() {
         timerIntervalId = null;
     }
     isRunning = false;
-    wasRunningWhenHidden = false; 
-    lastVisibleTimestamp = null;  
+    wasRunningWhenHidden = false;
+    lastVisibleTimestamp = null;
     debugLog("Timer stopped at game time " + formatTime(currentGameSeconds));
     updateDisplay();
 }
@@ -299,7 +323,7 @@ function handlePeriodEnd() {
     // ... (content of this function remains the same as your last correct version)
     debugLog(`Handling end of period ${currentPeriod}. Game time: ${formatTime(currentGameSeconds)}`);
 
-    if (subIsPending) { 
+    if (subIsPending) {
         debugLog(`Period ${currentPeriod} ended with sub pending. Cancelling sub.`);
         subIsPending = false; pendingOutPlayers = []; pendingInPlayers = []; pendingSubTriggerTime = null;
     }
@@ -309,8 +333,8 @@ function handlePeriodEnd() {
     }
 
     currentPeriod++;
-    periodElapsedSeconds = 0; 
-    recalculateRemainingAutoSubTimes(); 
+    periodElapsedSeconds = 0;
+    recalculateRemainingAutoSubTimes();
 
     let message = `End of Period ${currentPeriod - 1}. Ready for Period ${currentPeriod}. Press START.`;
     showStatusMessage(message, 0);
@@ -319,11 +343,11 @@ function handlePeriodEnd() {
 function endGame() {
     // ... (content of this function remains the same as your last correct version)
     debugLog("--- endGame() called ---");
-    if (isRunning || timerIntervalId) stopTimer(); 
+    if (isRunning || timerIntervalId) stopTimer();
     isRunning = false;
     wasRunningWhenHidden = false;
     lastVisibleTimestamp = null;
-    isHalftimeScreenActive = false; 
+    isHalftimeScreenActive = false;
 
     const totalGameDuration = gameSettings.numPeriods * periodLengthSeconds;
     if (currentGameSeconds > totalGameDuration && totalGameDuration > 0) {
@@ -340,14 +364,14 @@ function endGame() {
 
     showStatusMessage(`Game Over! Final Time: ${formatTime(currentGameSeconds)}. Periods: ${gameSettings.numPeriods}.`, 0);
     debugLog("--- FINAL PLAYTIMES ---");
-    allPlayers.sort((a,b) => a.localeCompare(b)).forEach(p => debugLog(`${p}: ${formatTime(playerPlayTimes[p] || 0)}`));
+    allPlayers.sort((a, b) => a.localeCompare(b)).forEach(p => debugLog(`${p}: ${formatTime(playerPlayTimes[p] || 0)}`));
     debugLog("-----------------------");
 
     if (startStopButton) { startStopButton.disabled = true; startStopButton.textContent = 'Game Over'; startStopButton.className = 'timer-box-button game-over'; }
     if (confirmSubButton) { confirmSubButton.classList.add('hidden'); confirmSubButton.disabled = true; }
     if (emergencySubButton) emergencySubButton.disabled = true;
     if (manageGKButton) manageGKButton.disabled = true;
-    if (warningSoundToggleInput) warningSoundToggleInput.disabled = true; 
+    if (warningSoundToggleInput) warningSoundToggleInput.disabled = true;
 
     if (halftimeScreenDiv) halftimeScreenDiv.classList.add('hidden');
     if (endOfPeriodActionsContainer) endOfPeriodActionsContainer.classList.add('hidden');
@@ -357,6 +381,6 @@ function endGame() {
     if (playerLists) playerLists.classList.remove('hidden');
     if (gameControls) gameControls.classList.remove('hidden');
 
-    updateDisplay(); 
+    updateDisplay();
 }
 // --- END OF FILE timer-and-gameplay.js ---

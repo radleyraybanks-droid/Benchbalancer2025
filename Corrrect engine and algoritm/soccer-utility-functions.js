@@ -26,6 +26,10 @@ function showStatusMessage(message, durationMs = 3000) {
     }
 }
 
+function hideStatusMessage() {
+    clearStatusMessage();
+}
+
 function getEligiblePlayers(playerList) {
     return playerList.filter(player => !playerGKStatus[player] && !playerRemovedStatus[player]);
 }

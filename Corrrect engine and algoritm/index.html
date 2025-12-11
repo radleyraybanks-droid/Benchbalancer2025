@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,17 +44,20 @@
             --transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        *, *::before, *::after {
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
             background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
-                        radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.08), transparent 50%),
-                        linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+                radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
             color: var(--text-primary);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
@@ -86,6 +90,8 @@
         .hidden {
             display: none !important;
         }
+
+
 
         /* ---------- Global Landing ---------- */
         #globalLanding {
@@ -301,8 +307,8 @@
             gap: 48px;
             padding: 56px 20px 72px;
             background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.08), transparent 50%),
-                        radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.12), transparent 52%),
-                        linear-gradient(160deg, var(--bg-900) 0%, #050913 55%, #02050b 100%);
+                radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.12), transparent 52%),
+                linear-gradient(160deg, var(--bg-900) 0%, #050913 55%, #02050b 100%);
         }
 
         .landing-topbar {
@@ -497,6 +503,7 @@
             border: 1px solid transparent;
             cursor: pointer;
             transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+            margin-top: auto;
         }
 
         .landing-button.primary {
@@ -591,8 +598,15 @@
         }
 
         @keyframes neonPulse {
-            0%, 100% { filter: drop-shadow(0 0 18px rgba(0, 255, 224, 0.45)); }
-            50% { filter: drop-shadow(0 0 28px rgba(0, 255, 224, 0.8)); }
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 18px rgba(0, 255, 224, 0.45));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 28px rgba(0, 255, 224, 0.8));
+            }
         }
 
         .app-tagline {
@@ -669,8 +683,8 @@
             gap: 10px;
         }
 
-        .player-input-row + .player-input-row,
-        .reserve-input-row + .reserve-input-row {
+        .player-input-row+.player-input-row,
+        .reserve-input-row+.reserve-input-row {
             margin-top: 12px;
         }
 
@@ -909,8 +923,7 @@
             margin: 0 auto;
             aspect-ratio: 0.6;
             background:
-                repeating-linear-gradient(
-                    90deg,
+                repeating-linear-gradient(90deg,
                     #8B5A2B 0px,
                     #A0522D 2px,
                     #CD853F 4px,
@@ -919,8 +932,7 @@
                     #8B4513 10px,
                     #A0522D 12px,
                     #CD853F 14px,
-                    #8B5A2B 16px
-                );
+                    #8B5A2B 16px);
             border: 4px solid rgba(255, 255, 255, 0.9);
             border-radius: 4px;
             box-shadow:
@@ -938,10 +950,9 @@
             position: absolute;
             inset: 0;
             background: linear-gradient(180deg,
-                rgba(0, 0, 0, 0.15) 0%,
-                rgba(0, 0, 0, 0.0) 40%,
-                rgba(0, 0, 0, 0.08) 100%
-            );
+                    rgba(0, 0, 0, 0.15) 0%,
+                    rgba(0, 0, 0, 0.0) 40%,
+                    rgba(0, 0, 0, 0.08) 100%);
             pointer-events: none;
             border-radius: inherit;
         }
@@ -952,7 +963,7 @@
             pointer-events: none;
         }
 
-        .court-lines > div {
+        .court-lines>div {
             position: absolute;
             border: 2.5px solid rgba(255, 255, 255, 0.85);
             box-sizing: border-box;
@@ -1144,7 +1155,7 @@
             background: linear-gradient(135deg, #FF8C00, #D2691E);
             border: 1.5px solid #333;
             border-radius: 50%;
-            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3);
+            box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.3);
         }
 
         /* Time display box */
@@ -1187,7 +1198,7 @@
             border-radius: 2px;
             white-space: nowrap;
             z-index: 20;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
         }
 
         /* Rotating off - red outline */
@@ -1281,7 +1292,7 @@
             font-size: 12px;
         }
 
-        .sub-player-box > div {
+        .sub-player-box>div {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
@@ -1380,7 +1391,7 @@
             padding: 0;
         }
 
-        .player-list li > .bench-player {
+        .player-list li>.bench-player {
             margin: 0;
         }
 
@@ -2143,26 +2154,26 @@
             .scoreboard-box {
                 grid-column: span 1;
             }
-            
+
             .scoreboard-content {
                 grid-template-columns: 1fr auto 1fr;
                 gap: 10px;
             }
-            
+
             .score-display {
                 font-size: 32px;
             }
-            
+
             .player-scoring {
                 bottom: -30px;
             }
-            
+
             .score-btn {
                 width: 28px;
                 height: 28px;
                 font-size: 14px;
             }
-            
+
             .scoring-pad-box {
                 right: 10px;
                 bottom: 80px;
@@ -2177,9 +2188,17 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* ---------- Media Queries ---------- */
@@ -2549,7 +2568,11 @@
         /* Remove pulse animation on mobile */
         @media (max-width: 768px) {
             @keyframes pulse {
-                0%, 100% { transform: scale(1); }
+
+                0%,
+                100% {
+                    transform: scale(1);
+                }
             }
 
             /* Disable hover effects on touch devices */
@@ -2589,19 +2612,22 @@
                 transform: none !important;
             }
         }
-
-</style>
+    </style>
 </head>
+
 <body>
     <div id="globalLanding">
         <div class="global-topbar">
-            <div class="global-logo">Bench Balancer.</div>
+            <div class="global-logo">
+                <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" style="height: 60px; width: auto;">
+            </div>
         </div>
 
         <section class="global-hero">
             <h1 class="global-title">Professional Sports <span>Team Management</span></h1>
             <p class="global-subtitle">
-                Intelligent substitution management for coaches. Take the stress out of managing playing time with our advanced algorithms that ensure every player gets fair field time.
+                Intelligent substitution management for coaches. Take the stress out of managing playing time with our
+                advanced algorithms that ensure every player gets fair field time.
             </p>
         </section>
 
@@ -2609,7 +2635,8 @@
             <article class="global-card badge-original" data-badge="Original">
                 <div class="global-card-icon">⚽</div>
                 <h3>Soccer</h3>
-                <p>Advanced substitution management for football teams. Perfect for youth leagues, clubs, and professional teams.</p>
+                <p>Advanced substitution management for football teams. Perfect for youth leagues, clubs, and
+                    professional teams.</p>
                 <ul class="global-feature-list">
                     <li>Field positioning</li>
                     <li>Smart rotations</li>
@@ -2622,7 +2649,8 @@
             <article class="global-card badge-new" data-badge="New">
                 <div class="global-card-icon">🏀</div>
                 <h3>Basketball</h3>
-                <p>Modern court management with real-time statistics. Built for competitive basketball teams and leagues.</p>
+                <p>Modern court management with real-time statistics. Built for competitive basketball teams and
+                    leagues.</p>
                 <ul class="global-feature-list">
                     <li>Court positioning</li>
                     <li>Real-time scoring</li>
@@ -2635,7 +2663,8 @@
             <article class="global-card badge-new" data-badge="New">
                 <div class="global-card-icon">🏉</div>
                 <h3>Oztag</h3>
-                <p>Rolling substitution management for Oztag teams. 8 on field, 6 reserves max with fair time distribution.</p>
+                <p>Rolling substitution management for Oztag teams. 8 on field, 6 reserves max with fair time
+                    distribution.</p>
                 <ul class="global-feature-list">
                     <li>8-player field positions</li>
                     <li>Rolling substitutions</li>
@@ -2649,7 +2678,10 @@
 
     <div id="landingScreen" class="hidden">
         <header class="landing-topbar">
-            <button type="button" class="landing-logo" id="landingLogoButton">Bench Balancer.</button>
+            <button type="button" class="landing-logo" id="landingLogoButton"
+                style="background: none; border: none; padding: 0;">
+                <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" style="height: 40px; width: auto;">
+            </button>
             <div class="landing-top-actions">
                 <button class="landing-pill primary" data-action="start-free-play">Free Play Mode</button>
                 <button class="landing-pill" id="landingUpgradeButton">Upgrade to Pro</button>
@@ -2658,7 +2690,10 @@
         </header>
 
         <section class="landing-hero">
-            <h1 class="landing-title">Basketball Bench Balancer</h1>
+            <div class="landing-title-wrapper" style="margin-bottom: 20px;">
+                <img src="assets/bench-balancer-logo-v2.png" alt="Basketball Bench Balancer"
+                    style="height: 80px; width: auto; max-width: 100%;">
+            </div>
             <p class="landing-subtitle">
                 Professional basketball rotation management system with coach authentication and team management.
             </p>
@@ -2694,8 +2729,8 @@
                     <li>Performance insights</li>
                     <li>PDF export &amp; sharing</li>
                 </ul>
-                <button class="landing-button secondary" id="landingProButton">
-                    Get Pro Access
+                <button class="landing-button secondary" id="landingSquadButton">
+                    Squad Management
                 </button>
             </article>
         </section>
@@ -2703,404 +2738,543 @@
 
     <div id="mainApp" class="hidden">
         <div id="appHeader">
-        <div class="header-shell">
-            <button type="button" class="logo-lockup logo-link" id="headerLogoButton">
-                <img src="assets/bench-balancer-logo.svg" alt="Bench Balancer logo" id="mastheadLogo">
-                <span class="app-tagline">Bench management, reimagined</span>
-            </button>
-            <span class="header-action-chip">Game Control Center</span>
-        </div>
-    </div>
-
-    <!-- Setup Section -->
-    <div id="setup">
-        <h2>🏀 Basketball Game Setup</h2>
-        
-        <div class="form-group">
-            <label for="gameFormat">Game Format:</label>
-            <select id="gameFormat">
-                <option value="halves" selected>Halves</option>
-                <option value="quarters">Quarters</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="minsPerPeriod" id="periodLabel">Minutes per Half:</label>
-            <input type="number" id="minsPerPeriod" min="1" value="20">
-        </div>
-        
-        <div class="form-group">
-            <label for="numOnField">Total Players on Court:</label>
-            <select id="numOnField" disabled>
-                <option value="5" selected>5</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="numReserves">Number of Bench Players: <span id="rosterSizeIndicator" style="color: var(--accent-cyan); font-weight: normal;">(Total Roster: 8)</span></label>
-            <select id="numReserves">
-                <option value="0">0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3" selected>3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-            </select>
-            <p class="small-note">Players available for substitution.</p>
-        </div>
-        <!-- Ideal shifts selection removed - optimizer auto-calculates based on roster size -->
-        
-        <div class="form-group">
-            <label for="warningSoundToggle">
-                <input type="checkbox" id="warningSoundToggle" checked>
-                Enable 10-second sub warning sound
-            </label>
-            <p class="small-note">Plays a short beep 10 seconds before an automatic substitution is due.</p>
-        </div>
-
-        <h2>🏀 Player Names</h2>
-        
-        <div class="form-group">
-            <label for="starterNamesContainer">Starting Players:</label>
-            <div id="starterNamesContainer">
-                <!-- Inputs will be dynamically generated here -->
-            </div>
-            <p class="small-note">Enter names or leave as default. Empty fields will use default numbers.</p>
-        </div>
-        
-        <div class="form-group">
-            <label for="reserveNamesContainer">Reserve Players:</label>
-            <div id="reserveNamesContainer">
-                <!-- Inputs will be dynamically generated here -->
-            </div>
-            <p class="small-note">Enter names or leave as default. Empty fields will use default numbers.</p>
-        </div>
-        
-        <div class="preliminary-plan-section">
-            <button id="getPlanButton" type="button">Show Preliminary Sub Plan</button>
-            <div id="preliminaryPlanOutput">
-                <!-- Plan details will appear here -->
+            <div class="header-shell">
+                <button type="button" class="logo-lockup logo-link" id="headerLogoButton">
+                    <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer logo" id="mastheadLogo"
+                        style="height: 40px; width: auto;">
+                </button>
+                <span class="header-action-chip">Game Control Center</span>
             </div>
         </div>
-        
-        <button id="confirmSetupButton">Confirm Setup & Start Game</button>
-        <p id="setupError" class="error-message"></p>
-    </div>
 
-    <!-- Game Display Section (Initially Hidden) -->
-    <div id="game-container" class="hidden">
-        <!-- Game Header -->
-        <div id="game-header">
-            <div id="game-info" class="info-section">
-                <div class="info-box">
-                    <h3>Period</h3>
-                    <p id="periodDisplay">1/2</p>
+        <!-- Setup Section -->
+        <div id="setup">
+            <h2>🏀 Basketball Game Setup</h2>
+
+            <div class="form-group">
+                <label for="gameFormat">Game Format:</label>
+                <select id="gameFormat">
+                    <option value="halves" selected>Halves</option>
+                    <option value="quarters">Quarters</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="minsPerPeriod" id="periodLabel">Minutes per Half:</label>
+                <input type="number" id="minsPerPeriod" min="1" value="20">
+            </div>
+
+            <div class="form-group">
+                <label for="numOnField">Total Players on Court:</label>
+                <select id="numOnField" disabled>
+                    <option value="5" selected>5</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="numReserves">Number of Bench Players: <span id="rosterSizeIndicator"
+                        style="color: var(--accent-cyan); font-weight: normal;">(Total Roster: 8)</span></label>
+                <select id="numReserves">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+                <p class="small-note">Players available for substitution.</p>
+            </div>
+            <!-- Ideal shifts selection removed - optimizer auto-calculates based on roster size -->
+
+            <div class="form-group">
+                <label for="warningSoundToggle">
+                    <input type="checkbox" id="warningSoundToggle" checked>
+                    Enable 10-second sub warning sound
+                </label>
+                <p class="small-note">Plays a short beep 10 seconds before an automatic substitution is due.</p>
+            </div>
+
+            <h2>🏀 Player Names</h2>
+
+            <div class="form-group">
+                <label for="starterNamesContainer">Starting Players:</label>
+                <div id="starterNamesContainer">
+                    <!-- Inputs will be dynamically generated here -->
                 </div>
-                <div class="info-box timer-box">
-                    <p id="gameTimer">00:00</p>
-                    <p id="periodTimer">(Total: 00:00)</p>
-                    <button id="startStopButton" class="timer-box-button start">START</button>
+                <p class="small-note">Enter names or leave as default. Empty fields will use default numbers.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="reserveNamesContainer">Reserve Players:</label>
+                <div id="reserveNamesContainer">
+                    <!-- Inputs will be dynamically generated here -->
                 </div>
-                <!-- Add this after the timer box in game-info -->
-                <div class="info-box scoreboard-box">
-                    <div class="scoreboard-content">
-                        <div class="team-score">
-                            <div class="team-name" id="homeTeamName" data-editable="true">Home</div>
-                            <div class="score-display" id="homeScore">0</div>
+                <p class="small-note">Enter names or leave as default. Empty fields will use default numbers.</p>
+            </div>
+
+            <div class="preliminary-plan-section">
+                <button id="getPlanButton" type="button">Show Preliminary Sub Plan</button>
+                <div id="preliminaryPlanOutput">
+                    <!-- Plan details will appear here -->
+                </div>
+            </div>
+
+            <button id="confirmSetupButton">Confirm Setup & Start Game</button>
+            <p id="setupError" class="error-message"></p>
+        </div>
+
+        <!-- Game Display Section (Initially Hidden) -->
+        <div id="game-container" class="hidden">
+            <!-- Game Header -->
+            <div id="game-header">
+                <div id="game-info" class="info-section">
+                    <div class="info-box">
+                        <h3>Period</h3>
+                        <p id="periodDisplay">1/2</p>
+                    </div>
+                    <div class="info-box timer-box">
+                        <p id="gameTimer">00:00</p>
+                        <p id="periodTimer">(Total: 00:00)</p>
+                        <button id="startStopButton" class="timer-box-button start">START</button>
+                    </div>
+                    <!-- Add this after the timer box in game-info -->
+                    <div class="info-box scoreboard-box">
+                        <div class="scoreboard-content">
+                            <div class="team-score">
+                                <div class="team-name" id="homeTeamName" data-editable="true">Home</div>
+                                <div class="score-display" id="homeScore">0</div>
+                            </div>
+                            <div class="score-divider">:</div>
+                            <div class="team-score">
+                                <div class="team-name" id="awayTeamName" data-editable="true">Opposition</div>
+                                <div class="score-display" id="awayScore">0</div>
+                            </div>
                         </div>
-                        <div class="score-divider">:</div>
-                        <div class="team-score">
-                            <div class="team-name" id="awayTeamName" data-editable="true">Opposition</div>
-                            <div class="score-display" id="awayScore">0</div>
+                    </div>
+                </div>
+                <p id="statusMessage" class="game-status-top"></p>
+            </div>
+
+            <!-- Basketball Court -->
+            <div class="basketball-court-container">
+                <div class="basketball-court" id="basketballCourt">
+                    <div class="court-lines">
+                        <div class="three-point-arc"></div>
+                        <div class="paint-area"></div>
+                        <div class="free-throw-circle"></div>
+                        <div class="center-circle-outline"></div>
+                    </div>
+                    <div id="courtPlayers">
+                        <!-- Player positions will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Substitution Box -->
+            <div id="nextSubBox" class="next-sub-section">
+                <h3 class="next-sub-title">Next Automatic Substitution</h3>
+                <div id="nextSubCountdown">--:--</div>
+                <div class="sub-players-container">
+                    <div class="sub-player-box">
+                        <h4>OFF</h4>
+                        <div id="playersComingOff">No rotation scheduled</div>
+                    </div>
+                    <div class="sub-arrows">⟷</div>
+                    <div class="sub-player-box">
+                        <h4>ON</h4>
+                        <div id="playersComingOn">No rotation scheduled</div>
+                    </div>
+                </div>
+                <button id="confirmSubButton" class="control-button hidden">CONFIRM SUB</button>
+
+            </div>
+
+            <!-- Player Lists Section -->
+            <div id="player-lists">
+                <div class="player-list-section">
+                    <div class="player-list-header">
+                        <h3>On Court (<span id="onFieldCount">5</span>)</h3>
+                    </div>
+                    <ul id="onFieldList" class="player-list">
+                        <!-- Players on court will be populated here -->
+                    </ul>
+                </div>
+
+                <div class="player-list-section bench-overview">
+                    <div class="player-list-header">
+                        <h3>On Bench (<span id="onBenchCount">0</span>)</h3>
+                    </div>
+                    <div class="bench-players" id="benchList">
+                        <!-- Bench players will be added dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Panel - Hidden by default, only shown when clicking basketball court -->
+            <div class="stats-panel stats-drawer" id="statsPanel" style="display: none;">
+                <button type="button" class="stats-drawer-toggle" id="statsDrawerToggle">
+                    <span class="stats-drawer-toggle-label">PLAYER STATISTICS</span>
+                </button>
+                <div class="stats-drawer-content">
+                    <h3 class="stats-panel-header">Player Statistics</h3>
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- Stats will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Sections: Visual Court Display -->
+            <!-- Hidden elements for compatibility - not displayed -->
+            <div class="bench-players" id="freezeList" style="display: none;"></div>
+            <div class="bench-players" id="outList" style="display: none;"></div>
+
+            <!-- Game Controls -->
+            <div id="game-controls" class="game-controls">
+                <button id="emergencySubButton" class="control-button emergency-sub">EMERGENCY SUB</button>
+                <button id="manageRemovedButton" class="control-button manage-removed">MANAGE REMOVED</button>
+                <button id="resetButton" class="control-button">RESET GAME</button>
+            </div>
+
+            <!-- Scoring Pad -->
+            <button class="scoring-pad-toggle" id="scoringPadToggle">🏀</button>
+            <div class="scoring-pad-box hidden" id="scoringPad">
+                <div class="scoring-pad-header">
+                    <span class="scoring-pad-title">Quick Scoring</span>
+                    <button type="button" class="scoring-pad-close" id="scoringPadClose"
+                        aria-label="Close quick scoring pad">✕</button>
+                </div>
+                <div class="scoring-pad-player-list" id="scoringPadPlayers">
+                    <!-- Players will be added dynamically -->
+                </div>
+                <div class="scoring-pad-opposition">
+                    <div class="scoring-pad-player">
+                        <span class="scoring-pad-player-name" id="oppositionNamePad">Opposition</span>
+                        <span class="scoring-pad-player-points" id="oppositionScorePad">0</span>
+                        <div class="scoring-pad-controls">
+                            <button class="scoring-pad-btn minus"
+                                onclick="basketballUI.updateOppositionScore(-1)">-</button>
+                            <button class="scoring-pad-btn" onclick="basketballUI.updateOppositionScore(1)">+</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <p id="statusMessage" class="game-status-top"></p>
-        </div>
 
-        <!-- Basketball Court -->
-        <div class="basketball-court-container">
-            <div class="basketball-court" id="basketballCourt">
-                <div class="court-lines">
-                    <div class="three-point-arc"></div>
-                    <div class="paint-area"></div>
-                    <div class="free-throw-circle"></div>
-                    <div class="center-circle-outline"></div>
-                </div>
-                <div id="courtPlayers">
-                    <!-- Player positions will be dynamically added here -->
-                </div>
-            </div>
-        </div>
-        
-        <!-- Next Substitution Box -->
-        <div id="nextSubBox" class="next-sub-section">
-            <h3 class="next-sub-title">Next Automatic Substitution</h3>
-            <div id="nextSubCountdown">--:--</div>
-            <div class="sub-players-container">
-                <div class="sub-player-box">
-                    <h4>OFF</h4>
-                    <div id="playersComingOff">No rotation scheduled</div>
-                </div>
-                <div class="sub-arrows">⟷</div>
-                <div class="sub-player-box">
-                    <h4>ON</h4>
-                    <div id="playersComingOn">No rotation scheduled</div>
-                </div>
-            </div>
-            <button id="confirmSubButton" class="control-button hidden">CONFIRM SUB</button>
-            <button id="earlySubButton" class="control-button hidden" style="background: linear-gradient(135deg, #f39c12, #e67e22); margin-top: 12px;">MAKE EARLY SUBSTITUTION</button>
-        </div>
-
-        <!-- Player Lists Section -->
-        <div id="player-lists">
-            <div class="player-list-section">
-                <div class="player-list-header">
-                    <h3>On Court (<span id="onFieldCount">5</span>)</h3>
-                </div>
-                <ul id="onFieldList" class="player-list">
-                    <!-- Players on court will be populated here -->
-                </ul>
-            </div>
-            
-            <div class="player-list-section bench-overview">
-                <div class="player-list-header">
-                    <h3>On Bench (<span id="onBenchCount">0</span>)</h3>
-                </div>
-                <div class="bench-players" id="benchList">
-                    <!-- Bench players will be added dynamically -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Panel - Hidden by default, only shown when clicking basketball court -->
-        <div class="stats-panel stats-drawer" id="statsPanel" style="display: none;">
-            <button type="button" class="stats-drawer-toggle" id="statsDrawerToggle">
-                <span class="stats-drawer-toggle-label">PLAYER STATISTICS</span>
-            </button>
-            <div class="stats-drawer-content">
-                <h3 class="stats-panel-header">Player Statistics</h3>
-                <div class="stats-grid" id="statsGrid">
-                    <!-- Stats will be populated dynamically -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Bottom Sections: Visual Court Display -->
-        <!-- Hidden elements for compatibility - not displayed -->
-        <div class="bench-players" id="freezeList" style="display: none;"></div>
-        <div class="bench-players" id="outList" style="display: none;"></div>
-
-        <!-- Game Controls -->
-        <div id="game-controls" class="game-controls">
-            <button id="emergencySubButton" class="control-button emergency-sub">EMERGENCY SUB</button>
-            <button id="manageRemovedButton" class="control-button manage-removed">MANAGE REMOVED</button>
-            <button id="resetButton" class="control-button">RESET GAME</button>
-        </div>
-
-        <!-- Scoring Pad -->
-        <button class="scoring-pad-toggle" id="scoringPadToggle">🏀</button>
-        <div class="scoring-pad-box hidden" id="scoringPad">
-            <div class="scoring-pad-header">
-                <span class="scoring-pad-title">Quick Scoring</span>
-                <button type="button" class="scoring-pad-close" id="scoringPadClose" aria-label="Close quick scoring pad">✕</button>
-            </div>
-            <div class="scoring-pad-player-list" id="scoringPadPlayers">
-                <!-- Players will be added dynamically -->
-            </div>
-            <div class="scoring-pad-opposition">
-                <div class="scoring-pad-player">
-                    <span class="scoring-pad-player-name" id="oppositionNamePad">Opposition</span>
-                    <span class="scoring-pad-player-points" id="oppositionScorePad">0</span>
-                    <div class="scoring-pad-controls">
-                        <button class="scoring-pad-btn minus" onclick="basketballUI.updateOppositionScore(-1)">-</button>
-                        <button class="scoring-pad-btn" onclick="basketballUI.updateOppositionScore(1)">+</button>
+            <!-- Emergency Sub Modal -->
+            <div id="emergencySubModal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <h3>Emergency Substitution</h3>
+                    <p>Select players for emergency swap.</p>
+                    <div class="form-group">
+                        <label for="subOutPlayer">Player to Come OFF (from Court):</label>
+                        <select id="subOutPlayer"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subInPlayer">Player to Come ON (from Bench):</label>
+                        <select id="subInPlayer"></select>
+                    </div>
+                    <h4>What happens to the player coming OFF?</h4>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="injuredFate" value="bench" checked> Return to Bench Rotation
+                        </label>
+                        <label>
+                            <input type="radio" name="injuredFate" value="remove"> Remove from Game
+                        </label>
+                    </div>
+                    <p id="emergencySubError" class="error-message"></p>
+                    <div class="modal-actions">
+                        <button id="confirmEmergencySubButton" class="control-button">Confirm Swap</button>
+                        <button id="cancelEmergencySubButton" class="control-button">Cancel</button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Emergency Sub Modal -->
-        <div id="emergencySubModal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <h3>Emergency Substitution</h3>
-                <p>Select players for emergency swap.</p>
-                <div class="form-group">
-                    <label for="subOutPlayer">Player to Come OFF (from Court):</label>
-                    <select id="subOutPlayer"></select>
-                </div>
-                <div class="form-group">
-                    <label for="subInPlayer">Player to Come ON (from Bench):</label>
-                    <select id="subInPlayer"></select>
-                </div>
-                <h4>What happens to the player coming OFF?</h4>
-                <div class="form-group">
-                    <label>
-                        <input type="radio" name="injuredFate" value="bench" checked> Return to Bench Rotation
-                    </label>
-                    <label>
-                        <input type="radio" name="injuredFate" value="remove"> Remove from Game
-                    </label>
-                </div>
-                <p id="emergencySubError" class="error-message"></p>
-                <div class="modal-actions">
-                    <button id="confirmEmergencySubButton" class="control-button">Confirm Swap</button>
-                    <button id="cancelEmergencySubButton" class="control-button">Cancel</button>
+            <!-- Manage Removed Modal -->
+            <div id="manageRemovedModal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <h3>Manage Removed Players</h3>
+                    <p>Toggle players between removed and active status.</p>
+                    <div id="removedPlayerList"></div>
+                    <p id="manageRemovedError" class="error-message"></p>
+                    <div class="modal-actions">
+                        <button id="confirmManageRemovedButton" class="control-button">Update Status</button>
+                        <button id="cancelManageRemovedButton" class="control-button">Cancel</button>
+                    </div>
                 </div>
             </div>
+
+
         </div>
 
-        <!-- Manage Removed Modal -->
-        <div id="manageRemovedModal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <h3>Manage Removed Players</h3>
-                <p>Toggle players between removed and active status.</p>
-                <div id="removedPlayerList"></div>
-                <p id="manageRemovedError" class="error-message"></p>
-                <div class="modal-actions">
-                    <button id="confirmManageRemovedButton" class="control-button">Update Status</button>
-                    <button id="cancelManageRemovedButton" class="control-button">Cancel</button>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
+        <!-- Basketball Scripts -->
+        <!-- Load in correct order: optimizer → engine → ui → setup → integration -->
+        <script src="basketball-interval-optimizer.js"></script>
+        <script src="basketball-game-engine.js"></script>
+        <script src="basketball-ui-manager.js"></script>
+        <script src="basketball-setup-manager.js"></script>
+        <script src="basketball-integration-main.js"></script>
+        <!-- Integration script already initializes on DOMContentLoaded; no duplicate init here -->
 
-    <!-- Basketball Scripts -->
-    <!-- Load in correct order: optimizer → engine → ui → setup → integration -->
-    <script src="basketball-interval-optimizer.js"></script>
-    <script src="basketball-game-engine.js"></script>
-    <script src="basketball-ui-manager.js"></script>
-    <script src="basketball-setup-manager.js"></script>
-    <script src="basketball-integration-main.js"></script>
-    <!-- Integration script already initializes on DOMContentLoaded; no duplicate init here -->
+        <!-- Authentication and Database Integration -->
+        <script src="config/supabase-config.js"></script>
+        <script src="auth/auth-manager.js"></script>
+        <script src="config/simple-supabase.js"></script>
+        <script src="config/stats-tracker.js"></script>
+        <script>
+            (function () {
+                const globalLanding = document.getElementById('globalLanding');
+                const landingScreen = document.getElementById('landingScreen');
+                const mainApp = document.getElementById('mainApp');
+                const globalBasketballButton = document.getElementById('globalBasketballButton');
+                const globalSoccerButton = document.getElementById('globalSoccerButton');
+                const globalOztagButton = document.getElementById('globalOztagButton');
+                const freePlayButtons = document.querySelectorAll('[data-action="start-free-play"]');
+                const proButton = document.getElementById('landingSquadButton');
+                const signInButton = document.getElementById('landingSignInButton');
+                const landingLogoButton = document.getElementById('landingLogoButton');
+                const headerLogoButton = document.getElementById('headerLogoButton');
 
-    <!-- Authentication and Database Integration -->
-    <script src="config/supabase-config.js"></script>
-    <script src="auth/auth-manager.js"></script>
-    <script src="config/simple-supabase.js"></script>
-    <script src="config/stats-tracker.js"></script>
-    <script>
-        (function() {
-            const globalLanding = document.getElementById('globalLanding');
-            const landingScreen = document.getElementById('landingScreen');
-            const mainApp = document.getElementById('mainApp');
-            const globalBasketballButton = document.getElementById('globalBasketballButton');
-            const globalSoccerButton = document.getElementById('globalSoccerButton');
-            const globalOztagButton = document.getElementById('globalOztagButton');
-            const freePlayButtons = document.querySelectorAll('[data-action="start-free-play"]');
-            const proButton = document.getElementById('landingProButton');
-            const signInButton = document.getElementById('landingSignInButton');
-            const landingLogoButton = document.getElementById('landingLogoButton');
-            const headerLogoButton = document.getElementById('headerLogoButton');
+                // State to track current sport
+                let currentSport = 'basketball'; // Default
 
-            function revealBasketballLanding() {
-                if (globalLanding) {
-                    globalLanding.classList.add('hidden');
-                }
-                if (landingScreen) {
-                    landingScreen.classList.remove('hidden');
-                    landingScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-
-            function showGlobalLanding() {
-                if (landingScreen) {
-                    landingScreen.classList.add('hidden');
-                }
-                if (mainApp) {
-                    mainApp.classList.add('hidden');
-                }
-                if (globalLanding) {
-                    globalLanding.classList.remove('hidden');
-                    globalLanding.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-
-            const gameContainer = document.getElementById('game-container');
-
-            function revealMainApp() {
-                if (globalLanding) {
-                    globalLanding.classList.add('hidden');
-                }
-                if (landingScreen) {
-                    landingScreen.classList.add('hidden');
-                }
-                if (mainApp) {
-                    mainApp.classList.remove('hidden');
-                }
-                const setupSection = document.getElementById('setup');
-                if (setupSection) {
-                    setupSection.classList.remove('hidden');
-                }
-                if (gameContainer) {
-                    gameContainer.classList.add('hidden');
-                }
-                if (setupSection) {
-                    setupSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-
-            if (globalBasketballButton) {
-                globalBasketballButton.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    revealBasketballLanding();
-                });
-            }
-
-            if (globalSoccerButton) {
-                globalSoccerButton.addEventListener('click', () => {
-                    window.location.href = 'soccer-game-modern.html';
-                });
-            }
-
-            if (globalOztagButton) {
-                globalOztagButton.addEventListener('click', () => {
-                    window.location.href = 'oztag-setup.html';
-                });
-            }
-
-            if (landingLogoButton) {
-                landingLogoButton.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    showGlobalLanding();
-                });
-            }
-
-            if (headerLogoButton) {
-                headerLogoButton.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    showGlobalLanding();
-                });
-            }
-
-            freePlayButtons.forEach((button) => {
-                button.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    revealMainApp();
-                });
-            });
-
-            if (proButton) {
-                proButton.addEventListener('click', () => {
-                    console.info('Pro access flow will be connected in a later update.');
-                });
-            }
-
-            if (signInButton) {
-                signInButton.addEventListener('click', () => {
-                    // Trigger the email auth modal from simple-supabase.js
-                    if (typeof showEmailAuthModal === 'function') {
-                        showEmailAuthModal();
-                    } else {
-                        console.info('Auth system is loading...');
+                // Content for each sport
+                const sportContent = {
+                    basketball: {
+                        subtitle: "Professional basketball rotation management system with coach authentication and team management.",
+                        freePlayTitle: "🏀 Free Play",
+                        freePlayDesc: "Dive straight into fair rotations and live scoring without creating an account.",
+                        freePlayFeatures: [
+                            "Complete rotation management",
+                            "Real-time scoring",
+                            "Fair playing time (< 60s variance)",
+                            "Session-only data"
+                        ],
+                        proDesc: "Everything in Free, plus season stats, saved rosters, and export-ready reports.",
+                        freePlayAction: () => revealMainApp()
+                    },
+                    soccer: {
+                        subtitle: "Advanced substitution management for football teams. Perfect for youth leagues, clubs, and professional teams.",
+                        freePlayTitle: "⚽ Free Play",
+                        freePlayDesc: "Manage field positioning, smart rotations, and equal playing time instantly.",
+                        freePlayFeatures: [
+                            "Field positioning & formations",
+                            "Smart rotations",
+                            "Equal playing time",
+                            "Goalkeeper management"
+                        ],
+                        proDesc: "Save your squad, track season stats, and manage goalkeeper rotations over time.",
+                        freePlayAction: () => window.location.href = 'soccer-game-modern.html'
+                    },
+                    oztag: {
+                        subtitle: "Rolling substitution management for Oztag teams. 8 on field, 6 reserves max with fair time distribution.",
+                        freePlayTitle: "🏉 Free Play",
+                        freePlayDesc: "Start a game immediately with 8-player field positions and rolling substitutions.",
+                        freePlayFeatures: [
+                            "8-player field positions",
+                            "Rolling substitutions",
+                            "Two-half format",
+                            "Try scoring tracking"
+                        ],
+                        proDesc: "Manage your team roster, track try scorers, and analyze fair time distribution across the season.",
+                        freePlayAction: () => window.location.href = 'oztag-setup.html'
                     }
+                };
+
+                // Handle URL parameters for routing
+                function handleRouting() {
+                    const params = new URLSearchParams(window.location.search);
+                    const sport = params.get('sport');
+
+                    if (sport === 'basketball') {
+                        updateLandingScreen('basketball');
+                        revealLanding();
+                    } else if (sport === 'soccer') {
+                        updateLandingScreen('soccer');
+                        revealLanding();
+                    } else if (sport === 'oztag') {
+                        updateLandingScreen('oztag');
+                        revealLanding();
+                    } else {
+                        showGlobalLanding();
+                    }
+                }
+
+                function updateLandingScreen(sport) {
+                    currentSport = sport;
+                    const content = sportContent[sport];
+                    if (!content) return;
+
+                    // Update Subtitle
+                    const subtitleEl = landingScreen.querySelector('.landing-subtitle');
+                    if (subtitleEl) subtitleEl.textContent = content.subtitle;
+
+                    // Update Free Play Card
+                    const freeCard = landingScreen.querySelector('.landing-card.free');
+                    if (freeCard) {
+                        freeCard.querySelector('h3').textContent = content.freePlayTitle;
+                        freeCard.querySelector('p').textContent = content.freePlayDesc;
+
+                        // Update features list if needed
+                        const featureList = freeCard.querySelector('.landing-feature-list');
+                        if (featureList && content.freePlayFeatures) {
+                            // Keep the last two negative items (No data persistence, No team management)
+                            // We'll reconstruct the list
+                            const negativeItems = Array.from(featureList.querySelectorAll('.negative'));
+
+                            let html = '';
+                            content.freePlayFeatures.forEach(feature => {
+                                html += `<li>${feature}</li>`;
+                            });
+
+                            featureList.innerHTML = html;
+                            negativeItems.forEach(item => featureList.appendChild(item));
+                        }
+                    }
+
+                    // Update Pro Card
+                    const proCard = landingScreen.querySelector('.landing-card.pro');
+                    if (proCard) {
+                        proCard.querySelector('p').textContent = content.proDesc;
+                    }
+                }
+
+                function revealLanding() {
+                    if (globalLanding) globalLanding.classList.add('hidden');
+                    if (mainApp) mainApp.classList.add('hidden');
+
+                    if (landingScreen) {
+                        landingScreen.classList.remove('hidden');
+                        landingScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // Update URL
+                    const url = new URL(window.location);
+                    url.searchParams.set('sport', currentSport);
+                    window.history.pushState({ sport: currentSport }, '', url);
+                }
+
+                function showGlobalLanding() {
+                    if (landingScreen) landingScreen.classList.add('hidden');
+                    if (mainApp) mainApp.classList.add('hidden');
+
+                    if (globalLanding) {
+                        globalLanding.classList.remove('hidden');
+                        globalLanding.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // Update URL
+                    const url = new URL(window.location);
+                    url.searchParams.delete('sport');
+                    window.history.pushState({ sport: 'global' }, '', url);
+                }
+
+                const gameContainer = document.getElementById('game-container');
+
+                function revealMainApp() {
+                    if (globalLanding) globalLanding.classList.add('hidden');
+                    if (landingScreen) landingScreen.classList.add('hidden');
+                    if (mainApp) mainApp.classList.remove('hidden');
+
+                    const setupSection = document.getElementById('setup');
+                    if (setupSection) {
+                        setupSection.classList.remove('hidden');
+                        setupSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    if (gameContainer) gameContainer.classList.add('hidden');
+                }
+
+                // Event Listeners
+                if (globalBasketballButton) {
+                    globalBasketballButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        updateLandingScreen('basketball');
+                        revealLanding();
+                    });
+                }
+
+                if (globalSoccerButton) {
+                    globalSoccerButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        updateLandingScreen('soccer');
+                        revealLanding();
+                    });
+                }
+
+                if (globalOztagButton) {
+                    globalOztagButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        updateLandingScreen('oztag');
+                        revealLanding();
+                    });
+                }
+
+                if (landingLogoButton) {
+                    landingLogoButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showGlobalLanding();
+                    });
+                }
+
+                if (headerLogoButton) {
+                    headerLogoButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showGlobalLanding();
+                    });
+                }
+
+                freePlayButtons.forEach((button) => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const content = sportContent[currentSport];
+                        if (content && content.freePlayAction) {
+                            content.freePlayAction();
+                        }
+                    });
                 });
-            }
-        })();
-    </script>
+
+                if (proButton) {
+                    proButton.addEventListener('click', async () => {
+                        // Check if user is logged in
+                        let session = null;
+                        if (window.benchBalancerSupabase) {
+                            const { data } = await window.benchBalancerSupabase.auth.getSession();
+                            session = data.session;
+                        }
+
+                        if (session) {
+                            // User is logged in, go to dashboard
+                            window.location.href = 'pro-dashboard.html';
+                        } else {
+                            // User is not logged in, show alert/message
+                            alert("Please create an account or log in to enter your dashboard.");
+                            // Trigger the sign-in modal
+                            if (typeof showEmailAuthModal === 'function') {
+                                showEmailAuthModal();
+                            }
+                        }
+                    });
+                }
+
+                if (signInButton) {
+                    signInButton.addEventListener('click', () => {
+                        if (typeof showEmailAuthModal === 'function') {
+                            showEmailAuthModal();
+                        } else {
+                            console.info('Auth system is loading...');
+                        }
+                    });
+                }
+
+                // Handle browser back/forward buttons
+                window.addEventListener('popstate', (event) => {
+                    handleRouting();
+                });
+
+                // Initial routing check
+                handleRouting();
+            })();
+        </script>
 </body>
+
 </html>

@@ -467,10 +467,31 @@ class OztagGameEngine {
         }
 
         // Warning beep
-        if (nextTime && this.state.currentTime === nextTime - ENGINE_CONFIG.WARNING_BEEP_TIME) {
-            if (this.callbacks.onWarning) {
-                this.callbacks.onWarning('beep', nextTime - this.state.currentTime);
+        if (nextTime &&
+            this.state.currentTime <= nextTime - ENGINE_CONFIG.WARNING_BEEP_TIME &&
+            this.state.currentTime > nextTime - ENGINE_CONFIG.WARNING_BEEP_TIME - 2) { // Play within a 2-second window to be safe but avoid repeats if tick is fast
+
+            // We need a flag to ensure we don't play it multiple times for the same rotation
+            if (!this.rotations.warningPlayedForCurrent) {
+                this.rotations.warningPlayedForCurrent = true;
+
+                // Play sound internally
+                if (typeof window !== 'undefined' && window.oztagUI && window.oztagUI.audio && window.oztagUI.audio.warningBeep) {
+                    // If UI has audio loaded
+                    window.oztagUI.audio.warningBeep.play().catch(e => console.warn('Warning beep failed:', e));
+                } else {
+                    // Fallback
+                    const beep = new Audio('beep-warning.wav');
+                    beep.play().catch(e => console.warn('Warning beep failed:', e));
+                }
+
+                if (this.callbacks.onWarning) {
+                    this.callbacks.onWarning('beep', nextTime - this.state.currentTime);
+                }
             }
+        } else if (nextTime && this.state.currentTime < nextTime - ENGINE_CONFIG.WARNING_BEEP_TIME - 5) {
+            // Reset flag if we are well before the warning time (e.g. schedule changed or new rotation)
+            this.rotations.warningPlayedForCurrent = false;
         }
     }
 
@@ -618,12 +639,12 @@ class OztagGameEngine {
      * Skip to next rotation time
      */
     advanceToNextRotation() {
-        const currentIdx = this.rotations.schedule.indexOf(this.rotations.nextRotationTime);
         if (currentIdx !== -1 && currentIdx < this.rotations.schedule.length - 1) {
             this.rotations.nextRotationTime = this.rotations.schedule[currentIdx + 1];
         } else {
             this.rotations.nextRotationTime = null;
         }
+        this.rotations.warningPlayedForCurrent = false;
     }
 
     /**

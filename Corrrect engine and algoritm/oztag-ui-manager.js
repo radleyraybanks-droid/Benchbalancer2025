@@ -69,7 +69,7 @@ class OztagUI {
         this.elements.playersComingOff = document.getElementById('playersComingOff');
         this.elements.playersComingOn = document.getElementById('playersComingOn');
         this.elements.confirmSubButton = document.getElementById('confirmSubButton');
-        this.elements.earlySubButton = document.getElementById('earlySubButton');
+
 
         // Player lists
         this.elements.onFieldList = document.getElementById('onFieldList');
@@ -128,14 +128,7 @@ class OztagUI {
             }
         });
 
-        // Early substitution button
-        this.elements.earlySubButton?.addEventListener('click', () => {
-            if (this.engine.rotations.nextRotationTime) {
-                this.engine.triggerRotation();
-                this.elements.earlySubButton.classList.add('hidden');
-                this.hideStatusMessage();
-            }
-        });
+
 
         // Emergency sub
         this.elements.emergencySubButton?.addEventListener('click', () => {
@@ -481,7 +474,7 @@ class OztagUI {
         if (currentTime === 0 && periodElapsed === 0) {
             try {
                 this.audio.startingWhistle.currentTime = 0;
-                this.audio.startingWhistle.play().catch(() => {});
+                this.audio.startingWhistle.play().catch(() => { });
                 this.startingWhistlePlayed = true;
             } catch (error) {
                 console.warn('Starting whistle playback failed:', error);
@@ -956,16 +949,13 @@ class OztagUI {
      * Show status message
      */
     showStatusMessage(message, duration = 3000, type = 'info') {
+        if (!this.elements.statusMessage) return;
+
         this.elements.statusMessage.textContent = message;
+        this.elements.statusMessage.className = ''; // Reset classes
 
-        const colors = {
-            'info': '#00FFE0',
-            'success': '#5CB85C',
-            'warning': '#FFD700',
-            'error': '#D9534F'
-        };
-
-        this.elements.statusMessage.style.color = colors[type] || colors.info;
+        // Set color/style based on type if needed, or use CSS classes
+        // For now, just text content
 
         if (duration > 0) {
             setTimeout(() => {
@@ -976,8 +966,13 @@ class OztagUI {
         }
     }
 
+    /**
+     * Hide status message immediately
+     */
     hideStatusMessage() {
-        this.elements.statusMessage.textContent = '';
+        if (this.elements.statusMessage) {
+            this.elements.statusMessage.textContent = '';
+        }
     }
 
     /**
@@ -992,13 +987,27 @@ class OztagUI {
      * Update start/stop button
      */
     updateStartStopButton(isRunning) {
+        if (!this.elements.startStopButton) return;
+
+        if (this.engine.state.gameOver) {
+            this.elements.startStopButton.textContent = 'GAME OVER';
+            this.elements.startStopButton.className = 'control-button game-over';
+            this.elements.startStopButton.disabled = true;
+            this.elements.startStopButton.style.opacity = '0.5';
+            this.elements.startStopButton.style.cursor = 'not-allowed';
+            return;
+        }
+
         if (isRunning) {
             this.elements.startStopButton.textContent = 'PAUSE CLOCK';
-            this.elements.startStopButton.classList.add('stop');
+            this.elements.startStopButton.className = 'control-button stop';
         } else {
-            this.elements.startStopButton.textContent = 'START';
-            this.elements.startStopButton.classList.remove('stop');
+            this.elements.startStopButton.textContent = 'START CLOCK';
+            this.elements.startStopButton.className = 'control-button start';
         }
+        this.elements.startStopButton.disabled = false;
+        this.elements.startStopButton.style.opacity = '1';
+        this.elements.startStopButton.style.cursor = 'pointer';
     }
 
     /**

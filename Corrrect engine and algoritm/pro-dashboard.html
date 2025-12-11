@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bench Balancer - Coaches Dashboard</title>
+
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Shared Theme Variables */
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #060b14;
+            --bg-card: #0d1626;
+            --accent-cyan: #00ffe0;
+            --accent-cyan-strong: #00cdb8;
+            --accent-purple: #7c5cff;
+            --accent-orange: #ff9966;
+            --accent-green: #1dd1a1;
+            --text-primary: #f5fbff;
+            --text-secondary: #94a3b8;
+            --border-faint: rgba(255, 255, 255, 0.06);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --shadow-strong: 0 20px 40px rgba(0, 0, 0, 0.6);
+            --radius-xl: 24px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-faint);
+            background: rgba(4, 7, 13, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-back {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-back:hover {
+            color: var(--text-primary);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .welcome-text {
+            font-family: 'Russo One', sans-serif;
+            font-size: 36px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sub-text {
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* Tile Card */
+        .tile {
+            background: rgba(13, 22, 38, 0.6);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 280px;
+        }
+
+        .tile:hover {
+            transform: translateY(-10px);
+            background: rgba(13, 22, 38, 0.9);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 20px 50px rgba(0, 255, 224, 0.15);
+        }
+
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-cyan), transparent);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .tile:hover::before {
+            opacity: 1;
+        }
+
+        .tile-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+        }
+
+        .tile-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            color: var(--text-primary);
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+
+        .tile-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .tile-arrow {
+            align-self: flex-end;
+            font-size: 24px;
+            color: var(--accent-cyan);
+            opacity: 0.5;
+            transition: var(--transition);
+            margin-top: 20px;
+        }
+
+        .tile:hover .tile-arrow {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        /* Specific Tile Accents */
+        .tile.squad:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .tile.stats:hover {
+            border-color: var(--accent-purple);
+        }
+
+        .tile.stats:hover::before {
+            background: linear-gradient(90deg, var(--accent-purple), transparent);
+        }
+
+        .tile.matches:hover {
+            border-color: var(--accent-orange);
+        }
+
+        .tile.matches:hover::before {
+            background: linear-gradient(90deg, var(--accent-orange), transparent);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="brand">
+            <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer Pro" style="height: 40px; width: auto;">
+        </div>
+        <div class="user-menu">
+            <a href="index.html" class="btn-back">Back to Home</a>
+            <button id="logoutBtn"
+                style="background: none; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 8px 16px; border-radius: 20px; cursor: pointer;">Sign
+                Out</button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <h1 class="welcome-text">Coach Dashboard</h1>
+        <p class="sub-text">Manage your team, analyze performance, and plan your next victory.</p>
+
+        <div class="tiles-grid">
+            <!-- Squad Management Tile -->
+            <a href="pro-squad-management.html" class="tile squad">
+                <div>
+                    <div class="tile-icon">👥</div>
+                    <div class="tile-title">Squad Management</div>
+                    <div class="tile-desc">Add players, manage profiles, track parental consent, and organize your
+                        roster.</div>
+                </div>
+                <div class="tile-arrow">→</div>
+            </a>
+
+            <!-- Stats Tile -->
+            <div class="tile stats" onclick="alert('Stats module coming soon!')">
+                <div>
+                    <div class="tile-icon">📊</div>
+                    <div class="tile-title">Player Statistics</div>
+                    <div class="tile-desc">View time on field, points scored, and performance metrics for every player.
+                    </div>
+                </div>
+                <div class="tile-arrow">→</div>
+            </div>
+
+            <!-- Matches Tile -->
+            <div class="tile matches" onclick="alert('Match history coming soon!')">
+                <div>
+                    <div class="tile-icon">🏆</div>
+                    <div class="tile-title">Match History</div>
+                    <div class="tile-desc">Review past games, scores, and rotation effectiveness.</div>
+                </div>
+                <div class="tile-arrow">→</div>
+            </div>
+
+            <!-- Settings Tile -->
+            <div class="tile settings" onclick="alert('Settings coming soon!')">
+                <div>
+                    <div class="tile-icon">⚙️</div>
+                    <div class="tile-title">Team Settings</div>
+                    <div class="tile-desc">Configure default game times, team names, and export preferences.</div>
+                </div>
+                <div class="tile-arrow">→</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config/supabase-config.js"></script>
+    <script src="auth/auth-manager.js"></script>
+    <script src="config/simple-supabase.js"></script>
+    <script>
+        document.getElementById('logoutBtn').onclick = async () => {
+            if (confirm('Sign out?')) {
+                if (window.benchBalancerSupabase) {
+                    await window.benchBalancerSupabase.auth.signOut();
+                }
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+
+</html>

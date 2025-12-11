@@ -11,18 +11,18 @@ class BasketballUI {
         this.elements = {};
         this.initializeElements();
         this.attachEventListeners();
-        
+
         // UI state
         this.displayState = {
             lastVariance: 0,
             lastTempo: 'balanced',
             recoveryActive: false
         };
-        
+
         // Scoring UI state
         this.scoringPadOpen = false;
-    // Used to suppress immediate re-open from iOS/Safari "ghost clicks" when closing
-    this._suppressToggleUntil = 0;
+        // Used to suppress immediate re-open from iOS/Safari "ghost clicks" when closing
+        this._suppressToggleUntil = 0;
         this.startingWhistlePlayed = false;
         this.audio = this.audio || {};
 
@@ -43,10 +43,10 @@ class BasketballUI {
                 console.warn('Failed to initialize starting whistle audio:', error);
             }
         }
-        
+
         console.log('🎨 Basketball UI Manager initialized');
     }
-    
+
     /**
      * Initialize DOM element references
      */
@@ -54,39 +54,38 @@ class BasketballUI {
         // Court display
         this.elements.court = document.getElementById('basketballCourt');
         this.elements.courtPlayers = document.getElementById('courtPlayers');
-        
+
         // Bench sections
         this.elements.benchList = document.getElementById('benchList');
         this.elements.freezeList = document.getElementById('freezeList');
         this.elements.outList = document.getElementById('outList');
-        
+
         // Timer and period
         this.elements.gameTimer = document.getElementById('gameTimer');
         this.elements.periodTimer = document.getElementById('periodTimer');
         this.elements.periodDisplay = document.getElementById('periodDisplay');
         this.elements.varianceDisplay = document.getElementById('varianceDisplay');
-        
+
         // Rotation display
         this.elements.nextSubCountdown = document.getElementById('nextSubCountdown');
         this.elements.playersComingOff = document.getElementById('playersComingOff');
         this.elements.playersComingOn = document.getElementById('playersComingOn');
         this.elements.confirmSubButton = document.getElementById('confirmSubButton');
-        this.elements.earlySubButton = document.getElementById('earlySubButton');  // NEW
 
         // Player lists
         this.elements.onFieldList = document.getElementById('onFieldList');
         this.elements.onFieldCount = document.getElementById('onFieldCount');
         this.elements.onBenchCount = document.getElementById('onBenchCount');
-        
+
         // Status
         this.elements.statusMessage = document.getElementById('statusMessage');
-        
+
         // Controls
         this.elements.startStopButton = document.getElementById('startStopButton');
         this.elements.emergencySubButton = document.getElementById('emergencySubButton');
         this.elements.manageRemovedButton = document.getElementById('manageRemovedButton');
         this.elements.resetButton = document.getElementById('resetButton');
-        
+
         // Modals
         this.elements.emergencyModal = document.getElementById('emergencySubModal');
         this.elements.manageRemovedModal = document.getElementById('manageRemovedModal');
@@ -104,7 +103,7 @@ class BasketballUI {
         this.elements.statsPanel = document.getElementById('statsPanel');
         this.elements.statsDrawerToggle = document.getElementById('statsDrawerToggle');
     }
-    
+
     /**
      * Attach event listeners to controls
      */
@@ -120,7 +119,7 @@ class BasketballUI {
                 this.playStartingWhistleIfNeeded();
             }
         });
-        
+
         // Confirm substitution
         this.elements.confirmSubButton?.addEventListener('click', () => {
             if (this.engine.confirmRotation()) {
@@ -131,26 +130,16 @@ class BasketballUI {
             }
         });
 
-        // NEW: Early substitution button
-        this.elements.earlySubButton?.addEventListener('click', () => {
-            // Trigger the scheduled rotation early
-            if (this.engine.rotations.nextScheduled) {
-                this.engine.triggerRotation(this.engine.rotations.nextScheduled);
-                this.elements.earlySubButton.classList.add('hidden');
-                this.hideStatusMessage();
-            }
-        });
-
         // Emergency sub
         this.elements.emergencySubButton?.addEventListener('click', () => {
             this.showEmergencySubModal();
         });
-        
+
         // Manage removed
         this.elements.manageRemovedButton?.addEventListener('click', () => {
             this.showManageRemovedModal();
         });
-        
+
         // Reset game
         this.elements.resetButton?.addEventListener('click', () => {
             if (confirm('Are you sure you want to reset the game? All progress will be lost.')) {
@@ -202,7 +191,7 @@ class BasketballUI {
             this.showStatsPanel();
         });
     }
-    
+
     /**
      * Update entire display based on game state
      */
@@ -530,7 +519,7 @@ class BasketballUI {
         if (currentTime === 0 && periodElapsed === 0) {
             try {
                 this.audio.startingWhistle.currentTime = 0;
-                this.audio.startingWhistle.play().catch(() => {});
+                this.audio.startingWhistle.play().catch(() => { });
                 this.startingWhistlePlayed = true;
             } catch (error) {
                 console.warn('Starting whistle playback failed:', error);
@@ -592,7 +581,7 @@ class BasketballUI {
             }
         });
     }
-    
+
     /**
      * Update timer displays
      */
@@ -615,7 +604,7 @@ class BasketballUI {
         const periodFormat = this.engine.config.format === 'quarters' ? '4' : '2';
         this.elements.periodDisplay.textContent = `${state.currentPeriod}/${periodFormat}`;
     }
-    
+
     /**
      * Update court player display with 3D isometric silhouettes
      */
@@ -657,7 +646,7 @@ class BasketballUI {
 
         this.elements.courtPlayers.innerHTML = courtHTML;
     }
-    
+
     /**
      * Update bench, freeze, and out sections
      */
@@ -703,10 +692,10 @@ class BasketballUI {
         if (this.elements.onBenchCount) {
             this.elements.onBenchCount.textContent = state.players.bench.length;
         }
-        
+
         // Freeze section (currently not used in basketball)
         this.elements.freezeList.innerHTML = this.renderEmptyState('None');
-        
+
         // Out section (removed players)
         let outHTML = '';
         state.players.removed.forEach(player => {
@@ -726,7 +715,7 @@ class BasketballUI {
         });
         this.elements.outList.innerHTML = outHTML || this.renderEmptyState('None');
     }
-    
+
     /**
      * Update player lists (On Court / On Bench)
      */
@@ -740,7 +729,7 @@ class BasketballUI {
             const safeName = this.escapeHTML(player);
             const badgeInitials = this.escapeHTML(this.getBadgeInitials(player));
             const position = this.escapeHTML(state.players.positions[player] || '');
-            
+
             onCourtHTML += `
                 <li data-player="${safeName}">
                     <div class="bench-player on-court-card">
@@ -773,7 +762,7 @@ class BasketballUI {
         this.elements.onFieldList.innerHTML = onCourtHTML;
         this.elements.onFieldCount.textContent = state.players.court.length;
     }
-    
+
     /**
      * Update rotation information display
      */
@@ -785,7 +774,7 @@ class BasketballUI {
             this.elements.playersComingOff.innerHTML = this.renderPlayerChips(state.rotations.pendingOff, 'No rotation scheduled');
             this.elements.playersComingOn.innerHTML = this.renderPlayerChips(state.rotations.pendingOn, 'No rotation scheduled');
             this.elements.confirmSubButton.classList.remove('hidden');
-            
+
             // Add highlights
             this.highlightRotatingPlayers(state.rotations.pendingOff, state.rotations.pendingOn);
         } else if (state.rotations.next) {
@@ -805,7 +794,7 @@ class BasketballUI {
             this.elements.confirmSubButton.classList.add('hidden');
         }
     }
-    
+
     /**
      * Update variance display
      */
@@ -828,7 +817,7 @@ class BasketballUI {
 
         this.displayState.lastVariance = variance;
     }
-    
+
     /**
      * Update status message
      */
@@ -840,7 +829,7 @@ class BasketballUI {
             this.showStatusMessage('Recovery complete - variance restored', 3000, 'success');
             this.displayState.recoveryActive = false;
         }
-        
+
         if (state.tempoLocked) {
             const lockIcon = '🔒';
             if (!this.elements.statusMessage.textContent.includes(lockIcon)) {
@@ -848,7 +837,7 @@ class BasketballUI {
             }
         }
     }
-    
+
     /**
      * NEW: Show early substitution warning (1 minute before scheduled sub)
      */
@@ -892,7 +881,7 @@ class BasketballUI {
     highlightRotatingPlayers(playersOff, playersOn) {
         // Clear existing highlights
         this.clearRotationHighlights();
-        
+
         // Highlight players coming off (court)
         playersOff.forEach(player => {
             const element = document.querySelector(`#courtPlayers [data-player="${player}"]`);
@@ -901,7 +890,7 @@ class BasketballUI {
                 element.style.border = '2px solid #FF8C00';
             }
         });
-        
+
         // Highlight players coming on (bench)
         playersOn.forEach(player => {
             const element = document.querySelector(`#benchList [data-player="${player}"]`);
@@ -911,7 +900,7 @@ class BasketballUI {
             }
         });
     }
-    
+
     /**
      * Clear rotation highlights
      */
@@ -921,7 +910,7 @@ class BasketballUI {
             el.style.border = '';
         });
     }
-    
+
     /**
      * Show emergency substitution modal
      */
@@ -929,7 +918,7 @@ class BasketballUI {
         // Populate dropdowns
         const offSelect = document.getElementById('subOutPlayer');
         const onSelect = document.getElementById('subInPlayer');
-        
+
         // Clear and populate court players
         offSelect.innerHTML = '';
         this.engine.players.court.forEach(player => {
@@ -938,7 +927,7 @@ class BasketballUI {
             option.textContent = player;
             offSelect.appendChild(option);
         });
-        
+
         // Clear and populate bench players
         onSelect.innerHTML = '';
         this.engine.players.bench.forEach(player => {
@@ -947,16 +936,16 @@ class BasketballUI {
             option.textContent = player;
             onSelect.appendChild(option);
         });
-        
+
         // Show modal
         this.elements.emergencyModal.classList.remove('hidden');
-        
+
         // Attach handlers
         document.getElementById('confirmEmergencySubButton').onclick = () => {
             const playerOff = offSelect.value;
             const playerOn = onSelect.value;
             const removeFromGame = document.querySelector('input[name="injuredFate"]:checked').value === 'remove';
-            
+
             if (playerOff && playerOn) {
                 if (this.engine.emergencySubstitution(playerOff, playerOn, removeFromGame)) {
                     this.elements.emergencyModal.classList.add('hidden');
@@ -964,55 +953,55 @@ class BasketballUI {
                 }
             }
         };
-        
+
         document.getElementById('cancelEmergencySubButton').onclick = () => {
             this.elements.emergencyModal.classList.add('hidden');
         };
     }
-    
+
     /**
      * Show manage removed players modal
      */
     showManageRemovedModal() {
         const listDiv = document.getElementById('removedPlayerList');
         listDiv.innerHTML = '';
-        
+
         if (this.engine.players.removed.size === 0) {
             listDiv.innerHTML = this.renderEmptyState('No removed players');
         } else {
             this.engine.players.removed.forEach(player => {
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'form-group';
-                
+
                 const label = document.createElement('label');
                 label.textContent = player + ' ';
-                
+
                 const button = document.createElement('button');
                 button.className = 'control-button';
                 button.textContent = 'Return to Game';
                 button.onclick = () => {
                     this.returnPlayerToGame(player);
                 };
-                
+
                 label.appendChild(button);
                 playerDiv.appendChild(label);
                 listDiv.appendChild(playerDiv);
             });
         }
-        
+
         // Show modal
         this.elements.manageRemovedModal.classList.remove('hidden');
-        
+
         // Attach handlers
         document.getElementById('confirmManageRemovedButton').onclick = () => {
             this.elements.manageRemovedModal.classList.add('hidden');
         };
-        
+
         document.getElementById('cancelManageRemovedButton').onclick = () => {
             this.elements.manageRemovedModal.classList.add('hidden');
         };
     }
-    
+
     /**
      * Return player to game (called from modal)
      */
@@ -1022,13 +1011,13 @@ class BasketballUI {
             this.showManageRemovedModal(); // Refresh modal
         }
     }
-    
+
     /**
      * Show status message
      */
     showStatusMessage(message, duration = 3000, type = 'info') {
         this.elements.statusMessage.textContent = message;
-        
+
         // Set color based on type
         const colors = {
             'info': '#00FFE0',
@@ -1036,9 +1025,9 @@ class BasketballUI {
             'warning': '#FFD700',
             'error': '#D9534F'
         };
-        
+
         this.elements.statusMessage.style.color = colors[type] || colors.info;
-        
+
         // Auto-hide after duration
         if (duration > 0) {
             setTimeout(() => {
@@ -1048,7 +1037,16 @@ class BasketballUI {
             }, duration);
         }
     }
-    
+
+    /**
+     * Hide status message immediately
+     */
+    hideStatusMessage() {
+        if (this.elements.statusMessage) {
+            this.elements.statusMessage.textContent = '';
+        }
+    }
+
     /**
      * Show error message
      */
@@ -1056,7 +1054,7 @@ class BasketballUI {
         this.showStatusMessage(error, 5000, 'error');
         console.error('UI Error:', error);
     }
-    
+
     /**
      * Show recovery notification
      */
@@ -1064,11 +1062,26 @@ class BasketballUI {
         const message = `Recovery: ${recovery.strategy} strategy, ${recovery.rotations} rotations planned`;
         this.showStatusMessage(message, 5000, 'warning');
     }
-    
+
     /**
      * Update start/stop button
      */
     updateStartStopButton(isRunning) {
+        // Check for game over state
+        if (this.engine && this.engine.state && this.engine.state.gameOver) {
+            this.elements.startStopButton.textContent = 'GAME OVER';
+            this.elements.startStopButton.classList.remove('stop');
+            this.elements.startStopButton.disabled = true;
+            this.elements.startStopButton.style.opacity = '0.5';
+            this.elements.startStopButton.style.cursor = 'not-allowed';
+            return;
+        }
+
+        // Reset disabled state
+        this.elements.startStopButton.disabled = false;
+        this.elements.startStopButton.style.opacity = '1';
+        this.elements.startStopButton.style.cursor = 'pointer';
+
         if (isRunning) {
             this.elements.startStopButton.textContent = 'PAUSE CLOCK';
             this.elements.startStopButton.classList.add('stop');
@@ -1077,14 +1090,14 @@ class BasketballUI {
             this.elements.startStopButton.classList.remove('stop');
         }
     }
-    
+
     /**
      * Calculate current stint time for a player
      */
     calculateCurrentStint(player, state) {
         const stint = this.engine.players.currentStints[player];
         if (!stint || !stint.onCourt) return 0;
-        
+
         return state.currentTime - stint.start;
     }
 
@@ -1097,7 +1110,7 @@ class BasketballUI {
         const benchStart = this.engine.players.lastRotationTime?.[player] ?? 0;
         return Math.max(0, state.currentTime - benchStart);
     }
-    
+
     /**
      * Format time for display
      */

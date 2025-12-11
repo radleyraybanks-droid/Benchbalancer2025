@@ -73,7 +73,7 @@ class BasketballGameEngine {
             autoConfirmRotations: false,
             warningBeepTime: GAME_CONFIG.WARNING_BEEP_TIME
         };
-        
+
         // Game state
         this.state = {
             initialized: false,
@@ -85,7 +85,7 @@ class BasketballGameEngine {
             isHalftime: false,
             gameOver: false
         };
-        
+
         // Player management - critical tracking
         this.players = {
             all: [],
@@ -98,7 +98,7 @@ class BasketballGameEngine {
             positions: {},
             lastRotationTime: {}
         };
-        
+
         // Scoring management
         this.scoring = {
             home: 0,
@@ -107,7 +107,7 @@ class BasketballGameEngine {
             awayTeamName: 'Opposition',
             playerPoints: {}
         };
-        
+
         // Rotation management
         this.rotations = {
             pending: false,
@@ -120,9 +120,9 @@ class BasketballGameEngine {
             currentPlanIndex: 0,
             lastConfirmedIndex: -1
         };
-        
+
         this.enforcer = null;
-        
+
         // UI callbacks
         this.callbacks = {
             onUpdate: null,
@@ -135,27 +135,27 @@ class BasketballGameEngine {
             onRecovery: null,
             onScoreUpdate: null
         };
-        
+
         // Timer
         this.timerInterval = null;
         this.lastTickTime = null;
         this.warningPlayed = false;
         this.earlyWarningShown = false;  // NEW: Track 1-minute early warning
-        
+
         // Page Visibility tracking for catch-up when tab is hidden/restored
         this.lastVisibleTimestamp = null;
         this.wasRunningWhenHidden = false;
-        
+
         // Audio
         this.audio = {
             warningBeep: null,
             whistle: null,
             enabled: true
         };
-        
+
         this.planTargetMinutes = 0;
         this.totalGameLength = 0;
-        
+
         // State validation flag
         this._stateNeedsValidation = false;
 
@@ -183,29 +183,29 @@ class BasketballGameEngine {
         if (this.players.court.length !== expectedCourtSize) {
             errors.push(`Court has ${this.players.court.length} players, should be ${expectedCourtSize}`);
         }
-        
+
         // Check no duplicates
         const allActive = [...this.players.court, ...this.players.bench];
         const uniqueActive = new Set(allActive);
         if (uniqueActive.size !== allActive.length) {
             errors.push('Duplicate players found in court/bench');
         }
-        
+
         // Check all non-removed players are accounted for
         const expectedActive = this.players.all.filter(p => !this.players.removed.has(p));
         if (expectedActive.length !== allActive.length) {
             errors.push(`Player count mismatch: ${expectedActive.length} expected, ${allActive.length} found`);
         }
-        
+
         if (errors.length > 0) {
             console.error('❌ PLAYER STATE INVALID:', errors);
             this.fixPlayerState();
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Fix invalid player state
      * Ensures court has exactly courtSpots players
@@ -245,42 +245,42 @@ class BasketballGameEngine {
 
         console.log(`✅ Fixed: ${this.players.court.length} on court, ${this.players.bench.length} on bench`);
     }
-    
+
     /**
      * Initialize game with setup parameters
      */
     initialize(setupData) {
         console.log('Initializing game with setup:', setupData);
-        
+
         // Parse setup data
         this.config.format = setupData.format || 'halves';
         this.config.periodLength = (setupData.minutesPerPeriod || 20) * 60;
         this.config.numPeriods = this.config.format === 'quarters' ? 4 : 2;
         this.config.autoConfirmRotations = setupData.autoConfirmRotations || false;
         this.config.warningBeepTime = setupData.warningBeepTime || 10;
-        
+
         const numReserves = setupData.numReserves || 3;
         const totalPlayers = 5 + numReserves;
-        
+
         // Set up players
         this.players.all = this.createPlayerRoster(setupData.starterNames, setupData.reserveNames);
         this.players.court = this.players.all.slice(0, 5); // EXACTLY 5
         this.players.bench = this.players.all.slice(5);    // Everyone else
-        
+
         // Validate initial state
         this.validatePlayerState();
-        
+
         // Initialize player tracking
         this.players.all.forEach(player => {
             this.players.minutes[player] = 0;
             this.players.benchMinutes[player] = 0;
-            this.players.currentStints[player] = { 
-                start: 0, 
-                onCourt: this.players.court.includes(player) 
+            this.players.currentStints[player] = {
+                start: 0,
+                onCourt: this.players.court.includes(player)
             };
             this.players.lastRotationTime[player] = 0;
         });
-        
+
         // Initialize player scoring
         this.scoring.home = 0;
         this.scoring.away = 0;
@@ -293,11 +293,11 @@ class BasketballGameEngine {
 
         // Assign initial positions
         this.assignPositions(this.players.court);
-        
+
         // Set up optimizer
         const totalGameLength = this.config.periodLength * this.config.numPeriods;
         this.totalGameLength = totalGameLength;
-        
+
         const subsPerRotation = setupData.subsPerChange || setupData.rotationsPerChange || 2; // Legacy
         const idealShifts = setupData.idealShiftsPerPlayer || 4; // NEW: Primary configuration
         const OptimizerCtor = window.BasketballIntervalOptimizer;
@@ -310,17 +310,17 @@ class BasketballGameEngine {
             subsPerRotation: Math.max(1, Math.min(2, subsPerRotation)), // Legacy compatibility
             minRotationGapSec: 120 // Legacy compatibility (not used in hybrid)
         });
-        
+
         this.enforcer.tempo = 'balanced';
-        
+
         // Initialize enforcer
         this.enforcer.initialize(this.players.all, {
             onCourt: [...this.players.court],
             onBench: [...this.players.bench],
-            playerMinutes: {...this.players.minutes},
+            playerMinutes: { ...this.players.minutes },
             elapsedTime: 0
         });
-        
+
         // Generate plan
         const gen = this.enforcer.generatePlan(0, []);
         const plan = {
@@ -328,26 +328,26 @@ class BasketballGameEngine {
             targetMinutes: Math.floor((totalGameLength * 5) / totalPlayers),
             expectedVariance: gen ? gen.expectedVariance : 0
         };
-        
+
         this.rotations.plan = plan.plan;
         this.planTargetMinutes = plan.targetMinutes;
         this.rotations.currentPlanIndex = 0;
         this.updateNextRotation();
-        
+
         // Set audio preference
         this.audio.enabled = setupData.enableWarningSound !== false;
         if (this.audio.enabled) {
             this.preloadAudio();
         }
-        
+
         this.state.initialized = true;
-        
+
         console.log('✅ Game initialized successfully');
         console.log(`   Roster: ${totalPlayers} players (${this.players.court.length} court, ${this.players.bench.length} bench)`);
         console.log(`   Format: ${this.config.numPeriods} × ${this.config.periodLength / 60} minutes`);
         console.log(`   Rotations planned: ${this.rotations.plan.length}`);
         console.log(`   Expected variance: ${plan.expectedVariance}s`);
-        
+
         return {
             success: true,
             roster: totalPlayers,
@@ -356,26 +356,26 @@ class BasketballGameEngine {
             expectedVariance: plan.expectedVariance
         };
     }
-    
+
     /**
      * Create player roster from names
      */
     createPlayerRoster(starterNames = [], reserveNames = []) {
         const roster = [];
-        
+
         // Add starters (ensure we have 5)
         for (let i = 0; i < 5; i++) {
             roster.push(starterNames[i] || `Player ${i + 1}`);
         }
-        
+
         // Add reserves
         reserveNames.forEach((name, index) => {
             roster.push(name || `Reserve ${index + 1}`);
         });
-        
+
         return roster;
     }
-    
+
     /**
      * Assign positions to players on court
      */
@@ -387,7 +387,7 @@ class BasketballGameEngine {
             }
         });
     }
-    
+
     /**
      * Confirm pending rotation - FIXED
      */
@@ -396,15 +396,15 @@ class BasketballGameEngine {
             this.handleError('No pending rotation to confirm');
             return false;
         }
-        
+
         const { pendingOff, pendingOn } = this.rotations;
-        
+
         // Validate rotation
         if (pendingOff.length !== pendingOn.length) {
             this.handleError('Invalid rotation: off/on counts do not match');
             return false;
         }
-        
+
         // Check all OFF players are on court
         for (const player of pendingOff) {
             if (!this.players.court.includes(player)) {
@@ -412,7 +412,7 @@ class BasketballGameEngine {
                 return false;
             }
         }
-        
+
         // Check all ON players are on bench
         for (const player of pendingOn) {
             if (!this.players.bench.includes(player)) {
@@ -420,53 +420,53 @@ class BasketballGameEngine {
                 return false;
             }
         }
-        
+
         const plannedTime = this.rotations.pendingTime;
         const rotationTime = this.state.currentTime;
         const delay = rotationTime - plannedTime;
-        
+
         console.log(`✅ Rotation confirmed at ${this.formatTime(rotationTime)}`);
-        
+
         // Execute rotation - CAREFUL ORDER
         // 1. Remove from court
         this.players.court = this.players.court.filter(p => !pendingOff.includes(p));
-        
+
         // 2. Add to court
         this.players.court.push(...pendingOn);
-        
+
         // 3. Remove from bench
         this.players.bench = this.players.bench.filter(p => !pendingOn.includes(p));
-        
+
         // 4. Add to bench
         this.players.bench.push(...pendingOff);
-        
+
         // Validate we still have exactly 5
         this.validatePlayerState();
-        
+
         // Update positions for new court players
         this.assignPositions(this.players.court);
-        
+
         // Update stints
         pendingOff.forEach(player => {
             this.players.currentStints[player].onCourt = false;
             this.players.lastRotationTime[player] = rotationTime;
         });
-        
+
         pendingOn.forEach(player => {
-            this.players.currentStints[player] = { 
-                start: rotationTime, 
-                onCourt: true 
+            this.players.currentStints[player] = {
+                start: rotationTime,
+                onCourt: true
             };
             this.players.lastRotationTime[player] = rotationTime;
         });
-        
+
         // Record rotation
         this.rotations.history.push({
             time: rotationTime,
             off: pendingOff,
             on: pendingOn
         });
-        
+
         // Handle late rotation
         const isLate = delay > 15;
         if (isLate) {
@@ -504,61 +504,61 @@ class BasketballGameEngine {
                 }
             }
         }
-        
+
         // Clear pending
         this.rotations.pending = false;
         this.rotations.pendingOff = [];
         this.rotations.pendingOn = [];
         this.rotations.pendingTime = null;
-        
+
         // Update rotation index
         this.rotations.lastConfirmedIndex = this.rotations.currentPlanIndex;
         this.rotations.currentPlanIndex++;
-        
+
         // Update next rotation
         this.updateNextRotation();
-        
+
         return true;
     }
-    
+
     /**
      * Handle emergency substitution - FIXED with playTimes
      */
     emergencySubstitution(playerOff, playerOn, removeFromGame = false) {
         console.log(`🚨 Emergency substitution: ${playerOff} → ${playerOn}`);
-        
+
         // Validate
         if (!this.players.court.includes(playerOff)) {
             this.handleError(`${playerOff} is not on court`);
             return false;
         }
-        
+
         if (!this.players.bench.includes(playerOn)) {
             this.handleError(`${playerOn} is not on bench`);
             return false;
         }
-        
+
         // Execute substitution - ATOMIC OPERATION
         const courtIndex = this.players.court.indexOf(playerOff);
         this.players.court[courtIndex] = playerOn;
-        
+
         const benchIndex = this.players.bench.indexOf(playerOn);
         this.players.bench[benchIndex] = playerOff;
-        
+
         // Validate state
         this.validatePlayerState();
-        
+
         // Update positions
         this.players.positions[playerOn] = this.players.positions[playerOff];
         delete this.players.positions[playerOff];
-        
+
         // Update stints
         this.players.currentStints[playerOff].onCourt = false;
-        this.players.currentStints[playerOn] = { 
-            start: this.state.currentTime, 
-            onCourt: true 
+        this.players.currentStints[playerOn] = {
+            start: this.state.currentTime,
+            onCourt: true
         };
-        
+
         // Record
         this.rotations.history.push({
             time: this.state.currentTime,
@@ -566,27 +566,27 @@ class BasketballGameEngine {
             on: [playerOn],
             reason: 'emergency'
         });
-        
+
         // Handle removal if requested
         if (removeFromGame) {
             this.removePlayer(playerOff);
         }
-        
+
         // Notify optimizer and replan WITH PLAY TIMES
         if (this.enforcer) {
             const playTimesSnapshot = { ...this.players.minutes };
             this.enforcer.syncWithActualState(
-                this.state.currentTime, 
-                [...this.players.court], 
+                this.state.currentTime,
+                [...this.players.court],
                 [...this.players.bench],
                 playTimesSnapshot
             );
             const deviationType = removeFromGame ? 'injury' : 'late_substitution';
             const newPlan = this.enforcer.handleDeviation(
                 deviationType,
-                { 
-                    player: playerOff, 
-                    actualCourt: [...this.players.court], 
+                {
+                    player: playerOff,
+                    actualCourt: [...this.players.court],
                     actualBench: [...this.players.bench],
                     playTimes: playTimesSnapshot
                 },
@@ -596,74 +596,74 @@ class BasketballGameEngine {
                 this.applyRecoveryPlan(newPlan);
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Handle player fouled out - FIXED with playTimes
      */
     playerFouledOut(player) {
         console.log(`🚫 ${player} fouled out`);
-        
+
         if (!this.players.all.includes(player)) {
             this.handleError(`${player} not in roster`);
             return false;
         }
-        
+
         // If on court, need immediate substitution
         if (this.players.court.includes(player)) {
             const availableBench = this.players.bench.filter(p => !this.players.removed.has(p));
-            
+
             if (availableBench.length === 0) {
                 this.handleError('No available players to substitute');
                 return false;
             }
-            
+
             // Auto-select replacement (least minutes)
-            const replacement = availableBench.sort((a, b) => 
+            const replacement = availableBench.sort((a, b) =>
                 (this.players.minutes[a] || 0) - (this.players.minutes[b] || 0)
             )[0];
-            
+
             // Execute substitution - ATOMIC
             const courtIndex = this.players.court.indexOf(player);
             this.players.court[courtIndex] = replacement;
-            
+
             const benchIndex = this.players.bench.indexOf(replacement);
             this.players.bench.splice(benchIndex, 1);
-            
+
             // DON'T add fouled player to bench - they're removed
-            
+
             // Update positions
             this.players.positions[replacement] = this.players.positions[player];
             delete this.players.positions[player];
-            
+
             console.log(`   Auto-subbed ${replacement} for ${player}`);
         } else {
             // Remove from bench
             this.players.bench = this.players.bench.filter(p => p !== player);
         }
-        
+
         // Mark as removed
         this.players.removed.add(player);
-        
+
         // Validate state
         this.validatePlayerState();
-        
+
         // Notify optimizer WITH PLAY TIMES
         if (this.enforcer) {
             const playTimesSnapshot = { ...this.players.minutes };
             this.enforcer.syncWithActualState(
-                this.state.currentTime, 
-                [...this.players.court], 
+                this.state.currentTime,
+                [...this.players.court],
                 [...this.players.bench],
                 playTimesSnapshot
             );
             const newPlan = this.enforcer.handleDeviation(
                 'injury',
-                { 
-                    player: player, 
-                    actualCourt: [...this.players.court], 
+                {
+                    player: player,
+                    actualCourt: [...this.players.court],
                     actualBench: [...this.players.bench],
                     playTimes: playTimesSnapshot
                 },
@@ -673,10 +673,10 @@ class BasketballGameEngine {
                 this.applyRecoveryPlan(newPlan);
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Remove player from game
      */
@@ -684,24 +684,24 @@ class BasketballGameEngine {
         if (this.players.removed.has(player)) {
             return true;
         }
-        
+
         console.log(`🚫 Removing ${player} from game`);
-        
+
         // Remove from bench (should NOT be on court)
         if (this.players.court.includes(player)) {
             this.handleError(`Cannot remove ${player} - still on court!`);
             return false;
         }
-        
+
         this.players.bench = this.players.bench.filter(p => p !== player);
         this.players.removed.add(player);
-        
+
         // Validate
         this.validatePlayerState();
-        
+
         return true;
     }
-    
+
     /**
      * Return removed player
      */
@@ -710,29 +710,29 @@ class BasketballGameEngine {
             this.handleError(`${player} was not removed`);
             return false;
         }
-        
+
         console.log(`✅ ${player} returned to game`);
-        
+
         this.players.removed.delete(player);
         this.players.bench.push(player);
-        
+
         // Validate
         this.validatePlayerState();
-        
+
         // Notify optimizer WITH PLAY TIMES
         if (this.enforcer) {
             const playTimesSnapshot = { ...this.players.minutes };
             this.enforcer.syncWithActualState(
-                this.state.currentTime, 
-                [...this.players.court], 
+                this.state.currentTime,
+                [...this.players.court],
                 [...this.players.bench],
                 playTimesSnapshot
             );
             const newPlan = this.enforcer.handleDeviation(
                 'player_returned',
-                { 
-                    player: player, 
-                    actualCourt: [...this.players.court], 
+                {
+                    player: player,
+                    actualCourt: [...this.players.court],
                     actualBench: [...this.players.bench],
                     playTimes: playTimesSnapshot
                 },
@@ -742,12 +742,12 @@ class BasketballGameEngine {
                 this.applyRecoveryPlan(newPlan);
             }
         }
-        
+
         return true;
     }
-    
+
     // [Keep all other methods the same - start, stop, tick, etc.]
-    
+
     /**
      * Start or resume game timer
      */
@@ -756,38 +756,38 @@ class BasketballGameEngine {
             this.handleError('Cannot start: game not initialized');
             return false;
         }
-        
+
         if (this.state.gameOver) {
             this.handleError('Cannot start: game is over');
             return false;
         }
-        
+
         if (this.state.running) {
             return true;
         }
-        
+
         // Validate before starting
         this.validatePlayerState();
-        
+
         console.log('▶️ Starting game timer');
-        
+
         if (this.state.currentTime === 0 && this.audio.enabled && this.audio.whistle) {
             this.playSound('whistle');
         }
-        
+
         this.state.running = true;
         this.state.paused = false;
         this.lastTickTime = Date.now();
-        
+
         this.timerInterval = setInterval(() => this.tick(), 1000);
-        
+
         if (this.callbacks.onUpdate) {
             this.callbacks.onUpdate(this.getState());
         }
-        
+
         return true;
     }
-    
+
     /**
      * Stop game timer
      */
@@ -795,12 +795,12 @@ class BasketballGameEngine {
         if (!this.state.running) {
             return true;
         }
-        
+
         console.log('⏸️ Stopping game timer');
-        
+
         this.state.running = false;
         this.state.paused = true;
-        
+
         // Clear visibility tracking flags when manually stopped
         this.wasRunningWhenHidden = false;
         this.lastVisibleTimestamp = null;
@@ -809,14 +809,14 @@ class BasketballGameEngine {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
-        
+
         if (this.callbacks.onUpdate) {
             this.callbacks.onUpdate(this.getState());
         }
-        
+
         return true;
     }
-    
+
     /**
      * Timer tick - called every second by interval
      * Includes error handling to prevent timer death
@@ -883,10 +883,19 @@ class BasketballGameEngine {
         // Check for rotation warning (10 seconds before)
         if (!this.warningPlayed &&
             this.rotations.nextScheduled &&
-            (this.rotations.nextScheduled.time - this.state.currentTime) === this.config.warningBeepTime) {
+            (this.rotations.nextScheduled.time - this.state.currentTime) <= this.config.warningBeepTime &&
+            (this.rotations.nextScheduled.time - this.state.currentTime) > 0) {
+
             this.warningPlayed = true;
+
+            // Play sound internally for robustness
+            if (this.audio.enabled) {
+                this.playSound('warningBeep');
+            }
+
             if (this.callbacks.onWarning) {
-                this.callbacks.onWarning();
+                const timeToRotation = this.rotations.nextScheduled.time - this.state.currentTime;
+                this.callbacks.onWarning(timeToRotation);
             }
         }
 
@@ -986,8 +995,8 @@ class BasketballGameEngine {
 
         // Check if missed time caused period to advance
         while (this.config.periodLength > 0 &&
-               this.state.periodElapsed >= this.config.periodLength &&
-               this.state.currentPeriod <= this.config.numPeriods) {
+            this.state.periodElapsed >= this.config.periodLength &&
+            this.state.currentPeriod <= this.config.numPeriods) {
 
             const timeOverPeriod = this.state.periodElapsed - this.config.periodLength;
 
@@ -1181,9 +1190,9 @@ class BasketballGameEngine {
         if (!this.rotations.pending) {
             return false;
         }
-        
+
         console.log('❌ Rotation cancelled');
-        
+
         if (this.enforcer) {
             const playTimesSnapshot = { ...this.players.minutes };
             this.enforcer.syncWithActualState(
@@ -1194,8 +1203,8 @@ class BasketballGameEngine {
             );
             const newPlan = this.enforcer.handleDeviation(
                 'late_substitution',
-                { 
-                    actualCourt: [...this.players.court], 
+                {
+                    actualCourt: [...this.players.court],
                     actualBench: [...this.players.bench],
                     playTimes: playTimesSnapshot
                 },
@@ -1205,18 +1214,18 @@ class BasketballGameEngine {
                 this.applyRecoveryPlan(newPlan);
             }
         }
-        
+
         this.rotations.pending = false;
         this.rotations.pendingOff = [];
         this.rotations.pendingOn = [];
         this.rotations.pendingTime = null;
-        
+
         this.rotations.currentPlanIndex++;
         this.updateNextRotation();
-        
+
         return true;
     }
-    
+
     /**
      * Apply recovery plan
      */
@@ -1263,7 +1272,7 @@ class BasketballGameEngine {
         this.rotations.plan = newPlanRotations;
         this.rotations.currentPlanIndex = 0;
         this.updateNextRotation();
-        
+
         if (this.callbacks.onRecovery) {
             this.callbacks.onRecovery({
                 strategy,
@@ -1272,7 +1281,7 @@ class BasketballGameEngine {
             });
         }
     }
-    
+
     /**
      * Update next scheduled rotation
      */
@@ -1281,29 +1290,29 @@ class BasketballGameEngine {
             this.rotations.nextScheduled = null;
             return;
         }
-        
+
         this.rotations.nextScheduled = this.rotations.plan[this.rotations.currentPlanIndex];
     }
-    
+
     /**
      * Handle period end
      */
     handlePeriodEnd() {
         console.log(`Period ${this.state.currentPeriod} ended`);
-        
+
         this.stop();
-        
+
         if (this.state.currentPeriod >= this.config.numPeriods) {
             this.handleGameEnd();
         }
         else {
             this.state.currentPeriod++;
             this.state.periodElapsed = 0;
-            
+
             if (this.state.currentPeriod === 2 && this.config.numPeriods === 2) {
                 this.state.isHalftime = true;
             }
-            
+
             if (this.callbacks.onPeriodEnd) {
                 this.callbacks.onPeriodEnd({
                     period: this.state.currentPeriod - 1,
@@ -1312,28 +1321,28 @@ class BasketballGameEngine {
             }
         }
     }
-    
+
     /**
      * Handle game end
      */
     handleGameEnd() {
         console.log('🏁 Game ended');
-        
+
         this.state.gameOver = true;
         this.state.running = false;
-        
+
         const stats = this.calculateFinalStats();
-        
+
         console.log('📊 Final Statistics:');
         console.log(`   Variance: ${stats.variance}s`);
         console.log(`   Rotations: ${stats.rotations}`);
         console.log(`   Average minutes: ${Math.floor(stats.averageMinutes / 60)}`);
-        
+
         if (this.callbacks.onGameEnd) {
             this.callbacks.onGameEnd(stats);
         }
     }
-    
+
     /**
      * Calculate final statistics
      */
@@ -1346,7 +1355,7 @@ class BasketballGameEngine {
             maxMinutes: 0,
             minMinutes: 0
         };
-        
+
         const activePlayers = this.players.all.filter(p => !this.players.removed.has(p));
         let totalMinutes = 0;
         const playTimes = [];
@@ -1379,14 +1388,14 @@ class BasketballGameEngine {
         }
 
         stats.averageMinutes = activePlayers.length > 0 ? totalMinutes / activePlayers.length : 0;
-        
+
         if (this.enforcer) {
             stats.enforcerAnalytics = this.enforcer.getAnalytics(this.state.currentTime);
         }
-        
+
         return stats;
     }
-    
+
     /**
      * Update player score
      */
@@ -1394,30 +1403,30 @@ class BasketballGameEngine {
         if (!this.scoring.playerPoints.hasOwnProperty(player)) {
             this.scoring.playerPoints[player] = 0;
         }
-        
+
         this.scoring.playerPoints[player] += points;
         this.scoring.home += points;
-        
+
         // Prevent negative scores for individual players
         if (this.scoring.playerPoints[player] < 0) {
             this.scoring.home -= this.scoring.playerPoints[player];
             this.scoring.playerPoints[player] = 0;
         }
-        
+
         if (this.scoring.home < 0) {
             this.scoring.home = 0;
         }
-        
+
         console.log(`${player} scored ${points > 0 ? '+' : ''}${points} (Total: ${this.scoring.playerPoints[player]})`);
-        
+
         const scoringStats = this.getScoringStats();
         if (this.callbacks.onScoreUpdate) {
             this.callbacks.onScoreUpdate(scoringStats);
         }
-        
+
         return this.scoring.playerPoints[player];
     }
-    
+
     /**
      * Update opposition score
      */
@@ -1426,17 +1435,17 @@ class BasketballGameEngine {
         if (this.scoring.away < 0) {
             this.scoring.away = 0;
         }
-        
+
         console.log(`Opposition scored ${points > 0 ? '+' : ''}${points} (Total: ${this.scoring.away})`);
-        
+
         const scoringStats = this.getScoringStats();
         if (this.callbacks.onScoreUpdate) {
             this.callbacks.onScoreUpdate(scoringStats);
         }
-        
+
         return this.scoring.away;
     }
-    
+
     /**
      * Update team names
      */
@@ -1446,12 +1455,12 @@ class BasketballGameEngine {
         } else if (team === 'away') {
             this.scoring.awayTeamName = name || 'Opposition';
         }
-        
+
         if (this.callbacks.onScoreUpdate) {
             this.callbacks.onScoreUpdate(this.getScoringStats());
         }
     }
-    
+
     /**
      * Get scoring stats snapshot
      */
@@ -1459,7 +1468,7 @@ class BasketballGameEngine {
         const topScorers = Object.entries(this.scoring.playerPoints)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5);
-        
+
         return {
             homeScore: this.scoring.home,
             awayScore: this.scoring.away,
@@ -1470,7 +1479,7 @@ class BasketballGameEngine {
             totalPoints: this.scoring.home + this.scoring.away
         };
     }
-    
+
     /**
      * Get current game state
      * @returns {Object} Current game state snapshot
@@ -1485,7 +1494,7 @@ class BasketballGameEngine {
             this.validatePlayerState();
             this._stateNeedsValidation = false;
         }
-        
+
         return {
             ...this.state,
             players: {
@@ -1512,7 +1521,7 @@ class BasketballGameEngine {
             scoring: this.getScoringStats()
         };
     }
-    
+
     /**
      * Format time for display
      */
@@ -1521,7 +1530,7 @@ class BasketballGameEngine {
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
-    
+
     /**
      * Preload audio files
      */
@@ -1539,13 +1548,13 @@ class BasketballGameEngine {
             console.warn('Audio preload failed:', e);
         }
     }
-    
+
     /**
      * Play sound effect
      */
     playSound(soundType) {
         if (!this.audio.enabled || !this.audio[soundType]) return;
-        
+
         try {
             const sound = this.audio[soundType].cloneNode();
             sound.volume = 0.5;
@@ -1554,31 +1563,31 @@ class BasketballGameEngine {
             console.warn(`Error playing ${soundType}:`, e);
         }
     }
-    
+
     /**
      * Handle errors
      */
     handleError(message) {
         console.error(`❌ [GameEngine] ${message}`);
-        
+
         if (this.callbacks.onError) {
             this.callbacks.onError(message);
         }
     }
-    
+
     /**
      * Reset game
      */
     reset() {
         console.log('🔄 Resetting game');
-        
+
         this.stop();
-        
+
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
-        
+
         // Reset visibility tracking variables
         this.lastVisibleTimestamp = null;
         this.wasRunningWhenHidden = false;
@@ -1593,7 +1602,7 @@ class BasketballGameEngine {
             isHalftime: false,
             gameOver: false
         };
-        
+
         this.players = {
             all: [],
             court: [],
@@ -1605,7 +1614,7 @@ class BasketballGameEngine {
             positions: {},
             lastRotationTime: {}
         };
-        
+
         this.rotations = {
             pending: false,
             pendingOff: [],
@@ -1617,7 +1626,7 @@ class BasketballGameEngine {
             currentPlanIndex: 0,
             lastConfirmedIndex: -1
         };
-        
+
         this.scoring = {
             home: 0,
             away: 0,
@@ -1627,7 +1636,7 @@ class BasketballGameEngine {
         };
 
         this.enforcer = null;
-        
+
         console.log('Reset complete');
     }
 }

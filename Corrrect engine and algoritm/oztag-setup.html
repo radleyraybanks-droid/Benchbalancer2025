@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,17 +34,22 @@
             --transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        *, *::before, *::after {
+
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
             background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
-                        radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.08), transparent 50%),
-                        linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+                radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
             color: var(--text-primary);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
@@ -225,12 +231,15 @@
         }
     </style>
 </head>
+
 <body>
     <div id="setup">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <a href="index.html" class="back-link" style="margin-bottom: 0;">← Back to Sports</a>
+            <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" style="height: 32px; width: auto;">
             <div id="authContainer" style="display: flex; gap: 10px; align-items: center;">
-                <button id="signInButton" onclick="if(typeof showEmailAuthModal === 'function') showEmailAuthModal(); else alert('Auth system loading...');"
+                <button id="signInButton"
+                    onclick="if(typeof showEmailAuthModal === 'function') showEmailAuthModal(); else alert('Auth system loading...');"
                     style="background: linear-gradient(45deg, #00FFE0, #4A90E2); color: #1a1a1f; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; transition: transform 0.2s;">
                     Sign In
                 </button>
@@ -240,7 +249,8 @@
         <h2>🏉 Oztag Game Setup</h2>
 
         <div class="info-box">
-            <p>Oztag: 8 players on field at any time. Up to 6 reserves allowed (14 max roster). Rolling substitutions with equal playing time distribution.</p>
+            <p>Oztag: 8 players on field at any time. Up to 6 reserves allowed (14 max roster). Rolling substitutions
+                with equal playing time distribution.</p>
         </div>
 
         <div class="form-group">
@@ -265,7 +275,8 @@
         </div>
 
         <div class="form-group">
-            <label for="numReserves">Number of Reserves: <span id="rosterSizeIndicator" class="roster-indicator">(Total Roster: 8)</span></label>
+            <label for="numReserves">Number of Reserves: <span id="rosterSizeIndicator" class="roster-indicator">(Total
+                    Roster: 8)</span></label>
             <select id="numReserves">
                 <option value="0">0 (no subs)</option>
                 <option value="1">1</option>
@@ -311,7 +322,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const gameFormatSelect = document.getElementById('gameFormat');
             const minsPerHalfInput = document.getElementById('minsPerHalf');
             const numReservesSelect = document.getElementById('numReserves');
@@ -448,5 +459,18 @@
     <script src="config/supabase-config.js"></script>
     <script src="auth/auth-manager.js"></script>
     <script src="config/simple-supabase.js"></script>
+
+    <script>
+        // Handle routing and state for Oztag
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (!params.has('sport')) {
+                const url = new URL(window.location);
+                url.searchParams.set('sport', 'oztag');
+                window.history.replaceState({ sport: 'oztag' }, '', url);
+            }
+        });
+    </script>
 </body>
+
 </html>

@@ -59,7 +59,7 @@ rsync_supports_info_progress2() {
   version_key=$(version_to_key "$1") || return 1
   local threshold_key
   threshold_key=$(version_to_key "3.1.0") || return 1
-  [[ "$version_key" -ge "$threshold_key" ]]
+  [[ "10#$version_key" -ge "10#$threshold_key" ]]
 }
 
 while getopts ":H:u:P:r:l:k:O:BnNh" opt; do
@@ -204,18 +204,19 @@ RSYNC_CMD=(
 "${RSYNC_CMD[@]}"
 
 if (( DRY_RUN == 0 )); then
-  "${SSH_BASE[@]}" bash -s -- "$REMOTE_PATH" "$REMOTE_OWNER" "$RELOAD_NGINX" <<'REMOTE_POST'
+  OWNER_ARG="${REMOTE_OWNER:-_NO_CHANGE_}"
+  "${SSH_BASE[@]}" bash -s -- "$REMOTE_PATH" "$OWNER_ARG" "$RELOAD_NGINX" <<'REMOTE_POST'
 set -euo pipefail
-REMOTE_PATH="$1"
-REMOTE_OWNER="$2"
-RELOAD_NGINX="$3"
+REMOTE_PATH="${1:-}"
+REMOTE_OWNER="${2:-}"
+RELOAD_NGINX="${3:-0}"
 
 SUDO_CMD=()
 if command -v sudo >/dev/null 2>&1; then
   SUDO_CMD=(sudo)
 fi
 
-if [[ -n "$REMOTE_OWNER" ]]; then
+if [[ "$REMOTE_OWNER" != "_NO_CHANGE_" && -n "$REMOTE_OWNER" ]]; then
   if "${SUDO_CMD[@]}" chown -R "$REMOTE_OWNER" "$REMOTE_PATH"; then
     echo "[remote] Ownership set to $REMOTE_OWNER."
   else

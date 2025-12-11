@@ -41,7 +41,7 @@ function updateDisplay() {
     if (isHalftimeScreenActive) {
         if (gameTimerP) gameTimerP.textContent = "HALFTIME";
         if (periodTimerP) periodTimerP.textContent = `(Total: ${formatTime(currentGameSeconds)})`;
-        if (periodDisplayP) periodDisplayP.textContent = `${Math.min(currentPeriod -1, gameSettings.numPeriods)}/${gameSettings.numPeriods}`;
+        if (periodDisplayP) periodDisplayP.textContent = `${Math.min(currentPeriod - 1, gameSettings.numPeriods)}/${gameSettings.numPeriods}`;
     } else {
         if (gameTimerP) gameTimerP.textContent = formatTime(Math.max(0, periodLengthSeconds - periodElapsedSeconds));
         if (periodTimerP) periodTimerP.textContent = `(Total: ${formatTime(currentGameSeconds)})`;
@@ -77,19 +77,19 @@ function updateDisplay() {
     // Halftime Music Buttons
     if (isHalftimeScreenActive) {
         if (halftimeMusicSound) {
-            if(stopHalftimeMusicButton) stopHalftimeMusicButton.classList.toggle('hidden', halftimeMusicSound.paused);
-            if(resumeHalftimeMusicButton) resumeHalftimeMusicButton.classList.toggle('hidden', !halftimeMusicSound.paused);
+            if (stopHalftimeMusicButton) stopHalftimeMusicButton.classList.toggle('hidden', halftimeMusicSound.paused);
+            if (resumeHalftimeMusicButton) resumeHalftimeMusicButton.classList.toggle('hidden', !halftimeMusicSound.paused);
         } else {
-            if(stopHalftimeMusicButton) stopHalftimeMusicButton.classList.add('hidden');
-            if(resumeHalftimeMusicButton) resumeHalftimeMusicButton.classList.remove('hidden');
+            if (stopHalftimeMusicButton) stopHalftimeMusicButton.classList.add('hidden');
+            if (resumeHalftimeMusicButton) resumeHalftimeMusicButton.classList.remove('hidden');
         }
         const halftimeButtonsDisabled = isGameOver;
-        if(stopHalftimeMusicButton) stopHalftimeMusicButton.disabled = halftimeButtonsDisabled;
-        if(resumeHalftimeMusicButton) resumeHalftimeMusicButton.disabled = halftimeButtonsDisabled;
-        if(prepareSecondHalfButton) prepareSecondHalfButton.disabled = halftimeButtonsDisabled;
+        if (stopHalftimeMusicButton) stopHalftimeMusicButton.disabled = halftimeButtonsDisabled;
+        if (resumeHalftimeMusicButton) resumeHalftimeMusicButton.disabled = halftimeButtonsDisabled;
+        if (prepareSecondHalfButton) prepareSecondHalfButton.disabled = halftimeButtonsDisabled;
     } else {
-        if(stopHalftimeMusicButton) stopHalftimeMusicButton.classList.add('hidden');
-        if(resumeHalftimeMusicButton) resumeHalftimeMusicButton.classList.add('hidden');
+        if (stopHalftimeMusicButton) stopHalftimeMusicButton.classList.add('hidden');
+        if (resumeHalftimeMusicButton) resumeHalftimeMusicButton.classList.add('hidden');
     }
 
     // Next Sub Box
@@ -106,56 +106,57 @@ function updateDisplay() {
             if (playersComingOnDiv) playersComingOnDiv.textContent = pendingInPlayers.join(', ');
         } else {
             pendingSubInfoP.classList.add('hidden'); nextSubInfoP.classList.remove('hidden');
-            const activeNonGk = allPlayers.filter(p=>!playerRemovedStatus[p]&&!playerGKStatus[p]).length;
-            const nonGkSpots = gameSettings.numOnField-gameSettings.numGoalkeepers;
+            const activeNonGk = allPlayers.filter(p => !playerRemovedStatus[p] && !playerGKStatus[p]).length;
+            const nonGkSpots = gameSettings.numOnField - gameSettings.numGoalkeepers;
             const canEverSub = gameSettings.subsPerChange > 0 && activeNonGk > nonGkSpots && nonGkSpots > 0 && totalGameDuration > 0 && periodLengthSeconds > 0;
 
-            if(!canEverSub && gameSettings.subsPerChange > 0 && allPlayers.length > 0 && periodLengthSeconds > 0){
-                nextSubCountdownP.textContent="--:--";
-                if(nonGkSpots<=0&&activeNonGk>0)nextSubInfoP.textContent="(All spots GK/no non-GK spots)";
-                else if(activeNonGk<=nonGkSpots)nextSubInfoP.textContent="(Not enough players for rotation)";
-                else nextSubInfoP.textContent="(Auto subs not possible)";
-            } else if(nextSubTimeInPeriod===Infinity || gameSettings.subsPerChange===0 || periodLengthSeconds === 0){
-                nextSubCountdownP.textContent="--:--";
-                if(gameSettings.subsPerChange===0&&allPlayers.length>0)nextSubInfoP.textContent="(Auto subs disabled)";
-                else if(totalGameDuration>0 && optimizedSubSchedule.length > 0 && targetSubTimes.length === 0 && currentGameSeconds >= optimizedSubSchedule[optimizedSubSchedule.length-1] && optimizedSubSchedule[optimizedSubSchedule.length-1] > 0) nextSubInfoP.textContent="(All subs completed)";
-                else if(totalGameDuration>0 && (currentGameSeconds + MIN_TIME_BEFORE_END_BUFFER_SECONDS) >= totalGameDuration) nextSubInfoP.textContent="(Game ending soon)";
-                else if(allPlayers.length>0 && optimizedSubSchedule.length === 0 && gameSettings.subsPerChange > 0 && periodLengthSeconds > 0) nextSubInfoP.textContent="(No plan generated)";
-                else if(allPlayers.length>0 && periodLengthSeconds > 0)nextSubInfoP.textContent="(No further auto subs)"; else nextSubInfoP.textContent="";
+            if (!canEverSub && gameSettings.subsPerChange > 0 && allPlayers.length > 0 && periodLengthSeconds > 0) {
+                nextSubCountdownP.textContent = "--:--";
+                if (nonGkSpots <= 0 && activeNonGk > 0) nextSubInfoP.textContent = "(All spots GK/no non-GK spots)";
+                else if (activeNonGk <= nonGkSpots) nextSubInfoP.textContent = "(Not enough players for rotation)";
+                else nextSubInfoP.textContent = "(Auto subs not possible)";
+            } else if (nextSubTimeInPeriod === Infinity || gameSettings.subsPerChange === 0 || periodLengthSeconds === 0) {
+                nextSubCountdownP.textContent = "--:--";
+                if (gameSettings.subsPerChange === 0 && allPlayers.length > 0) nextSubInfoP.textContent = "(Auto subs disabled)";
+                else if (totalGameDuration > 0 && optimizedSubSchedule.length > 0 && targetSubTimes.length === 0 && currentGameSeconds >= optimizedSubSchedule[optimizedSubSchedule.length - 1] && optimizedSubSchedule[optimizedSubSchedule.length - 1] > 0) nextSubInfoP.textContent = "(All subs completed)";
+                else if (totalGameDuration > 0 && (currentGameSeconds + MIN_TIME_BEFORE_END_BUFFER_SECONDS) >= totalGameDuration) nextSubInfoP.textContent = "(Game ending soon)";
+                else if (allPlayers.length > 0 && optimizedSubSchedule.length === 0 && gameSettings.subsPerChange > 0 && periodLengthSeconds > 0) nextSubInfoP.textContent = "(No plan generated)";
+                else if (allPlayers.length > 0 && periodLengthSeconds > 0) nextSubInfoP.textContent = "(No further auto subs)"; else nextSubInfoP.textContent = "";
             } else {
-                nextSubCountdownP.textContent=formatTime(Math.max(0,nextSubTimeInPeriod-currentGameSeconds));
-                const{playersOff,playersOn}=getPlayersForSubstitutionAtTime(nextSubTimeInPeriod);
-                if(playersOff.length>0&&playersOn.length>0){nextSubInfoP.textContent=`(Plan: ${playersOff.length}x ${playersOff.join(',')} OFF, ${playersOn.join(',')} ON)`;
-                    if(playersComingOffDiv)playersComingOffDiv.textContent=playersOff.join(', ');if(playersComingOnDiv)playersComingOnDiv.textContent=playersOn.join(', ');
-                }else{nextSubInfoP.textContent=`(Sub planned for ${formatTime(nextSubTimeInPeriod)}, but no valid players found)`;if(playersComingOffDiv)playersComingOffDiv.textContent='TBD';if(playersComingOnDiv)playersComingOnDiv.textContent='TBD';}
+                nextSubCountdownP.textContent = formatTime(Math.max(0, nextSubTimeInPeriod - currentGameSeconds));
+                const { playersOff, playersOn } = getPlayersForSubstitutionAtTime(nextSubTimeInPeriod);
+                if (playersOff.length > 0 && playersOn.length > 0) {
+                    nextSubInfoP.textContent = `(Plan: ${playersOff.length}x ${playersOff.join(',')} OFF, ${playersOn.join(',')} ON)`;
+                    if (playersComingOffDiv) playersComingOffDiv.textContent = playersOff.join(', '); if (playersComingOnDiv) playersComingOnDiv.textContent = playersOn.join(', ');
+                } else { nextSubInfoP.textContent = `(Sub planned for ${formatTime(nextSubTimeInPeriod)}, but no valid players found)`; if (playersComingOffDiv) playersComingOffDiv.textContent = 'TBD'; if (playersComingOnDiv) playersComingOnDiv.textContent = 'TBD'; }
             }
-             if (playersComingOffDiv && (nextSubInfoP.textContent.includes("No further") || nextSubInfoP.textContent.includes("disabled") || nextSubInfoP.textContent.includes("not possible") || nextSubInfoP.textContent.includes("completed") || nextSubInfoP.textContent.includes("No plan generated"))) {
+            if (playersComingOffDiv && (nextSubInfoP.textContent.includes("No further") || nextSubInfoP.textContent.includes("disabled") || nextSubInfoP.textContent.includes("not possible") || nextSubInfoP.textContent.includes("completed") || nextSubInfoP.textContent.includes("No plan generated"))) {
                 playersComingOffDiv.textContent = ''; if (playersComingOnDiv) playersComingOnDiv.textContent = '';
             }
         }
-        confirmSubButton.disabled=!(subIsPending&&!isModalOpen);
-        subIsPending&&!isModalOpen?confirmSubButton.classList.remove('hidden'):confirmSubButton.classList.add('hidden');
+        confirmSubButton.disabled = !(subIsPending && !isModalOpen);
+        subIsPending && !isModalOpen ? confirmSubButton.classList.remove('hidden') : confirmSubButton.classList.add('hidden');
     } else if (nextSubBox) {
-        if(nextSubCountdownP) nextSubCountdownP.textContent = "--:--";
-        if(nextSubInfoP) nextSubInfoP.textContent = isGameOver ? "(Game Over)" : (isProceedToHalftimeVisible || isHalftimeScreenActive ? "" : "(Sub info hidden)");
-        if(pendingSubInfoP) pendingSubInfoP.classList.add('hidden');
-        if(confirmSubButton) confirmSubButton.classList.add('hidden');
-        if(playersComingOffDiv) playersComingOffDiv.textContent = '';
-        if(playersComingOnDiv) playersComingOnDiv.textContent = '';
+        if (nextSubCountdownP) nextSubCountdownP.textContent = "--:--";
+        if (nextSubInfoP) nextSubInfoP.textContent = isGameOver ? "(Game Over)" : (isProceedToHalftimeVisible || isHalftimeScreenActive ? "" : "(Sub info hidden)");
+        if (pendingSubInfoP) pendingSubInfoP.classList.add('hidden');
+        if (confirmSubButton) confirmSubButton.classList.add('hidden');
+        if (playersComingOffDiv) playersComingOffDiv.textContent = '';
+        if (playersComingOnDiv) playersComingOnDiv.textContent = '';
     }
 
     if (!isSetupScreenVisible && gameContainerDiv && !gameContainerDiv.classList.contains('hidden') && !isHalftimeScreenActive && !isProceedToHalftimeVisible) {
         updatePlayerList(onFieldListUl, onFieldCountSpan, onField);
         const activeBench = onBench.sort((a, b) => (playerPlayTimes[a] || 0) - (playerPlayTimes[b] || 0) || a.localeCompare(b));
-        const removedList = removedPlayers.sort((a,b) => a.localeCompare(b));
+        const removedList = removedPlayers.sort((a, b) => a.localeCompare(b));
         const benchListDisp = [...activeBench, ...removedList];
         updatePlayerList(onBenchListUl, onBenchCountSpan, benchListDisp);
     }
 
     const isSetupComplete = allPlayers.length > 0 && periodLengthSeconds > 0;
-    if(startStopButton) {
+    if (startStopButton) {
         startStopButton.disabled = isModalOpen || isSetupScreenVisible || !isSetupComplete || isGameOver || isHalftimeScreenActive || isProceedToHalftimeVisible;
-        if(!startStopButton.disabled) {
+        if (!startStopButton.disabled) {
             startStopButton.textContent = isRunning ? 'STOP' : 'START';
             startStopButton.className = 'timer-box-button ' + (isRunning ? 'stop' : 'start');
             if (subIsPending) {
@@ -166,18 +167,17 @@ function updateDisplay() {
             }
         } else {
             startStopButton.classList.remove('pending-sub-warning');
-            if(isGameOver) { startStopButton.textContent = 'Game Over'; startStopButton.className = 'timer-box-button game-over'; }
-            else { startStopButton.textContent = isRunning ? 'STOP' : 'START'; startStopButton.className = 'timer-box-button ' + (isRunning ? 'stop' : 'start');}
+            if (isGameOver) { startStopButton.textContent = 'Game Over'; startStopButton.className = 'timer-box-button game-over'; }
+            else { startStopButton.textContent = isRunning ? 'STOP' : 'START'; startStopButton.className = 'timer-box-button ' + (isRunning ? 'stop' : 'start'); }
         }
     }
 
-    const eligibleBenchForEmergency = allPlayers.filter(p => !onField.includes(p) && !playerGKStatus[p] && !playerRemovedStatus[p]).length;
-    const canDoEmergencySub = isSetupComplete && !isGameOver && onField.length > 0 && eligibleBenchForEmergency > 0 && !isModalOpen && !isHalftimeScreenActive && !isProceedToHalftimeVisible;
-    if(emergencySubButton) emergencySubButton.disabled = !canDoEmergencySub;
-    if(manageGKButton) manageGKButton.disabled = !isSetupComplete || isGameOver || isModalOpen || isHalftimeScreenActive || !isProceedToHalftimeVisible;
+    const canDoEmergencySub = isSetupComplete && !isGameOver && onField.length > 0 && !isModalOpen && !isHalftimeScreenActive && !isProceedToHalftimeVisible;
+    if (emergencySubButton) emergencySubButton.disabled = !canDoEmergencySub;
+    if (manageGKButton) manageGKButton.disabled = !isSetupComplete || isGameOver || isModalOpen || isHalftimeScreenActive || isProceedToHalftimeVisible;
 
     const mainGameResetButton = document.querySelector('#game-controls #resetButton');
-    if(mainGameResetButton) mainGameResetButton.disabled = isModalOpen || (isSetupScreenVisible && (!gameContainerDiv || gameContainerDiv.classList.contains('hidden')));
+    if (mainGameResetButton) mainGameResetButton.disabled = isModalOpen || (isSetupScreenVisible && (!gameContainerDiv || gameContainerDiv.classList.contains('hidden')));
 
 
     // Status Message Logic (targets #statusMessage, now located under #game-header)
@@ -199,22 +199,22 @@ function updateDisplay() {
                 const timeToNextSub = nextSubTimeInPeriod - currentGameSeconds;
                 message += ` Next auto-sub in ${formatTime(timeToNextSub)}.`;
             }
-        } else if (isSetupComplete) { 
+        } else if (isSetupComplete) {
             if (currentGameSeconds === 0 && currentPeriod === 1) {
                 message = "Setup Complete. Press START with referee's whistle.";
             } else {
-                 // Check if it's an intermediate period break or game just paused
+                // Check if it's an intermediate period break or game just paused
                 if (periodElapsedSeconds === periodLengthSeconds && periodLengthSeconds > 0 && currentPeriod <= gameSettings.numPeriods && !isFinalPeriod) { // isFinalPeriod needs to be defined or logic adjusted
-                    message = `End of Period ${currentPeriod -1}. Ready for Period ${currentPeriod}. Press START.`;
+                    message = `End of Period ${currentPeriod - 1}. Ready for Period ${currentPeriod}. Press START.`;
                 } else {
                     message = `Timer Paused (Period ${currentPeriod}). Press START to resume.`;
                 }
             }
             if (pendingOutPlayers.length > 0 && !isRunning) { // If sub was pending when timer stopped
-                 message = `SUB PENDING. ${message}`;
+                message = `SUB PENDING. ${message}`;
             }
         }
-        
+
         if (statusMessageP.textContent !== message || message === "") { // Update if different or if message should be cleared
             showStatusMessage(message, message === "" ? 1 : 0); // Clear if empty, else persist
         }

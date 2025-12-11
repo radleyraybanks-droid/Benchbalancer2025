@@ -3,8 +3,33 @@
 
 console.log('Loading BenchBalancer Supabase integration...');
 
-// Wait for Supabase CDN to load
-document.addEventListener('DOMContentLoaded', function() {
+// Initialize Supabase Client
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Loading BenchBalancer Supabase integration...');
+    console.log('📍 Current URL:', window.location.href);
+
+    // FIX: Check for double hash (##) which breaks Supabase parsing
+    if (window.location.hash && window.location.hash.startsWith('##')) {
+        console.log('🔧 Fixing malformed double-hash in URL...');
+        const fixedHash = window.location.hash.substring(1); // Remove first #
+        history.replaceState(null, null, window.location.pathname + window.location.search + fixedHash);
+        // Force reload to let Supabase client pick up the correct hash
+        window.location.reload();
+        return;
+    }
+
+    console.log('📍 URL Hash:', window.location.hash);
+
+    // Check if we were waiting for a magic link
+    if (localStorage.getItem('benchbalancer_magic_link_pending') === 'true') {
+        console.log('🕵️‍♂️ Magic link return detected via local storage flag.');
+        if (!window.location.hash) {
+            console.warn('⚠️ Magic link flag set but NO hash found in URL. Redirect might have stripped it.');
+        }
+        // Clear the flag
+        localStorage.removeItem('benchbalancer_magic_link_pending');
+    }
+
     console.log('[Supabase] Checking for Supabase library...');
     console.log('[Supabase] window.supabase:', typeof window.supabase);
 
@@ -35,10 +60,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Make client available globally
         window.benchBalancerSupabase = client;
-        
-        // Do not inject auth buttons on the landing page; options live inside the Sign In modal
-        // addAuthButton();
-        
+
+        // Listen for auth state changes (this handles the redirect back from Google and Magic Links)
+        client.auth.onAuthStateChange((event, session) => {
+            console.log('[Supabase] Auth state changed:', event);
+            if (session?.user) {
+                console.log('✅ User authenticated:', session.user.email);
+                updateAuthUI(session.user);
+
+                // If we just signed in via Magic Link, we might want to clear the hash
+                if (window.location.hash && window.location.hash.includes('access_token')) {
+                    console.log('🧹 Clearing auth hash from URL');
+                    history.replaceState(null, null, window.location.pathname + window.location.search);
+                }
+
+                // Check for sport param and redirect if needed (e.g. if we landed on index.html but meant to go to soccer)
+                const params = new URLSearchParams(window.location.search);
+                const sport = params.get('sport');
+                if (sport === 'soccer' && !window.location.pathname.includes('soccer')) {
+                    console.log('⚽ Redirecting to Soccer app...');
+                    window.location.href = 'soccer-game-modern.html?sport=soccer';
+                } else if (sport === 'oztag' && !window.location.pathname.includes('oztag')) {
+                    console.log('🏉 Redirecting to Oztag app...');
+                    window.location.href = 'oztag-setup.html?sport=oztag';
+                } else if (sport === 'basketball' && window.location.pathname.includes('index.html')) {
+                    // Ensure we show the basketball section if we are on index
+                    if (typeof revealBasketballLanding === 'function') {
+                        revealBasketballLanding();
+                    }
+                }
+
+            } else {
+                console.log('ℹ️ No active session');
+            }
+        });
+
+        // Check for hash fragment with auth token (Magic Link handling)
+        if (window.location.hash && window.location.hash.includes('access_token')) {
+            console.log('🔗 Detected auth token in URL hash, processing...');
+            // The Supabase client automatically detects this, but we log it for debugging
+        }
+
         // Test connection
         client.from('users').select('count').then(result => {
             if (result.error) {
@@ -46,13 +108,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Auth buttons available - will try to authenticate when clicked');
             } else {
                 console.log('🔗 Supabase backend connected successfully!');
-                checkCurrentUser();
+                // checkCurrentUser(); // No longer needed as onAuthStateChange handles it
             }
         }).catch(error => {
             console.log('⚠️ Connection test failed:', error.message);
             console.log('Auth buttons available - will try to authenticate when clicked');
         });
-        
+
     } catch (error) {
         console.log('⚠️ Supabase initialization failed:', error.message);
         console.log('Running in offline mode...');
@@ -73,7 +135,7 @@ function addAuthButton() {
             gap: 10px;
             align-items: center;
         `;
-        
+
         // Google Sign In Button
         const googleButton = document.createElement('button');
         googleButton.id = 'googleAuthButton';
@@ -89,24 +151,24 @@ function addAuthButton() {
             font-size: 12px;
             transition: transform 0.2s;
         `;
-        
+
         googleButton.onmouseover = () => googleButton.style.transform = 'scale(1.05)';
         googleButton.onmouseout = () => googleButton.style.transform = 'scale(1)';
-        
-        googleButton.onclick = async function() {
+
+        googleButton.onclick = async function () {
             try {
                 if (!window.benchBalancerSupabase) {
                     alert('Backend not available. Running in offline mode.');
                     return;
                 }
-                
+
                 const { error } = await window.benchBalancerSupabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
                         redirectTo: window.location.href
                     }
                 });
-                
+
                 if (error) {
                     console.error('Google auth error:', error.message);
                     alert('Google sign in failed: ' + error.message);
@@ -118,7 +180,7 @@ function addAuthButton() {
                 alert('Google sign in failed. Check console for details.');
             }
         };
-        
+
         // Email Sign Up Button
         const emailButton = document.createElement('button');
         emailButton.id = 'emailAuthButton';
@@ -134,19 +196,19 @@ function addAuthButton() {
             font-size: 12px;
             transition: transform 0.2s;
         `;
-        
+
         emailButton.onmouseover = () => emailButton.style.transform = 'scale(1.05)';
         emailButton.onmouseout = () => emailButton.style.transform = 'scale(1)';
-        
-        emailButton.onclick = function() {
+
+        emailButton.onclick = function () {
             showEmailAuthModal();
         };
-        
+
         authContainer.appendChild(googleButton);
         authContainer.appendChild(emailButton);
         header.appendChild(authContainer);
         console.log('🔐 Auth buttons added successfully!');
-        
+
         // Flash the buttons to make them visible
         setTimeout(() => {
             googleButton.style.boxShadow = '0 0 15px rgba(66, 133, 244, 0.6)';
@@ -160,7 +222,7 @@ function addAuthButton() {
 }
 
 // Make showEmailAuthModal available globally
-window.showEmailAuthModal = function() {
+window.showEmailAuthModal = function () {
     // Create modal overlay
     const modal = document.createElement('div');
     modal.id = 'authModal';
@@ -190,14 +252,14 @@ window.showEmailAuthModal = function() {
     `;
 
     modalContent.innerHTML = `
-        <h2 style="color: #00FFE0; margin-bottom: 10px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 0.1em;">
-            🏀 BENCHBALANCER
+        <h2 style="margin-bottom: 10px; text-align: center;">
+            <img src="assets/bench-balancer-neon-logo.png" alt="Bench Balancer" style="height: 50px; width: auto;">
         </h2>
         <p style="color: #B0B0B8; text-align: center; margin-bottom: 25px; font-size: 14px;">
             Sign in or create an account to track your stats
         </p>
 
-        <!-- Google Sign In Button -->
+        <!--Google Sign In Button-->
         <button id="googleSignInBtn" style="width: 100%; background: white;
             color: #444; border: none; padding: 14px 20px; border-radius: 10px;
             cursor: pointer; font-weight: bold; margin-bottom: 15px; display: flex;
@@ -247,21 +309,34 @@ window.showEmailAuthModal = function() {
                 padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 500; font-size: 14px;">
                 Cancel
             </button>
+            
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <button id="magicLinkBtn" style="flex: 1; background: transparent; color: #00FFE0; border: 1px solid #00FFE0;
+                    padding: 8px; border-radius: 10px; cursor: pointer; font-weight: 500; font-size: 12px;">
+                    ✨ Send Magic Link
+                </button>
+                <button id="resendBtn" style="flex: 1; background: transparent; color: #6f829e; border: 1px solid #6f829e;
+                    padding: 8px; border-radius: 10px; cursor: pointer; font-weight: 500; font-size: 12px;">
+                    Resend Confirmation
+                </button>
+            </div>
         </div>
 
         <p style="color: #6f829e; font-size: 12px; text-align: center; margin-top: 20px; line-height: 1.5;">
             Pro users get unlimited teams, advanced stats tracking, and cloud sync across all devices!
         </p>
     `;
-    
+
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
-    
+
     // Event listeners
     document.getElementById('signUpBtn').onclick = handleEmailSignUp;
     document.getElementById('signInBtn').onclick = handleEmailSignIn;
     document.getElementById('googleSignInBtn').onclick = handleGoogleSignIn;
     document.getElementById('cancelBtn').onclick = () => document.body.removeChild(modal);
+    document.getElementById('resendBtn').onclick = handleResendConfirmation;
+    document.getElementById('magicLinkBtn').onclick = handleMagicLinkSignIn;
 
     // Close on overlay click
     modal.onclick = (e) => {
@@ -287,7 +362,7 @@ async function handleGoogleSignIn() {
         const { data, error } = await window.benchBalancerSupabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin,
+                redirectTo: window.location.href, // Preserve current URL (including ?sport=basketball)
                 queryParams: {
                     access_type: 'offline',
                     prompt: 'consent',
@@ -356,9 +431,17 @@ async function handleEmailSignUp() {
         if (error) {
             console.error('[Auth] Sign up error:', error);
             alert('Sign up failed: ' + error.message);
+        } else if (data.session) {
+            // Auto sign-in (Email confirmation disabled in Supabase)
+            console.log('✅ User signed up and auto-signed in:', data.user?.email);
+            alert('🎉 Sign up successful! You are now signed in.');
+            const modal = document.getElementById('authModal');
+            if (modal) document.body.removeChild(modal);
+            updateAuthUI(data.user);
         } else {
-            console.log('✅ User signed up:', data.user?.email);
-            alert('🎉 Sign up successful! Check your email to confirm your account.');
+            // Email confirmation required
+            console.log('✅ User signed up, awaiting confirmation:', data.user?.email);
+            alert('🎉 Sign up successful! Please check your email (including Spam/Junk folder) to confirm your account.\n\nNote: Default Supabase emails can sometimes be delayed or blocked.');
             const modal = document.getElementById('authModal');
             if (modal) document.body.removeChild(modal);
         }
@@ -401,7 +484,13 @@ async function handleEmailSignIn() {
 
         if (error) {
             console.error('[Auth] Sign in error:', error);
-            alert('Sign in failed: ' + error.message);
+            if (error.message.includes('Email not confirmed')) {
+                alert('⚠️ Email not confirmed.\n\nPlease check your inbox (and Spam/Junk folder) for the confirmation link.\n\nIf you just signed up, it might take a minute to arrive.');
+            } else if (error.message.includes('Invalid login credentials')) {
+                alert('❌ Invalid email or password.\n\nIf you signed up with Google, please use the "Continue with Google" button instead.');
+            } else {
+                alert('Sign in failed: ' + error.message);
+            }
         } else {
             console.log('✅ User signed in:', data.user?.email);
             alert('🎉 Welcome back! You are now signed in.');
@@ -419,9 +508,86 @@ async function handleEmailSignIn() {
     }
 }
 
+async function handleMagicLinkSignIn() {
+    const email = document.getElementById('emailInput').value;
+
+    if (!email) {
+        alert('Please enter your email address first.');
+        return;
+    }
+
+    try {
+        if (!window.benchBalancerSupabase) {
+            alert('Backend not available.');
+            return;
+        }
+
+        console.log('[Auth] Sending Magic Link to:', email);
+
+        // Set a flag so we know we're expecting a magic link return
+        localStorage.setItem('benchbalancer_magic_link_pending', 'true');
+
+        const { error } = await window.benchBalancerSupabase.auth.signInWithOtp({
+            email: email,
+            options: {
+                // Use origin only to avoid query param issues stripping the hash
+                emailRedirectTo: window.location.origin
+            }
+        });
+
+        if (error) {
+            console.error('[Auth] Magic Link error:', error);
+            alert('Failed to send Magic Link: ' + error.message);
+            localStorage.removeItem('benchbalancer_magic_link_pending');
+        } else {
+            alert('✨ Magic Link sent!\n\nCheck your email for a login link. It works like a password-free sign in.');
+        }
+    } catch (err) {
+        console.error('[Auth] Magic Link exception:', err);
+        alert('Error: ' + err.message);
+        localStorage.removeItem('benchbalancer_magic_link_pending');
+    }
+}
+
+async function handleResendConfirmation() {
+    const email = document.getElementById('emailInput').value;
+
+    if (!email) {
+        alert('Please enter your email address first.');
+        return;
+    }
+
+    try {
+        if (!window.benchBalancerSupabase) {
+            alert('Backend not available.');
+            return;
+        }
+
+        console.log('[Auth] Resending confirmation to:', email);
+
+        const { error } = await window.benchBalancerSupabase.auth.resend({
+            type: 'signup',
+            email: email,
+            options: {
+                emailRedirectTo: window.location.origin
+            }
+        });
+
+        if (error) {
+            console.error('[Auth] Resend error:', error);
+            alert('Failed to resend: ' + error.message);
+        } else {
+            alert('✅ Confirmation email resent!\n\nPlease check your inbox and spam folder again in a few moments.');
+        }
+    } catch (err) {
+        console.error('[Auth] Resend exception:', err);
+        alert('Error: ' + err.message);
+    }
+}
+
 async function checkCurrentUser() {
     if (!window.benchBalancerSupabase) return;
-    
+
     try {
         const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
         if (user) {
@@ -434,25 +600,65 @@ async function checkCurrentUser() {
 }
 
 function updateAuthUI(user) {
-    if (user) {
-        const authContainer = document.getElementById('authContainer');
-        if (authContainer) {
-            authContainer.innerHTML = `
-                <div style="color: #00FFE0; font-size: 12px; text-align: right;">
-                    <div>👋 ${user.user_metadata?.full_name || user.email}</div>
-                    <button id="signOutBtn" style="background: #D9534F; color: white; border: none; 
-                        padding: 4px 8px; border-radius: 10px; cursor: pointer; font-size: 10px; margin-top: 2px;">
-                        Sign Out
-                    </button>
-                </div>
-            `;
-            
-            document.getElementById('signOutBtn').onclick = async () => {
+    if (!user) return;
+
+    console.log('Updating UI for user:', user.email);
+
+    // 1. Update Landing Page Button
+    const landingSignInBtn = document.getElementById('landingSignInButton');
+    if (landingSignInBtn) {
+        const name = user.user_metadata?.full_name || user.email.split('@')[0];
+        landingSignInBtn.innerHTML = `👋 ${name}`;
+        landingSignInBtn.title = "Click to Sign Out";
+        landingSignInBtn.style.background = 'rgba(0, 255, 224, 0.15)';
+        landingSignInBtn.style.color = '#00FFE0';
+        landingSignInBtn.style.borderColor = '#00FFE0';
+
+        // Change click handler to sign out
+        landingSignInBtn.onclick = async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (confirm('Do you want to sign out?')) {
                 await window.benchBalancerSupabase.auth.signOut();
-                location.reload();
-            };
+                window.location.reload();
+            }
+        };
+    }
+
+    // 2. Update Landing Page "Squad Management" Button
+    const squadBtn = document.getElementById('landingSquadButton');
+    if (squadBtn) {
+        if (user) {
+            squadBtn.innerHTML = 'Enter Dashboard';
+            squadBtn.onclick = () => window.location.href = 'pro-dashboard.html';
+        } else {
+            squadBtn.innerHTML = 'Squad Management';
+            squadBtn.onclick = () => showEmailAuthModal();
         }
     }
+
+    // 3. Update Generic Sign In Button (e.g. Oztag Setup)
+    const genericSignInBtn = document.getElementById('signInButton');
+    if (genericSignInBtn) {
+        const name = user.user_metadata?.full_name || user.email.split('@')[0];
+        genericSignInBtn.innerHTML = `👋 ${name}`;
+        genericSignInBtn.title = "Click to Sign Out";
+        genericSignInBtn.style.background = 'rgba(0, 255, 224, 0.15)';
+        genericSignInBtn.style.color = '#00FFE0';
+        genericSignInBtn.style.border = '1px solid #00FFE0';
+
+        genericSignInBtn.onclick = async (e) => {
+            e.preventDefault();
+            if (confirm('Do you want to sign out?')) {
+                await window.benchBalancerSupabase.auth.signOut();
+                window.location.reload();
+            }
+        };
+    }
+
+    // 3. Close modal if open
+    const modal = document.getElementById('authModal');
+    if (modal) document.body.removeChild(modal);
 }
 
 // Simple API interface that works offline and online
@@ -460,19 +666,19 @@ window.BenchBalancerAPI = {
     async isConnected() {
         return !!window.benchBalancerSupabase;
     },
-    
+
     async getCurrentUser() {
         if (!window.benchBalancerSupabase) return null;
         const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
         return user;
     },
-    
+
     async createTempMatch(matchData) {
         if (!window.benchBalancerSupabase) {
             console.log('Creating match offline...');
             return { id: 'offline_' + Date.now(), ...matchData };
         }
-        
+
         const { data, error } = await window.benchBalancerSupabase
             .from('temp_matches')
             .insert({
@@ -481,7 +687,7 @@ window.BenchBalancerAPI = {
             })
             .select()
             .single();
-        
+
         if (error) throw error;
         console.log('✅ Match created in Supabase:', data.id);
         return data;

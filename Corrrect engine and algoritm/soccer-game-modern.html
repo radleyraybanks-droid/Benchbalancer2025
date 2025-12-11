@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +12,9 @@
     <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;600;700&display=swap"
+        rel="stylesheet">
 
     <style>
         /* Modern Dark Theme Variables - Matching Basketball UI */
@@ -50,6 +53,8 @@
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+
+
         * {
             margin: 0;
             padding: 0;
@@ -60,8 +65,8 @@
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
             line-height: 1.6;
             background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
-                        radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
-                        linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+                radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
@@ -90,12 +95,20 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
         }
 
         #mastheadLogo {
-            display: none; /* Hide logo if not needed */
+            display: none;
+            /* Hide logo if not needed */
         }
 
         .app-title {
@@ -384,7 +397,7 @@
             font-size: 12px;
             color: #041018;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
-                        0 0 20px rgba(0, 255, 224, 0.4);
+                0 0 20px rgba(0, 255, 224, 0.4);
             transition: all var(--transition);
             cursor: pointer;
             z-index: 10;
@@ -393,13 +406,13 @@
         .field-player:hover {
             transform: scale(1.1);
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5),
-                        0 0 30px rgba(0, 255, 224, 0.6);
+                0 0 30px rgba(0, 255, 224, 0.6);
         }
 
         .field-player.goalkeeper {
             background: linear-gradient(135deg, #ffd700, #ffed4e);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
-                        0 0 20px rgba(255, 215, 0, 0.4);
+                0 0 20px rgba(255, 215, 0, 0.4);
         }
 
         /* Player Lists */
@@ -428,13 +441,11 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: repeating-linear-gradient(
-                90deg,
-                transparent,
-                transparent 10px,
-                rgba(255, 255, 255, 0.02) 10px,
-                rgba(255, 255, 255, 0.02) 20px
-            );
+            background: repeating-linear-gradient(90deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.02) 10px,
+                    rgba(255, 255, 255, 0.02) 20px);
             pointer-events: none;
         }
 
@@ -449,13 +460,11 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 15px,
-                rgba(0, 0, 0, 0.1) 15px,
-                rgba(0, 0, 0, 0.1) 16px
-            );
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 15px,
+                    rgba(0, 0, 0, 0.1) 15px,
+                    rgba(0, 0, 0, 0.1) 16px);
             pointer-events: none;
         }
 
@@ -585,8 +594,15 @@
         }
 
         @keyframes statusPulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
+
+            0%,
+            100% {
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 1;
+            }
         }
 
         .hidden {
@@ -641,8 +657,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .modal-content {
@@ -755,7 +776,9 @@
         }
 
         @keyframes spin {
-            to { transform: translate(-50%, -50%) rotate(360deg); }
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
         }
 
         /* Scrollbar Styling */
@@ -827,13 +850,18 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <header id="appHeader">
-        <div class="app-title">BENCH BALANCER</div>
+        <div class="app-title">
+            <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" style="height: 32px; width: auto;">
+        </div>
         <div class="app-subtitle">Soccer Team Management</div>
-        <div id="authContainer" style="position: absolute; top: 15px; right: 20px; display: flex; gap: 10px; align-items: center;">
-            <button id="signInButton" onclick="if(typeof showEmailAuthModal === 'function') showEmailAuthModal(); else alert('Auth system loading...');"
+        <div id="authContainer"
+            style="position: absolute; top: 15px; right: 20px; display: flex; gap: 10px; align-items: center;">
+            <button id="signInButton"
+                onclick="if(typeof showEmailAuthModal === 'function') showEmailAuthModal(); else alert('Auth system loading...');"
                 style="background: linear-gradient(45deg, #00FFE0, #4A90E2); color: #1a1a1f; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; transition: transform 0.2s;">
                 Sign In
             </button>
@@ -852,7 +880,8 @@
 
             <div class="form-group">
                 <label for="numOnField">Total Players on Field (incl. GK):</label>
-                <select id="numOnField" style="width: 100%; padding: 8px; background: var(--bg-800); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;">
+                <select id="numOnField"
+                    style="width: 100%; padding: 8px; background: var(--bg-800); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;">
                     <option value="4">4</option>
                     <option value="5">5</option>
                     <option value="6">6</option>
@@ -866,16 +895,20 @@
 
             <div class="form-group">
                 <label for="numGoalkeepers">Initial Number of Goalkeepers:</label>
-                <select id="numGoalkeepers" style="width: 100%; padding: 8px; background: var(--bg-800); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;">
+                <select id="numGoalkeepers"
+                    style="width: 100%; padding: 8px; background: var(--bg-800); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;">
                     <option value="0">0</option>
                     <option value="1" selected>1</option>
                 </select>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Set the number of goalkeepers starting on the field. The first name listed in "Starting Players" will be marked as GK if set to 1.</p>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Set the number of goalkeepers
+                    starting on the field. The first name listed in "Starting Players" will be marked as GK if set to 1.
+                </p>
             </div>
 
             <div class="form-group">
                 <label for="numReserves">Number of Reserves:</label>
-                <select id="numReserves" style="width: 100%; padding: 8px; background: var(--bg-800); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;">
+                <select id="numReserves"
+                    style="width: 100%; padding: 8px; background: var(--bg-800); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;">
                     <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -884,7 +917,8 @@
                     <option value="5">5</option>
                     <option value="6">6</option>
                 </select>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Players available for substitution.</p>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Players available for
+                    substitution.</p>
             </div>
 
             <div class="form-group">
@@ -895,7 +929,9 @@
                     <option value="2">2</option>
                     <option value="3">3</option>
                 </select>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">How many non-goalkeeper players swap simultaneously during automatic substitutions. Cannot exceed available non-GK field spots or non-GK reserves.</p>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">How many non-goalkeeper
+                    players swap simultaneously during automatic substitutions. Cannot exceed available non-GK field
+                    spots or non-GK reserves.</p>
             </div>
 
             <h2>Player Names</h2>
@@ -906,7 +942,8 @@
                 <div id="starterNamesContainer" style="margin-top: 10px;">
                     <!-- Player name inputs will be dynamically added here -->
                 </div>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Enter names or leave as default. Empty fields will use default numbers.</p>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Enter names or leave as
+                    default. Empty fields will use default numbers.</p>
             </div>
 
             <!-- Reserve Names Container -->
@@ -915,7 +952,8 @@
                 <div id="reserveNamesContainer" style="margin-top: 10px;">
                     <!-- Reserve name inputs will be dynamically added here -->
                 </div>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Enter names or leave as default. Empty fields will use default numbers.</p>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Enter names or leave as
+                    default. Empty fields will use default numbers.</p>
             </div>
 
             <div id="warning-sound-toggle-container" style="margin: 20px 0;">
@@ -923,7 +961,8 @@
                     <input type="checkbox" id="warningSoundToggle" checked>
                     <span>Enable 10-second sub warning sound</span>
                 </label>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; margin-left: 28px;">Plays a short beep 10 seconds before an automatic substitution is due.</p>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; margin-left: 28px;">Plays a
+                    short beep 10 seconds before an automatic substitution is due.</p>
             </div>
 
             <div style="margin-top: 32px; text-align: center;">
@@ -963,7 +1002,8 @@
             <!-- Next Substitution Box -->
             <div id="nextSubBox" class="hidden">
                 <h3>Next Substitution</h3>
-                <div id="nextSubCountdown" style="font-size: 20px; color: var(--accent-cyan); margin-bottom: 10px;">00:00</div>
+                <div id="nextSubCountdown" style="font-size: 20px; color: var(--accent-cyan); margin-bottom: 10px;">
+                    00:00</div>
                 <div id="nextSubInfo" style="margin-bottom: 10px;">
                     <strong>Coming Off:</strong> <span id="playersComingOff">-</span>
                 </div>
@@ -1065,5 +1105,18 @@
     <script src="config/supabase-config.js"></script>
     <script src="auth/auth-manager.js"></script>
     <script src="config/simple-supabase.js"></script>
+
+    <script>
+        // Handle routing and state for Soccer
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (!params.has('sport')) {
+                const url = new URL(window.location);
+                url.searchParams.set('sport', 'soccer');
+                window.history.replaceState({ sport: 'soccer' }, '', url);
+            }
+        });
+    </script>
 </body>
+
 </html>
