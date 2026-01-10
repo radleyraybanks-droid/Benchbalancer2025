@@ -1165,11 +1165,14 @@ async function sendGuestStats(email, stats) {
  * Format stats for email
  */
 function formatStatsForEmail(stats, email) {
-    // Helper function to format seconds as MM:SS
+    // Helper function to format seconds as "1m 27s" format
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = Math.round(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
+        if (secs === 0) {
+            return `${mins}m`;
+        }
+        return `${mins}m ${secs}s`;
     };
 
     const players = Object.entries(stats.players || {}).map(([name, data]) => ({

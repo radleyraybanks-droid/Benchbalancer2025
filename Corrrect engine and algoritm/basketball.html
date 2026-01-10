@@ -2100,6 +2100,55 @@
             transform: scale(1.1);
         }
 
+        /* Quick Score Button - Replaces Image */
+        .quick-score-button {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00e5d0, #00c8d8);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            box-shadow: 0 6px 20px rgba(0, 255, 224, 0.6), 0 0 40px rgba(0, 255, 224, 0.4);
+            z-index: 900;
+            transition: all 0.3s ease;
+            padding: 8px;
+        }
+
+        .quick-score-button:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 24px rgba(0, 255, 224, 0.8), 0 0 50px rgba(0, 255, 224, 0.6);
+        }
+
+        .quick-score-button:active {
+            transform: scale(0.95);
+        }
+
+        .quick-score-icon {
+            font-size: 32px;
+            line-height: 1;
+            margin-bottom: -2px;
+        }
+
+        .quick-score-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: #000;
+            text-transform: uppercase;
+            line-height: 1;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+        }
+
         .scoring-pad-player-list {
             display: flex;
             flex-direction: column;
@@ -2667,16 +2716,34 @@
 
         /* Quick Score Button Mobile Sizing */
         @media (max-width: 768px) {
-            img[alt="Quick score"] {
-                height: 80px !important;
-                bottom: 100px !important;
-                right: 15px !important;
+            .quick-score-button {
+                width: 90px;
+                height: 90px;
+                bottom: 100px;
+                right: 15px;
+            }
+
+            .quick-score-icon {
+                font-size: 34px;
+            }
+
+            .quick-score-label {
+                font-size: 14px;
             }
         }
 
         @media (max-width: 480px) {
-            img[alt="Quick score"] {
-                height: 75px !important;
+            .quick-score-button {
+                width: 80px;
+                height: 80px;
+            }
+
+            .quick-score-icon {
+                font-size: 30px;
+            }
+
+            .quick-score-label {
+                font-size: 12px;
             }
         }
 
@@ -3040,11 +3107,10 @@
 
             <!-- Scoring Pad -->
             <button class="scoring-pad-toggle" id="scoringPadToggle">🏀</button>
-            <img src="assets/btn-quick-score.png" alt="Quick score"
-                onclick="document.getElementById('scoringPadToggle').click()"
-                style="position: fixed; bottom: 90px; right: 20px; height: 70px; width: auto; z-index: 900; cursor: pointer; opacity: 0.95; transition: opacity 0.2s, transform 0.2s; filter: drop-shadow(0 4px 12px rgba(0, 255, 224, 0.6));"
-                onmouseover="this.style.opacity=1; this.style.transform='scale(1.08)'"
-                onmouseout="this.style.opacity=0.95; this.style.transform='scale(1)'">
+            <button class="quick-score-button" onclick="document.getElementById('scoringPadToggle').click()">
+                <div class="quick-score-icon">🏀</div>
+                <div class="quick-score-label">Quick score</div>
+            </button>
             <div class="scoring-pad-box hidden" id="scoringPad">
                 <div class="scoring-pad-header">
                     <span class="scoring-pad-title">Quick score</span>
@@ -3197,7 +3263,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
         <!-- Main ES Module Integration -->
-        <script type="module" src="basketball-integration-main.js?v=20260111T080000"></script>
+        <script type="module" src="basketball-integration-main.js?v=20260111T082800"></script>
 
         <!-- Inline logic (module) to ensure it runs after main integration -->
         <script type="module">
