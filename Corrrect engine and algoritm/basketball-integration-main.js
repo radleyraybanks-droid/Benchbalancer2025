@@ -306,72 +306,7 @@ async function handleGameEnd(stats) {
     }
     actionWrapper.innerHTML = ''; // Clear old buttons
 
-    // Show message about adjusting scores
-    gameUI.showStatusMessage('Adjust scores if needed, then SAVE to database', 0, 'info');
-
-    // ===========================================
-    // SAVE TO DATABASE BUTTON (for all matches)
-    // ===========================================
-    const saveBtn = document.createElement('button');
-    saveBtn.id = 'saveToDbBtn';
-    saveBtn.className = 'btn-primary';
-    saveBtn.style.cssText = 'background: linear-gradient(135deg, #00ffe0, #00cdb8); color: #041018; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 15px rgba(0, 255, 224, 0.4); padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 14px; letter-spacing: 0.1em;';
-    saveBtn.innerHTML = '<span>💾</span> SAVE TO DATABASE';
-
-    saveBtn.onclick = async () => {
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<span>⏳</span> SAVING...';
-        saveBtn.style.opacity = '0.7';
-        saveBtn.style.cursor = 'not-allowed';
-
-        try {
-            // Get FRESH stats from game engine (includes any post-game score adjustments)
-            const finalStats = gameEngine.getStats();
-            console.log('📊 Final stats to save:', finalStats);
-
-            if (isCompetitive) {
-                await saveCompetitiveMatchResults(finalStats, window.competitiveMatchData);
-            } else if (window.statsTracker) {
-                // For practice matches, check pro status
-                let isPro = false;
-                if (window.benchBalancerSupabase) {
-                    const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
-                    if (user) {
-                        isPro = await SubscriptionLimits.isProUser(user.id);
-                    }
-                }
-
-                if (isPro) {
-                    const result = await window.statsTracker.saveGame(finalStats);
-                    if (result.success) {
-                        gameUI.showStatusMessage('✅ Stats saved successfully!', 5000, 'success');
-                    } else {
-                        gameUI.showStatusMessage('⚠️ Stats save failed', 5000, 'warning');
-                    }
-                } else {
-                    gameUI.showStatusMessage('⚠️ Pro subscription required to save practice stats', 5000, 'warning');
-                }
-            }
-
-            saveBtn.innerHTML = '<span>✅</span> SAVED!';
-            saveBtn.style.background = 'linear-gradient(135deg, #4be9a6, #3dd192)';
-
-        } catch (error) {
-            console.error('Save failed:', error);
-            saveBtn.innerHTML = '<span>❌</span> SAVE FAILED - TRY AGAIN';
-            saveBtn.disabled = false;
-            saveBtn.style.opacity = '1';
-            saveBtn.style.cursor = 'pointer';
-            gameUI.showStatusMessage('Error saving stats: ' + error.message, 5000, 'error');
-        }
-    };
-
-    actionWrapper.appendChild(saveBtn);
-
-    // ===========================================
-    // DOWNLOAD REPORT BUTTON (for guests only)
-    // ===========================================
-    // Check if user is authenticated - if so, skip download button
+    // Check if user is authenticated first
     let isAuthenticated = false;
     if (window.benchBalancerSupabase) {
         try {
@@ -382,12 +317,77 @@ async function handleGameEnd(stats) {
         }
     }
 
-    // Only show download button for guests (non-authenticated users)
-    if (!isAuthenticated) {
+    // ===========================================
+    // SAVE TO DATABASE BUTTON (authenticated users only)
+    // ===========================================
+    if (isAuthenticated) {
+        gameUI.showStatusMessage('Adjust scores if needed, then SAVE to database', 0, 'info');
+
+        const saveBtn = document.createElement('button');
+        saveBtn.id = 'saveToDbBtn';
+        saveBtn.className = 'btn-primary';
+        saveBtn.style.cssText = 'background: linear-gradient(135deg, #00ffe0, #00cdb8); color: #041018; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 15px rgba(0, 255, 224, 0.4); padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 14px; letter-spacing: 0.1em;';
+        saveBtn.innerHTML = '<span>💾</span> SAVE TO DATABASE';
+
+        saveBtn.onclick = async () => {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span>⏳</span> SAVING...';
+            saveBtn.style.opacity = '0.7';
+            saveBtn.style.cursor = 'not-allowed';
+
+            try {
+                // Get FRESH stats from game engine (includes any post-game score adjustments)
+                const finalStats = gameEngine.getStats();
+                console.log('📊 Final stats to save:', finalStats);
+
+                if (isCompetitive) {
+                    await saveCompetitiveMatchResults(finalStats, window.competitiveMatchData);
+                } else if (window.statsTracker) {
+                    // For practice matches, check pro status
+                    let isPro = false;
+                    if (window.benchBalancerSupabase) {
+                        const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                        if (user) {
+                            isPro = await SubscriptionLimits.isProUser(user.id);
+                        }
+                    }
+
+                    if (isPro) {
+                        const result = await window.statsTracker.saveGame(finalStats);
+                        if (result.success) {
+                            gameUI.showStatusMessage('✅ Stats saved successfully!', 5000, 'success');
+                        } else {
+                            gameUI.showStatusMessage('⚠️ Stats save failed', 5000, 'warning');
+                        }
+                    } else {
+                        gameUI.showStatusMessage('⚠️ Pro subscription required to save practice stats', 5000, 'warning');
+                    }
+                }
+
+                saveBtn.innerHTML = '<span>✅</span> SAVED!';
+                saveBtn.style.background = 'linear-gradient(135deg, #4be9a6, #3dd192)';
+
+            } catch (error) {
+                console.error('Save failed:', error);
+                saveBtn.innerHTML = '<span>❌</span> SAVE FAILED - TRY AGAIN';
+                saveBtn.disabled = false;
+                saveBtn.style.opacity = '1';
+                saveBtn.style.cursor = 'pointer';
+                gameUI.showStatusMessage('Error saving stats: ' + error.message, 5000, 'error');
+            }
+        };
+
+        actionWrapper.appendChild(saveBtn);
+    } else {
+        // ===========================================
+        // DOWNLOAD REPORT BUTTON (guests only)
+        // ===========================================
+        gameUI.showStatusMessage('Game complete! Download your match report below.', 0, 'info');
+
         const downloadBtn = document.createElement('button');
         downloadBtn.id = reportBtnId;
         downloadBtn.className = 'btn-primary';
-        downloadBtn.style.cssText = 'background: linear-gradient(135deg, #ff4444, #cc0000); color: white; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4); padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 14px; letter-spacing: 0.1em;';
+        downloadBtn.style.cssText = 'background: linear-gradient(135deg, #00ffe0, #00cdb8); color: #041018; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 15px rgba(0, 255, 224, 0.4); padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 14px; letter-spacing: 0.1em;';
         downloadBtn.innerHTML = '<span>📄</span> DOWNLOAD MATCH REPORT';
 
         downloadBtn.onclick = () => {
@@ -1165,10 +1165,19 @@ async function sendGuestStats(email, stats) {
  * Format stats for email
  */
 function formatStatsForEmail(stats, email) {
+    // Helper function to format seconds as MM:SS
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.round(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     const players = Object.entries(stats.players || {}).map(([name, data]) => ({
         name,
-        courtTime: Math.round(data.minutes || 0),
-        benchTime: Math.round(data.benchMinutes || 0),
+        courtTime: formatTime(data.minutes || 0),
+        benchTime: formatTime(data.benchMinutes || 0),
+        courtTimeSeconds: Math.round(data.minutes || 0),
+        benchTimeSeconds: Math.round(data.benchMinutes || 0),
         points: data.points || 0,
         position: data.position || '-'
     }));

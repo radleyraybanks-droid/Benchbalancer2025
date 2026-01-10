@@ -82,8 +82,8 @@ function createEmailHTML(gameData) {
       <td style="padding: 12px; font-weight: 600; color: #1f2937;">${i + 1}</td>
       <td style="padding: 12px; font-weight: 600; color: #1f2937;">${p.name}</td>
       <td style="padding: 12px; text-align: center; color: #6b7280;">${p.position}</td>
-      <td style="padding: 12px; text-align: center; color: #10b981; font-weight: 600;">${p.courtTime} min</td>
-      <td style="padding: 12px; text-align: center; color: #6b7280;">${p.benchTime} min</td>
+      <td style="padding: 12px; text-align: center; color: #10b981; font-weight: 600;">${p.courtTime}</td>
+      <td style="padding: 12px; text-align: center; color: #6b7280;">${p.benchTime}</td>
       <td style="padding: 12px; text-align: center; color: #00ffe0; font-weight: 700; font-size: 16px;">${p.points}</td>
     </tr>
   `).join('')
