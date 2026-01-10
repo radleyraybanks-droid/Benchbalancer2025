@@ -5,10 +5,18 @@
  * Version 2.0 - Production Ready
  */
 
+import { BasketballGameEngine } from './basketball-game-engine.js';
+import { BasketballUI } from './basketball-ui-manager.js';
+import { BasketballSetup } from './basketball-setup-manager.js';
+import { benchBalancerSupabase, initAuth } from './config/simple-supabase.js';
+import { SubscriptionLimits } from './js/subscription-limits.js';
+
 // Global variables for game components
 let gameEngine = null;
 let gameUI = null;
 let setupManager = null;
+
+// Auth will be initialized after DOM is ready
 
 /**
  * Initialize basketball game system
@@ -16,36 +24,75 @@ let setupManager = null;
 function initializeBasketballSystem() {
     console.log('🏀 Initializing Basketball System...');
 
-    // Check for required components
-    if (typeof BasketballIntervalOptimizer === 'undefined') {
-        console.error('BasketballIntervalOptimizer not loaded');
-        showInitError('Basketball Interval Optimizer module not loaded');
-        return false;
-    }
-
-    if (typeof BasketballGameEngine === 'undefined') {
-        console.error('BasketballGameEngine not loaded');
-        showInitError('Basketball Game Engine module not loaded');
-        return false;
-    }
-
-    if (typeof BasketballUI === 'undefined') {
-        console.error('BasketballUI not loaded');
-        showInitError('Basketball UI module not loaded');
-        return false;
-    }
-
-    if (typeof BasketballSetup === 'undefined') {
-        console.error('BasketballSetup not loaded');
-        showInitError('Basketball Setup module not loaded');
-        return false;
-    }
-
     // Initialize setup manager
     setupManager = new BasketballSetup();
 
     // Load any saved configuration
     setupManager.loadSavedConfig();
+
+    // Check for active game session to restore
+    try {
+        const savedState = localStorage.getItem('basketballGameState');
+        if (savedState) {
+            console.log('📦 Found saved game state, attempting restore...');
+            const snapshot = JSON.parse(savedState);
+
+            // Only restore if less than 24 hours old
+            if (Date.now() - snapshot.timestamp < 24 * 60 * 60 * 1000) {
+                // Initialize engine
+                gameEngine = new BasketballGameEngine();
+
+                // Initialize UI first so it's ready
+                gameUI = new BasketballUI(gameEngine);
+                if (typeof window !== 'undefined') {
+                    window.basketballUI = gameUI;
+                }
+
+                if (gameEngine.restoreFromSnapshot(snapshot)) {
+                    console.log('♻️ Game restored!');
+                    setupGameCallbacks();
+
+                    // Hide setup, show game
+                    const setupEl = document.getElementById('setup');
+                    const gameEl = document.getElementById('game-container');
+                    if (setupEl) setupEl.classList.add('hidden');
+                    if (gameEl) gameEl.classList.remove('hidden');
+
+                    // Update display immediately
+                    gameUI.updateDisplay(gameEngine.getState());
+                    gameUI.showStatusMessage('Game restored from previous session (Paused)', 5000, 'info');
+
+                    return true;
+                }
+            } else {
+                console.log('🗑️ Saved state expired, clearing...');
+                localStorage.removeItem('basketballGameState');
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to restore saved game:', e);
+        // Clear corrupt state
+        localStorage.removeItem('basketballGameState');
+    }
+
+    // Check for competitive match mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const isCompetitiveMode = urlParams.get('mode') === 'competitive';
+
+    if (isCompetitiveMode) {
+        console.log('🏆 Competitive Match Mode Detected');
+        const matchData = sessionStorage.getItem('competitiveMatchData');
+        if (matchData) {
+            try {
+                const parsedMatch = JSON.parse(matchData);
+                console.log('📋 Match Data:', parsedMatch);
+                // Store globally for game initialization
+                window.competitiveMatchData = parsedMatch;
+            } catch (e) {
+                console.warn('Failed to parse match data:', e);
+            }
+        }
+    }
 
     console.log('✅ Basketball System initialized successfully');
     return true;
@@ -61,6 +108,10 @@ function startBasketballGame(setupData) {
     try {
         // Create game engine
         gameEngine = new BasketballGameEngine();
+
+        // EXPOSE TO WINDOW FOR DEBUGGING
+        window.gameEngine = gameEngine;
+        console.log('🎮 gameEngine exposed to window.gameEngine');
 
         // Initialize game with setup data
         const initResult = gameEngine.initialize(setupData);
@@ -116,11 +167,17 @@ function setupGameCallbacks() {
     // Update display on every tick
     gameEngine.callbacks.onUpdate = (state) => {
         gameUI.updateDisplay(state);
+        // Note: State persistence removed - getSnapshot method not implemented
     };
 
     // Handle score updates
     gameEngine.callbacks.onScoreUpdate = (scoring) => {
         gameUI.updateScoreboard(scoring);
+        // Save immediately on score change (only if getSnapshot exists)
+        if (typeof gameEngine.getSnapshot === 'function') {
+            const snapshot = gameEngine.getSnapshot();
+            localStorage.setItem('basketballGameState', JSON.stringify(snapshot));
+        }
     };
 
     // Handle rotation notifications
@@ -131,11 +188,18 @@ function setupGameCallbacks() {
     // Handle period end
     gameEngine.callbacks.onPeriodEnd = (periodInfo) => {
         handlePeriodEnd(periodInfo);
+        // Save at period end (only if getSnapshot exists)
+        if (typeof gameEngine.getSnapshot === 'function') {
+            const snapshot = gameEngine.getSnapshot();
+            localStorage.setItem('basketballGameState', JSON.stringify(snapshot));
+        }
     };
 
     // Handle game end
     gameEngine.callbacks.onGameEnd = (stats) => {
         handleGameEnd(stats);
+        // Clear saved state when game finishes naturally
+        localStorage.removeItem('basketballGameState');
     };
 
     // Handle errors
@@ -160,6 +224,28 @@ function setupGameCallbacks() {
     gameEngine.callbacks.onRecovery = (recovery) => {
         gameUI.showRecovery(recovery);
     };
+
+    // =========================================================================
+    // NEW: Robust State Persistence (Auto-save & Save-on-Exit)
+    // =========================================================================
+
+    // 1. periodic auto-save (every 30 seconds)
+    if (window.gameAutoSaveInterval) clearInterval(window.gameAutoSaveInterval);
+    window.gameAutoSaveInterval = setInterval(() => {
+        if (gameEngine && gameEngine.state.running && typeof gameEngine.getSnapshot === 'function') {
+            const snapshot = gameEngine.getSnapshot();
+            localStorage.setItem('basketballGameState', JSON.stringify(snapshot));
+            // Optional: console.log('💾 Auto-saved game state');
+        }
+    }, 30000);
+
+    // 2. Save on tab close/refresh
+    window.addEventListener('beforeunload', () => {
+        if (gameEngine && gameEngine.state.initialized && typeof gameEngine.getSnapshot === 'function') {
+            const snapshot = gameEngine.getSnapshot();
+            localStorage.setItem('basketballGameState', JSON.stringify(snapshot));
+        }
+    });
 }
 
 /**
@@ -182,7 +268,7 @@ function handlePeriodEnd(periodInfo) {
 /**
  * Handle game end
  */
-function handleGameEnd(stats) {
+async function handleGameEnd(stats) {
     console.log('Game ended with stats:', stats);
 
     // Show final statistics
@@ -201,6 +287,403 @@ function handleGameEnd(stats) {
 
     // Display detailed stats
     displayFinalStats(stats);
+
+    // Check if this was a competitive match
+    const isCompetitive = window.competitiveMatchData !== undefined;
+
+    // MATCH REPORT FLOW
+    // Show buttons for post-match actions
+    const container = document.getElementById('game-container');
+    const reportBtnId = 'downloadReportBtn_' + Date.now();
+
+    // Create or find a wrapper for end game actions
+    let actionWrapper = document.getElementById('endGameActions');
+    if (!actionWrapper) {
+        actionWrapper = document.createElement('div');
+        actionWrapper.id = 'endGameActions';
+        actionWrapper.style.cssText = 'position:fixed; top:120px; left:50%; transform:translateX(-50%); z-index:1001; display:flex; gap:16px; flex-direction:column; width:320px; background: rgba(4, 7, 13, 0.95); padding: 20px; border-radius: 16px; border: 2px solid var(--accent-cyan); box-shadow: 0 0 30px rgba(0, 255, 224, 0.3);';
+        container.appendChild(actionWrapper);
+    }
+    actionWrapper.innerHTML = ''; // Clear old buttons
+
+    // Show message about adjusting scores
+    gameUI.showStatusMessage('Adjust scores if needed, then SAVE to database', 0, 'info');
+
+    // ===========================================
+    // SAVE TO DATABASE BUTTON (for all matches)
+    // ===========================================
+    const saveBtn = document.createElement('button');
+    saveBtn.id = 'saveToDbBtn';
+    saveBtn.className = 'btn-primary';
+    saveBtn.style.cssText = 'background: linear-gradient(135deg, #00ffe0, #00cdb8); color: #041018; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 15px rgba(0, 255, 224, 0.4); padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 14px; letter-spacing: 0.1em;';
+    saveBtn.innerHTML = '<span>💾</span> SAVE TO DATABASE';
+
+    saveBtn.onclick = async () => {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span>⏳</span> SAVING...';
+        saveBtn.style.opacity = '0.7';
+        saveBtn.style.cursor = 'not-allowed';
+
+        try {
+            // Get FRESH stats from game engine (includes any post-game score adjustments)
+            const finalStats = gameEngine.getStats();
+            console.log('📊 Final stats to save:', finalStats);
+
+            if (isCompetitive) {
+                await saveCompetitiveMatchResults(finalStats, window.competitiveMatchData);
+            } else if (window.statsTracker) {
+                // For practice matches, check pro status
+                let isPro = false;
+                if (window.benchBalancerSupabase) {
+                    const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                    if (user) {
+                        isPro = await SubscriptionLimits.isProUser(user.id);
+                    }
+                }
+
+                if (isPro) {
+                    const result = await window.statsTracker.saveGame(finalStats);
+                    if (result.success) {
+                        gameUI.showStatusMessage('✅ Stats saved successfully!', 5000, 'success');
+                    } else {
+                        gameUI.showStatusMessage('⚠️ Stats save failed', 5000, 'warning');
+                    }
+                } else {
+                    gameUI.showStatusMessage('⚠️ Pro subscription required to save practice stats', 5000, 'warning');
+                }
+            }
+
+            saveBtn.innerHTML = '<span>✅</span> SAVED!';
+            saveBtn.style.background = 'linear-gradient(135deg, #4be9a6, #3dd192)';
+
+        } catch (error) {
+            console.error('Save failed:', error);
+            saveBtn.innerHTML = '<span>❌</span> SAVE FAILED - TRY AGAIN';
+            saveBtn.disabled = false;
+            saveBtn.style.opacity = '1';
+            saveBtn.style.cursor = 'pointer';
+            gameUI.showStatusMessage('Error saving stats: ' + error.message, 5000, 'error');
+        }
+    };
+
+    actionWrapper.appendChild(saveBtn);
+
+    // ===========================================
+    // DOWNLOAD REPORT BUTTON (for guests only)
+    // ===========================================
+    // Check if user is authenticated - if so, skip download button
+    let isAuthenticated = false;
+    if (window.benchBalancerSupabase) {
+        try {
+            const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+            isAuthenticated = !!user;
+        } catch (e) {
+            isAuthenticated = false;
+        }
+    }
+
+    // Only show download button for guests (non-authenticated users)
+    if (!isAuthenticated) {
+        const downloadBtn = document.createElement('button');
+        downloadBtn.id = reportBtnId;
+        downloadBtn.className = 'btn-primary';
+        downloadBtn.style.cssText = 'background: linear-gradient(135deg, #ff4444, #cc0000); color: white; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4); padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 14px; letter-spacing: 0.1em;';
+        downloadBtn.innerHTML = '<span>📄</span> DOWNLOAD MATCH REPORT';
+
+        downloadBtn.onclick = () => {
+            // Get fresh stats for email
+            const reportStats = gameEngine.getStats();
+            showGuestStatsEmailModal(reportStats);
+        };
+
+        actionWrapper.appendChild(downloadBtn);
+    }
+}
+
+/**
+ * Save competitive match results to Supabase
+ */
+async function saveCompetitiveMatchResults(stats, matchData) {
+    if (!benchBalancerSupabase) {
+        console.warn('Supabase not available');
+        gameUI.showStatusMessage('Match finished (Not connected to save stats)', 5000, 'warning');
+        return;
+    }
+
+    try {
+        const { data: { user } } = await benchBalancerSupabase.auth.getUser();
+
+        if (!user) {
+            console.warn('User not authenticated');
+            gameUI.showStatusMessage('Match finished (Sign in to save stats)', 5000, 'warning');
+            return;
+        }
+
+        // Determine result
+        console.log('📊 Stats received for save:', {
+            homeScore: stats.homeScore,
+            awayScore: stats.awayScore,
+            teamName: stats.teamName,
+            opponentName: stats.opponentName,
+            players: Object.keys(stats.players || {}).length
+        });
+
+        let result = 'draw';
+        if (stats.homeScore > stats.awayScore) result = 'win';
+        else if (stats.homeScore < stats.awayScore) result = 'loss';
+
+        console.log('📊 Determined result:', result, `(${stats.homeScore} vs ${stats.awayScore})`);
+
+        // Get planned lineup from localStorage
+        let plannedLineup = null;
+        try {
+            const lineupData = localStorage.getItem('benchbalancer_default_lineup');
+            if (lineupData) {
+                const parsed = JSON.parse(lineupData);
+                // For planned lineup, we use localStorage, assuming data is reliable
+                plannedLineup = {
+                    starting: parsed.starting || [],
+                    bench: parsed.bench || [],
+                    unavailable: parsed.unavailable || []
+                };
+            }
+        } catch (e) {
+            console.warn('Could not load planned lineup:', e);
+        }
+
+        // Get actual lineup from game stats (who actually played)
+        const actualLineup = {
+            played: Object.keys(stats.players || {}),
+            starters: Object.keys(stats.players || {}).filter(name => {
+                const p = stats.players[name];
+                return p && p.minutes > 0;
+            })
+        };
+
+        // Save match result
+        const insertData = {
+            scheduled_match_id: matchData.scheduleId || null,
+            opponent: matchData.opponent || stats.opponentName,
+            match_date: matchData.date || new Date().toISOString().split('T')[0],
+            match_time: matchData.time || null,
+            venue: matchData.venue || null,
+            home_away: matchData.homeAway !== undefined ? matchData.homeAway : true,
+            team_score: stats.homeScore || 0,
+            opponent_score: stats.awayScore || 0,
+            game_format: stats.format || 'halves',
+            result: result,
+            planned_lineup: plannedLineup,
+            actual_lineup: actualLineup,
+            user_id: user.id
+        };
+
+        console.log('📤 Inserting match data:', insertData);
+
+        const { data: matchResult, error: matchError } = await benchBalancerSupabase
+            .from('match_results')
+            .insert(insertData)
+            .select()
+            .single();
+
+        if (matchError) {
+            console.error('Failed to save match result:', matchError);
+            console.error('Error details:', matchError.message, matchError.details, matchError.hint);
+            gameUI.showStatusMessage('Error saving: ' + matchError.message, 5000, 'warning');
+            return;
+        }
+
+        console.log('✅ Match result saved:', matchResult);
+
+        // Save player stats
+        const playerStats = Object.entries(stats.players).map(([playerName, playerData]) => ({
+            match_result_id: matchResult.id,
+            user_id: user.id,  // REQUIRED: Add user_id for RLS
+            player_name: playerName,
+            jersey_number: playerData.jerseyNumber ? parseInt(playerData.jerseyNumber, 10) : null,  // Convert to integer
+            position: playerData.position || null,
+            time_on_court: playerData.minutes || 0,
+            time_on_bench: playerData.benchMinutes || 0,
+            points_scored: playerData.points || 0
+        }));
+
+        console.log('📤 Saving player stats:', playerStats);
+        console.log('📊 Stats object structure:', stats.players);
+
+        const { error: statsError } = await benchBalancerSupabase
+            .from('match_player_stats')
+            .insert(playerStats);
+
+        if (statsError) {
+            console.error('❌ Failed to save player stats:', statsError);
+            console.error('Error details:', JSON.stringify(statsError, null, 2));
+            gameUI.showStatusMessage('Match saved but player stats failed: ' + statsError.message, 5000, 'warning');
+            return;
+        }
+
+        console.log('✅ Player stats saved for', playerStats.length, 'players');
+        gameUI.showStatusMessage(`✅ Competitive match saved! Result: ${result.toUpperCase()}`, 6000, 'success');
+
+        // Clear competitive match data
+        sessionStorage.removeItem('competitiveMatchData');
+        window.competitiveMatchData = undefined;
+
+    } catch (error) {
+        console.error('Error saving competitive match:', error);
+        gameUI.showStatusMessage('Match finished (Error saving to database)', 5000, 'warning');
+    }
+}
+
+/**
+ * Report Download Logic
+ */
+async function initiateReportDownload(stats) {
+    // Check if user is logged in (using existing token check)
+    const session = localStorage.getItem('sb-pomcalscfnwsqlscunxf-auth-token');
+
+    if (session) {
+        // Logged in: Direct Download
+        generateMatchReportPDF(stats);
+    } else {
+        // Not logged in: Show Email Capture
+        showEmailCaptureModal(stats);
+    }
+}
+
+function showEmailCaptureModal(stats) {
+    const modalId = 'emailCaptureModal';
+    let modal = document.getElementById(modalId);
+
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content" style="text-align:center; max-width:350px;">
+                <h2 style="color:var(--accent-cyan); margin-top:0;">Get your Report</h2>
+                <p style="color:#aaa; font-size:14px; margin-bottom:20px;">Enter your email to unlock the professional match report PDF.</p>
+                
+                <input type="email" id="leadEmailInput" placeholder="coach@example.com" 
+                    style="width:100%; padding:12px; border-radius:8px; border:1px solid #444; background:#111; color:white; margin-bottom:16px;">
+                
+                <button id="unlockReportBtn" style="width:100%; padding:14px; background:var(--accent-cyan); color:black; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
+                    UNLOCK PDF
+                </button>
+                <div id="leadError" style="color:red; font-size:12px; margin-top:8px; display:none;"></div>
+                <button onclick="document.getElementById('${modalId}').remove()" style="background:none; border:none; color:#666; font-size:12px; margin-top:16px; cursor:pointer;">No thanks</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Handler
+        document.getElementById('unlockReportBtn').onclick = async () => {
+            const email = document.getElementById('leadEmailInput').value;
+            const btn = document.getElementById('unlockReportBtn');
+            const err = document.getElementById('leadError');
+
+            if (!email || !email.includes('@')) {
+                err.innerText = "Please enter a valid email";
+                err.style.display = 'block';
+                return;
+            }
+
+            btn.innerText = "Generating...";
+            btn.disabled = true;
+
+            // Save Lead
+            try {
+                if (benchBalancerSupabase) { // Use the imported client
+                    await benchBalancerSupabase.from('leads').insert([{ email: email, source: 'match_report' }]);
+                }
+            } catch (e) { console.warn('Lead save failed', e); }
+
+            modal.remove();
+            generateMatchReportPDF(stats);
+            gameUI.showStatusMessage('Report generated! Check your downloads.', 4000, 'success');
+        };
+    } else {
+        modal.style.display = 'flex';
+    }
+}
+
+/**
+ * Generate PDF using jsPDF
+ */
+function generateMatchReportPDF(stats) {
+    if (!window.jspdf) {
+        alert('PDF generator not loaded. Please refresh.');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Colors & Fonts
+    const primaryColor = [0, 204, 221]; // Neon Cyan-ish
+    const darkBg = [15, 21, 31];
+
+    // Header Section
+    doc.setFillColor(...darkBg);
+    doc.rect(0, 0, 210, 50, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text("MATCH REPORT", 105, 20, null, null, "center");
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${stats.teamName}  vs  ${stats.opponentName}`, 105, 35, null, null, "center");
+
+    // Score Big
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(48);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${stats.homeScore}  -  ${stats.awayScore}`, 105, 75, null, null, "center");
+
+    // Fairness Card
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+
+    let varianceText = "Excellent Balance";
+    if (stats.variance > 60) varianceText = "Good Balance";
+    if (stats.variance > 120) varianceText = "Uneven Playing Time";
+
+    doc.text(`Fairness Analysis: ${varianceText} (${stats.variance}s variance)`, 105, 90, null, null, "center");
+
+    // Table Data
+    const tableData = [];
+    Object.entries(stats.players).forEach(([name, data]) => {
+        const mins = Math.floor(data.minutes / 60);
+        const secs = data.minutes % 60;
+        const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+        const pct = data.percentage + '%';
+        // Mock points if not available yet in stats object structure fully
+        const points = data.points !== undefined ? data.points : '-';
+
+        tableData.push([name, timeStr, pct, points]);
+    });
+
+    // Sort by Time
+    tableData.sort((a, b) => parseFloat(b[2]) - parseFloat(a[2]));
+
+    doc.autoTable({
+        startY: 100,
+        head: [['Player Name', 'Time on Court', 'Share %', 'Points']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
+        styles: { fontSize: 11, cellPadding: 6 },
+        alternateRowStyles: { fillColor: [245, 245, 245] }
+    });
+
+    // Footer
+    const finalY = doc.lastAutoTable.finalY + 20;
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text("Generated by Bench Balancer - The Fair Play App", 105, 280, null, null, "center");
+
+    const filename = `MatchReport_${stats.teamName.replace(/\s/g, '')}.pdf`;
+    doc.save(filename);
 }
 
 /**
@@ -240,29 +723,6 @@ function displayFinalStats(stats) {
 
     // Create visual stats display (optional)
     // Could add a modal or special display for end-game stats
-}
-
-/**
- * Show initialization error
- */
-function showInitError(message) {
-    console.error('Initialization Error:', message);
-
-    const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: #D9534F;
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        font-size: 18px;
-        z-index: 9999;
-    `;
-    errorDiv.textContent = `Error: ${message}. Please refresh the page.`;
-    document.body.appendChild(errorDiv);
 }
 
 /**
@@ -406,6 +866,9 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Target: Maintain variance < 60s');
     console.log('=================================');
 
+    // Initialize auth system first
+    initAuth();
+
     // Initialize system
     if (initializeBasketballSystem()) {
         // Set up keyboard shortcuts
@@ -488,12 +951,307 @@ window.addEventListener('beforeunload', function (e) {
     }
 });
 
-// Export for debugging
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        initializeBasketballSystem,
-        startBasketballGame
+/**
+ * Show email collection modal for guest users
+ */
+function showGuestStatsEmailModal(stats) {
+    // Don't show if modal already exists
+    if (document.getElementById('guestStatsModal')) return;
+
+    // Create modal HTML
+    const modalHtml = `
+        <div id="guestStatsModal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        ">
+            <div style="
+                background: linear-gradient(180deg, #0d1626 0%, #08101a 100%);
+                border: 2px solid rgba(0, 255, 224, 0.3);
+                border-radius: 24px;
+                padding: 40px;
+                max-width: 500px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(0, 255, 224, 0.3);
+                animation: slideUp 0.4s ease;
+            ">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                    <h2 style="
+                        font-family: 'Russo One', sans-serif;
+                        font-size: 28px;
+                        color: #00ffe0;
+                        margin: 0 0 12px 0;
+                        text-shadow: 0 0 20px rgba(0, 255, 224, 0.5);
+                    ">Game Complete!</h2>
+                    <p style="
+                        color: #94a3b8;
+                        font-size: 16px;
+                        line-height: 1.6;
+                        margin: 0;
+                    ">Want your detailed game stats sent to your email?</p>
+                </div>
+
+                <div style="
+                    background: rgba(0, 255, 224, 0.05);
+                    border: 1px solid rgba(0, 255, 224, 0.2);
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-bottom: 24px;
+                ">
+                    <div style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;">You'll receive:</div>
+                    <ul style="
+                        list-style: none;
+                        padding: 0;
+                        margin: 0;
+                        color: #f5fbff;
+                        font-size: 14px;
+                    ">
+                        <li style="padding: 4px 0;">✓ Final score breakdown</li>
+                        <li style="padding: 4px 0;">✓ Individual player statistics</li>
+                        <li style="padding: 4px 0;">✓ Court time & bench time analysis</li>
+                        <li style="padding: 4px 0;">✓ Rotation variance report</li>
+                    </ul>
+                </div>
+
+                <form id="guestEmailForm" style="margin-bottom: 20px;">
+                    <input type="email" id="guestEmail" required placeholder="Enter your email..." style="
+                        width: 100%;
+                        background: rgba(4, 7, 13, 0.8);
+                        border: 1px solid rgba(0, 255, 224, 0.3);
+                        border-radius: 12px;
+                        padding: 16px;
+                        font-size: 16px;
+                        color: #f5fbff;
+                        margin-bottom: 16px;
+                        outline: none;
+                        transition: all 0.2s;
+                    " onfocus="this.style.borderColor='#00ffe0'; this.style.boxShadow='0 0 0 3px rgba(0, 255, 224, 0.2)'" 
+                       onblur="this.style.borderColor='rgba(0, 255, 224, 0.3)'; this.style.boxShadow='none'">
+                    
+                    <button type="submit" id="sendStatsBtn" style="
+                        width: 100%;
+                        background: linear-gradient(135deg, #00ffe0 0%, #00cdb8 100%);
+                        color: #000;
+                        border: none;
+                        border-radius: 12px;
+                        padding: 16px;
+                        font-family: 'Russo One', sans-serif;
+                        font-size: 16px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                    " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 24px rgba(0, 255, 224, 0.4)'"
+                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
+                        📧 Send Me My Stats
+                    </button>
+                </form>
+
+                <button onclick="window.closeGuestStatsModal()" style="
+                    width: 100%;
+                    background: transparent;
+                    color: #94a3b8;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 12px;
+                    padding: 12px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                " onmouseover="this.style.borderColor='rgba(255, 255, 255, 0.3)'"
+                   onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.1)'">
+                    No thanks, skip
+                </button>
+
+                <p style="
+                    text-align: center;
+                    color: #64748b;
+                    font-size: 12px;
+                    margin: 16px 0 0 0;
+                    line-height: 1.5;
+                ">By providing your email, you'll receive game stats and occasional updates about Bench Balancer Pro features.</p>
+            </div>
+        </div>
+
+        <style>
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        </style>
+    `;
+
+    // Add to DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Add form submission handler
+    document.getElementById('guestEmailForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('guestEmail').value.trim();
+        await sendGuestStats(email, stats);
+    });
+}
+
+/**
+ * Send stats to guest email and save to marketing list
+ */
+async function sendGuestStats(email, stats) {
+    const btn = document.getElementById('sendStatsBtn');
+    const originalText = btn.innerHTML;
+
+    try {
+        // Update button state
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Sending...';
+        btn.style.opacity = '0.7';
+
+        // Format stats for email
+        const emailData = formatStatsForEmail(stats, email);
+
+        // Save email to marketing list
+        await saveMarketingEmail(email, emailData);
+
+        // Success state
+        btn.innerHTML = '✅ Stats Sent!';
+        btn.style.background = 'linear-gradient(135deg, #4be9a6 0%, #39d98a 100%)';
+
+        setTimeout(() => {
+            window.closeGuestStatsModal();
+        }, 1500);
+
+    } catch (error) {
+        console.error('Error sending stats:', error);
+        btn.innerHTML = '❌ Error - Try Again';
+        btn.style.background = 'linear-gradient(135deg, #ff5f6d 0%, #ff4757 100%)';
+        btn.disabled = false;
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = 'linear-gradient(135deg, #00ffe0 0%, #00cdb8 100%)';
+            btn.style.opacity = '1';
+        }, 2000);
+    }
+}
+
+/**
+ * Format stats for email
+ */
+function formatStatsForEmail(stats, email) {
+    const players = Object.entries(stats.players || {}).map(([name, data]) => ({
+        name,
+        courtTime: Math.round(data.minutes || 0),
+        benchTime: Math.round(data.benchMinutes || 0),
+        points: data.points || 0,
+        position: data.position || '-'
+    }));
+
+    return {
+        email,
+        gameDate: new Date().toLocaleDateString(),
+        gameTime: new Date().toLocaleTimeString(),
+        finalScore: `${stats.homeScore || 0} - ${stats.awayScore || 0}`,
+        homeScore: stats.homeScore || 0,
+        awayScore: stats.awayScore || 0,
+        variance: Math.round(stats.variance || 0),
+        format: stats.format || 'halves',
+        players,
+        totalPlayers: players.length
     };
 }
+
+/**
+ * Save email to Supabase marketing list
+ */
+async function saveMarketingEmail(email, gameData) {
+    if (!benchBalancerSupabase) {
+        console.warn('Supabase not available - email saved locally only');
+        // Save to localStorage as backup
+        const savedEmails = JSON.parse(localStorage.getItem('benchbalancer_guest_emails') || '[]');
+        savedEmails.push({ email, gameData, timestamp: new Date().toISOString() });
+        localStorage.setItem('benchbalancer_guest_emails', JSON.stringify(savedEmails));
+        return;
+    }
+
+    try {
+        // Save to database first
+        const { error: dbError } = await benchBalancerSupabase
+            .from('guest_emails')
+            .insert({
+                email,
+                source: 'game_stats',
+                game_data: gameData,
+                subscribed: true,
+                created_at: new Date().toISOString()
+            });
+
+        if (dbError) throw dbError;
+        console.log('✅ Email saved to marketing list:', email);
+
+        // Send actual email via Edge Function
+        try {
+            const { data: emailResponse, error: emailError } = await benchBalancerSupabase.functions.invoke(
+                'send-game-stats-email',
+                {
+                    body: {
+                        email,
+                        gameData
+                    }
+                }
+            );
+
+            if (emailError) {
+                console.error('Email send error:', emailError);
+            } else {
+                console.log('✅ Stats email sent successfully to:', email);
+            }
+        } catch (emailErr) {
+            console.error('Failed to send email:', emailErr);
+            // Don't throw - email is still saved to database
+        }
+
+    } catch (error) {
+        console.error('Error saving email to Supabase:', error);
+        // Save to localStorage as backup
+        const savedEmails = JSON.parse(localStorage.getItem('benchbalancer_guest_emails') || '[]');
+        savedEmails.push({ email, gameData, timestamp: new Date().toISOString() });
+        localStorage.setItem('benchbalancer_guest_emails', JSON.stringify(savedEmails));
+        console.log('📋 Email saved to localStorage as backup');
+    }
+}
+
+/**
+ * Close guest stats modal
+ */
+window.closeGuestStatsModal = function () {
+    const modal = document.getElementById('guestStatsModal');
+    if (modal) {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => modal.remove(), 300);
+    }
+};
 
 console.log('🏀 Basketball Integration loaded - Main orchestrator ready');

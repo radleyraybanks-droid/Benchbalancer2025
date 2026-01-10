@@ -2034,14 +2034,17 @@
 
         .scoring-pad-title {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 22px;
-            letter-spacing: 0.15em;
-            color: #fff;
-            font-weight: 700;
+            font-size: 26px;
+            letter-spacing: 0.2em;
+            color: var(--accent-cyan);
+            font-weight: 900;
             flex: 1;
             text-align: left;
             text-transform: uppercase;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 0 20px rgba(0, 255, 224, 0.8), 0 3px 10px rgba(0, 0, 0, 0.9);
+            background: linear-gradient(90deg, rgba(0, 255, 224, 0.15) 0%, transparent 100%);
+            padding: 4px 12px;
+            border-radius: 8px;
         }
 
         .scoring-pad-close {
@@ -2247,7 +2250,8 @@
             }
 
             .scoring-pad-title {
-                font-size: 20px;
+                font-size: 24px;
+                letter-spacing: 0.18em;
             }
         }
 
@@ -2661,6 +2665,21 @@
             }
         }
 
+        /* Quick Score Button Mobile Sizing */
+        @media (max-width: 768px) {
+            img[alt="Quick score"] {
+                height: 80px !important;
+                bottom: 100px !important;
+                right: 15px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            img[alt="Quick score"] {
+                height: 75px !important;
+            }
+        }
+
         /* Better touch feedback without movement */
         @media (hover: none) and (pointer: coarse) {
             .badge-score-btn:active {
@@ -3023,9 +3042,9 @@
             <button class="scoring-pad-toggle" id="scoringPadToggle">🏀</button>
             <img src="assets/btn-quick-score.png" alt="Quick score"
                 onclick="document.getElementById('scoringPadToggle').click()"
-                style="position: fixed; bottom: 90px; right: 20px; height: 40px; width: auto; z-index: 900; cursor: pointer; opacity: 0.9; transition: opacity 0.2s, transform 0.2s;"
-                onmouseover="this.style.opacity=1; this.style.transform='scale(1.05)'"
-                onmouseout="this.style.opacity=0.9; this.style.transform='scale(1)'">
+                style="position: fixed; bottom: 90px; right: 20px; height: 70px; width: auto; z-index: 900; cursor: pointer; opacity: 0.95; transition: opacity 0.2s, transform 0.2s; filter: drop-shadow(0 4px 12px rgba(0, 255, 224, 0.6));"
+                onmouseover="this.style.opacity=1; this.style.transform='scale(1.08)'"
+                onmouseout="this.style.opacity=0.95; this.style.transform='scale(1)'">
             <div class="scoring-pad-box hidden" id="scoringPad">
                 <div class="scoring-pad-header">
                     <span class="scoring-pad-title">Quick score</span>
@@ -3173,9 +3192,12 @@
         </div>
 
         <!-- Basketball Scripts -->
-        <!-- Basketball Scripts -->
+        <!-- jsPDF Library for PDF Generation -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
         <!-- Main ES Module Integration -->
-        <script type="module" src="basketball-integration-main.js?v=2026011010"></script>
+        <script type="module" src="basketball-integration-main.js?v=2026011011"></script>
 
         <!-- Inline logic (module) to ensure it runs after main integration -->
         <script type="module">
