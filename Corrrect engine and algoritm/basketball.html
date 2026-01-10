@@ -2872,8 +2872,7 @@
         <div id="appHeader">
             <div class="header-shell">
                 <div class="logo-lockup">
-                    <a href="basketball-dashboard.html" class="landing-pill" style="text-decoration: none;">← BACK TO
-                        DASHBOARD</a>
+                    <a href="index.html" id="headerBackButton" class="landing-pill" style="text-decoration: none;">🏠 PLAY AGAIN</a>
                     <button class="landing-pill primary" id="headerUpgradeButton">UPGRADE</button>
                     <button type="button" class="logo-link" id="headerLogoButton">
                         <span class="header-logo-text">benchbalancer</span>
@@ -3243,8 +3242,8 @@
                             </button>
                         </div>
                         <div style="padding: 16px; background: rgba(255, 178, 63, 0.05); border-radius: 10px; border: 1px solid rgba(255, 178, 63, 0.2);">
-                            <a href="basketball-dashboard.html" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; display: block; text-align: center;">
-                                ← Back to Dashboard
+                            <a href="index.html" id="settingsBackButton" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; display: block; text-align: center;">
+                                🏠 Back to Home
                             </a>
                         </div>
                     </div>
@@ -3288,6 +3287,42 @@
                 const themeLabel = document.getElementById('themeLabel');
                 const soundToggle = document.getElementById('soundToggle');
                 const soundLabel = document.getElementById('soundLabel');
+                const headerBackButton = document.getElementById('headerBackButton');
+                const settingsBackButton = document.getElementById('settingsBackButton');
+
+                // Update navigation buttons based on authentication status
+                async function updateNavigationButtons() {
+                    let isAuthenticated = false;
+
+                    if (window.benchBalancerSupabase) {
+                        try {
+                            const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                            isAuthenticated = !!user;
+                        } catch (e) {
+                            console.log('Auth check failed:', e);
+                        }
+                    }
+
+                    if (headerBackButton) {
+                        if (isAuthenticated) {
+                            headerBackButton.href = 'basketball-dashboard.html';
+                            headerBackButton.textContent = '← BACK TO DASHBOARD';
+                        } else {
+                            headerBackButton.href = 'index.html';
+                            headerBackButton.textContent = '🏠 PLAY AGAIN';
+                        }
+                    }
+
+                    if (settingsBackButton) {
+                        if (isAuthenticated) {
+                            settingsBackButton.href = 'basketball-dashboard.html';
+                            settingsBackButton.textContent = '← Back to Dashboard';
+                        } else {
+                            settingsBackButton.href = 'index.html';
+                            settingsBackButton.textContent = '🏠 Back to Home';
+                        }
+                    }
+                }
 
                 function revealBasketballLanding() {
                     if (globalLanding) {
@@ -3334,6 +3369,9 @@
                     if (setupSection) {
                         setupSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
+
+                    // Update navigation buttons based on auth status
+                    updateNavigationButtons();
                 }
 
                 if (globalBasketballButton) {
