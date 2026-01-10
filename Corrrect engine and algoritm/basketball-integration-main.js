@@ -609,12 +609,16 @@ function showEmailCaptureModal(stats) {
  * Generate PDF using jsPDF
  */
 function generateMatchReportPDF(stats) {
-    if (!window.jspdf) {
-        alert('PDF generator not loaded. Please refresh.');
+    // Check for jsPDF in both lowercase and uppercase (different CDN versions)
+    const jsPDFLib = window.jspdf || window.jsPDF;
+
+    if (!jsPDFLib) {
+        console.error('jsPDF not loaded. window.jspdf:', window.jspdf, 'window.jsPDF:', window.jsPDF);
+        alert('PDF generator not loaded. Please refresh the page.');
         return;
     }
 
-    const { jsPDF } = window.jspdf;
+    const jsPDF = jsPDFLib.jsPDF || jsPDFLib;
     const doc = new jsPDF();
 
     // Colors & Fonts
