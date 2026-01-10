@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Emails - Bench Balancer Admin</title>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config/env.js"></script>
+    <script type="module" src="config/simple-supabase.js"></script>
+    <script type="module">
+        import { initAuth } from './config/simple-supabase.js';
+        initAuth();
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Poppins:wght@400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a1220;
+            color: #f5fbff;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Russo One', sans-serif;
+            color: #00ffe0;
+            margin-bottom: 32px;
+            font-size: 36px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: #0d1626;
+            border: 1px solid rgba(0, 255, 224, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            color: #00ffe0;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .email-table {
+            background: #0d1626;
+            border: 1px solid rgba(0, 255, 224, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: rgba(0, 255, 224, 0.1);
+            color: #00ffe0;
+            padding: 16px;
+            text-align: left;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+        }
+
+        tr:hover {
+            background: rgba(0, 255, 224, 0.05);
+        }
+
+        .export-btn {
+            background: #00ffe0;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .export-btn:hover {
+            background: #00cdb8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📧 Guest Email Collection</h1>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value" id="totalEmails">0</div>
+                <div class="stat-label">Total Emails</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="todayCount">0</div>
+                <div class="stat-label">Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="weekCount">0</div>
+                <div class="stat-label">This Week</div>
+            </div>
+        </div>
+
+        <button class="export-btn" onclick="exportCSV()">📊 Export to CSV</button>
+
+        <div id="emailContainer">
+            <div class="loading">Loading emails...</div>
+        </div>
+    </div>
+
+    <script>
+        let allEmails = [];
+
+        async function loadEmails() {
+            if (!window.benchBalancerSupabase) {
+                alert('Supabase not connected');
+                return;
+            }
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                if (!user) {
+                    alert('Please sign in to view emails');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const { data, error } = await window.benchBalancerSupabase
+                    .from('guest_emails')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allEmails = data || [];
+                updateStats();
+                renderTable();
+
+            } catch (error) {
+                console.error('Error loading emails:', error);
+                document.getElementById('emailContainer').innerHTML = `
+                    <div class="loading">Error loading emails: ${error.message}</div>
+                `;
+            }
+        }
+
+        function updateStats() {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            const todayCount = allEmails.filter(e => new Date(e.created_at) >= today).length;
+            const weekCount = allEmails.filter(e => new Date(e.created_at) >= weekAgo).length;
+
+            document.getElementById('totalEmails').textContent = allEmails.length;
+            document.getElementById('todayCount').textContent = todayCount;
+            document.getElementById('weekCount').textContent = weekCount;
+        }
+
+        function renderTable() {
+            const html = `
+                <div class="email-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Date</th>
+                                <th>Source</th>
+                                <th>Game Data</th>
+                                <th>Subscribed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${allEmails.map(email => `
+                                <tr>
+                                    <td><strong>${email.email}</strong></td>
+                                    <td>${new Date(email.created_at).toLocaleString()}</td>
+                                    <td>${email.source}</td>
+                                    <td>${email.game_data ? formatGameData(email.game_data) : '-'}</td>
+                                    <td>${email.subscribed ? '✅ Yes' : '❌ No'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('emailContainer').innerHTML = html;
+        }
+
+        function formatGameData(data) {
+            return `${data.finalScore || 'N/A'} • ${data.totalPlayers || 0} players • ${data.variance || 0}s variance`;
+        }
+
+        function exportCSV() {
+            const headers = ['Email', 'Date', 'Source', 'Subscribed', 'Game Score', 'Total Players', 'Variance'];
+            const rows = allEmails.map(e => [
+                e.email,
+                new Date(e.created_at).toISOString(),
+                e.source,
+                e.subscribed ? 'Yes' : 'No',
+                e.game_data?.finalScore || '',
+                e.game_data?.totalPlayers || '',
+                e.game_data?.variance || ''
+            ]);
+
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(r => r.join(','))
+            ].join('\\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `guest-emails-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        loadEmails();
+    </script>
+</body>
+
+</html>
