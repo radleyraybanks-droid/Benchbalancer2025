@@ -43,7 +43,7 @@
             --radius-md: 20px;
             --radius-sm: 12px;
             --transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
-            --oztag-green: #2E8B57;
+            /* Oztag field green - only for the actual playing surface */
             --oztag-field: #228B22;
         }
 
@@ -58,7 +58,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
-            background: radial-gradient(circle at 20% 20%, rgba(46, 139, 87, 0.08), transparent 45%),
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.08), transparent 45%),
                 radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.08), transparent 50%),
                 linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
             color: var(--text-primary);
@@ -111,14 +111,15 @@
         }
 
         .sport-badge {
-            background: linear-gradient(135deg, var(--oztag-green), #1a6b3a);
-            color: white;
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.95), rgba(0, 205, 184, 0.95));
+            color: #041018;
             padding: 8px 20px;
             border-radius: 999px;
             font-size: 13px;
             font-weight: 700;
             letter-spacing: 0.15em;
             text-transform: uppercase;
+            box-shadow: 0 8px 24px -8px rgba(0, 255, 224, 0.5);
         }
 
         /* ---------- Info Grid ---------- */
@@ -144,7 +145,7 @@
             position: absolute;
             inset: 0;
             border-radius: inherit;
-            background: linear-gradient(135deg, rgba(46, 139, 87, 0.12), transparent 55%);
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.12), transparent 55%);
             opacity: 0.6;
             pointer-events: none;
         }
@@ -188,8 +189,8 @@
         /* ---------- Scoreboard ---------- */
         .scoreboard-box {
             grid-column: span 2;
-            background: linear-gradient(135deg, rgba(46, 139, 87, 0.15), rgba(255, 178, 63, 0.08));
-            border-color: rgba(46, 139, 87, 0.3);
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.12), rgba(124, 92, 255, 0.08));
+            border-color: rgba(0, 255, 224, 0.25);
         }
 
         .scoreboard-content {
@@ -694,8 +695,8 @@
         }
 
         .player-list-header h3 .count {
-            background: var(--oztag-green);
-            color: #fff;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong));
+            color: #041018;
             padding: 4px 12px;
             border-radius: 999px;
             font-size: 14px;
@@ -735,14 +736,14 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--oztag-green), #1a6b3a);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong));
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
             font-weight: 700;
-            color: #fff;
-            border: 2px solid rgba(46, 139, 87, 0.5);
+            color: #041018;
+            border: 2px solid rgba(0, 255, 224, 0.5);
         }
 
         .player-card-name {
@@ -803,19 +804,19 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--oztag-green), #1a6b3a);
-            color: #fff;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong));
+            color: #041018;
             border: none;
             font-size: 28px;
             cursor: pointer;
-            box-shadow: 0 12px 32px rgba(46, 139, 87, 0.6);
+            box-shadow: 0 12px 32px rgba(0, 255, 224, 0.5);
             z-index: 100;
             transition: transform var(--transition), box-shadow var(--transition);
         }
 
         .scoring-pad-toggle:hover {
             transform: scale(1.1);
-            box-shadow: 0 16px 40px rgba(46, 139, 87, 0.7);
+            box-shadow: 0 16px 40px rgba(0, 255, 224, 0.6);
         }
 
         .scoring-pad {
@@ -844,7 +845,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 16px;
-            background: rgba(46, 139, 87, 0.15);
+            background: rgba(0, 255, 224, 0.1);
             border-bottom: 1px solid var(--border-soft);
         }
 
@@ -1311,7 +1312,12 @@
     <!-- Authentication and Database Integration -->
     <script src="config/supabase-config.js"></script>
     <script src="auth/auth-manager.js"></script>
-    <script src="config/simple-supabase.js"></script>
+    <script src="config/env.js"></script>
+    <script type="module" src="config/simple-supabase.js"></script>
+    <script type="module">
+        import { initAuth } from './config/simple-supabase.js';
+        initAuth();
+    </script>
 
     <script>
         let oztagEngine = null;
@@ -1374,6 +1380,7 @@
 
             oztagEngine.setCallback('onGameEnd', () => {
                 oztagUI.showStatusMessage('Game Over!', 0, 'success');
+                showOztagGameOverModal();
             });
 
             oztagEngine.setCallback('onError', (error) => {
@@ -1384,6 +1391,298 @@
             oztagUI.updateDisplay(oztagEngine.getState());
             console.log('🏉 Oztag game initialized with', gameSetup.playerNames.length, 'players');
         });
+
+        // ============================================================================
+        // GAME OVER & EMAIL MATCH REPORT FUNCTIONALITY
+        // ============================================================================
+
+        /**
+         * Show game over modal with email stats option
+         */
+        function showOztagGameOverModal() {
+            if (document.getElementById('oztagGameOverModal')) return;
+
+            const stats = oztagEngine.getStats();
+
+            const modalHtml = `
+                <div id="oztagGameOverModal" class="modal-overlay" style="animation: fadeIn 0.3s ease-out;">
+                    <div class="modal-content" style="max-width: 420px; text-align: center;">
+                        <div style="margin-bottom: 24px;">
+                            <div style="font-size: 48px; margin-bottom: 12px;">🏉</div>
+                            <h2 style="
+                                font-family: 'Bebas Neue', sans-serif;
+                                font-size: 32px;
+                                letter-spacing: 0.15em;
+                                color: var(--accent-cyan);
+                                margin: 0 0 8px 0;
+                            ">GAME OVER</h2>
+                            <p style="color: var(--text-secondary); font-size: 16px; margin: 0;">
+                                Final Score: ${stats.homeScore || 0} - ${stats.awayScore || 0}
+                            </p>
+                        </div>
+
+                        <div style="
+                            background: rgba(0, 255, 224, 0.05);
+                            border: 1px solid rgba(0, 255, 224, 0.2);
+                            border-radius: var(--radius-sm);
+                            padding: 16px;
+                            margin-bottom: 24px;
+                            text-align: left;
+                        ">
+                            <h4 style="color: var(--accent-cyan); margin: 0 0 12px 0; font-size: 14px; letter-spacing: 0.1em;">MATCH STATS INCLUDE:</h4>
+                            <ul style="color: var(--text-secondary); font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.8;">
+                                <li>Individual playing time for each player</li>
+                                <li>Try scorers and totals</li>
+                                <li>Rotation variance report</li>
+                            </ul>
+                        </div>
+
+                        <button onclick="showOztagEmailModal()" style="
+                            width: 100%;
+                            padding: 16px;
+                            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong));
+                            color: #041018;
+                            font-weight: 700;
+                            font-size: 14px;
+                            letter-spacing: 0.12em;
+                            border: none;
+                            border-radius: var(--radius-sm);
+                            cursor: pointer;
+                            margin-bottom: 12px;
+                            text-transform: uppercase;
+                        ">📧 EMAIL MATCH REPORT</button>
+
+                        <button onclick="closeOztagGameOverModal()" style="
+                            width: 100%;
+                            padding: 14px;
+                            background: transparent;
+                            color: var(--text-secondary);
+                            font-weight: 600;
+                            font-size: 13px;
+                            border: 1px solid var(--border-soft);
+                            border-radius: var(--radius-sm);
+                            cursor: pointer;
+                        ">PLAY AGAIN</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function closeOztagGameOverModal() {
+            const modal = document.getElementById('oztagGameOverModal');
+            if (modal) modal.remove();
+            // Redirect to setup page for new game
+            window.location.href = 'oztag-setup.html';
+        }
+
+        /**
+         * Show email collection modal for guest users
+         */
+        function showOztagEmailModal() {
+            if (document.getElementById('oztagStatsEmailModal')) return;
+
+            const stats = oztagEngine.getStats();
+
+            const modalHtml = `
+                <div id="oztagStatsEmailModal" class="modal-overlay" style="animation: fadeIn 0.3s ease-out;">
+                    <div class="modal-content" style="max-width: 380px; text-align: center;">
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="
+                                font-family: 'Bebas Neue', sans-serif;
+                                font-size: 24px;
+                                letter-spacing: 0.15em;
+                                color: var(--accent-cyan);
+                                margin: 0 0 8px 0;
+                            ">GET YOUR STATS</h3>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">
+                                Enter your email to receive the detailed match report.
+                            </p>
+                        </div>
+
+                        <form id="oztagEmailForm" style="margin-bottom: 16px;">
+                            <input type="email" id="oztagEmailInput" required placeholder="coach@example.com" style="
+                                width: 100%;
+                                padding: 14px 16px;
+                                background: rgba(4, 7, 13, 0.8);
+                                border: 1px solid rgba(0, 255, 224, 0.3);
+                                border-radius: var(--radius-sm);
+                                color: var(--text-primary);
+                                font-size: 15px;
+                                margin-bottom: 16px;
+                            ">
+
+                            <button type="submit" id="oztagSendStatsBtn" style="
+                                width: 100%;
+                                padding: 16px;
+                                background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong));
+                                color: #041018;
+                                font-weight: 700;
+                                font-size: 14px;
+                                letter-spacing: 0.12em;
+                                border: none;
+                                border-radius: var(--radius-sm);
+                                cursor: pointer;
+                                text-transform: uppercase;
+                            ">SEND STATS</button>
+                        </form>
+
+                        <button onclick="closeOztagEmailModal()" style="
+                            width: 100%;
+                            padding: 12px;
+                            background: transparent;
+                            color: var(--text-muted);
+                            font-size: 13px;
+                            border: none;
+                            cursor: pointer;
+                        ">Maybe later</button>
+
+                        <p style="
+                            text-align: center;
+                            color: var(--text-muted);
+                            font-size: 11px;
+                            margin: 12px 0 0 0;
+                            line-height: 1.4;
+                        ">By providing your email, you'll receive game stats and occasional updates about Bench Balancer Pro features.</p>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            document.getElementById('oztagEmailForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('oztagEmailInput').value.trim();
+                await sendOztagStats(email, stats);
+            });
+        }
+
+        function closeOztagEmailModal() {
+            const modal = document.getElementById('oztagStatsEmailModal');
+            if (modal) modal.remove();
+        }
+
+        /**
+         * Send stats to guest email
+         */
+        async function sendOztagStats(email, stats) {
+            const btn = document.getElementById('oztagSendStatsBtn');
+            const originalText = btn.innerHTML;
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Sending...';
+                btn.style.opacity = '0.7';
+
+                const emailData = formatOztagStatsForEmail(stats, email);
+                await saveOztagMarketingEmail(email, emailData);
+
+                btn.innerHTML = '✅ Stats Sent!';
+                btn.style.background = 'linear-gradient(135deg, #4be9a6 0%, #39d98a 100%)';
+
+                setTimeout(() => {
+                    closeOztagEmailModal();
+                    closeOztagGameOverModal();
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error sending stats:', error);
+                btn.innerHTML = '❌ Error - Try Again';
+                btn.style.background = 'linear-gradient(135deg, #ff5f6d 0%, #ff9966 100%)';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = 'linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong))';
+                }, 2000);
+            }
+        }
+
+        /**
+         * Format stats for email
+         */
+        function formatOztagStatsForEmail(stats, email) {
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.round(seconds % 60);
+                if (secs === 0) return `${mins}m`;
+                return `${mins}m ${secs}s`;
+            };
+
+            const players = Object.entries(stats.players || {}).map(([name, data]) => ({
+                name,
+                playingTime: formatTime(data.minutes || 0),
+                tries: data.tries || 0
+            }));
+
+            return {
+                email,
+                sport: 'oztag',
+                gameDate: new Date().toLocaleDateString(),
+                gameTime: new Date().toLocaleTimeString(),
+                finalScore: `${stats.homeScore || 0} - ${stats.awayScore || 0}`,
+                homeScore: stats.homeScore || 0,
+                awayScore: stats.awayScore || 0,
+                players,
+                variance: stats.variance || 0,
+                totalPlayers: players.length
+            };
+        }
+
+        /**
+         * Save email to Supabase marketing list
+         */
+        async function saveOztagMarketingEmail(email, gameData) {
+            if (typeof benchBalancerSupabase === 'undefined' || !benchBalancerSupabase) {
+                console.warn('Supabase not available - email saved locally only');
+                const savedEmails = JSON.parse(localStorage.getItem('benchbalancer_guest_emails') || '[]');
+                savedEmails.push({ email, gameData, timestamp: new Date().toISOString() });
+                localStorage.setItem('benchbalancer_guest_emails', JSON.stringify(savedEmails));
+                return;
+            }
+
+            try {
+                const { error: dbError } = await benchBalancerSupabase
+                    .from('guest_emails')
+                    .insert({
+                        email,
+                        source: 'oztag_game_stats',
+                        game_data: gameData,
+                        subscribed: true,
+                        created_at: new Date().toISOString()
+                    });
+
+                if (dbError) throw dbError;
+                console.log('✅ Email saved to marketing list:', email);
+
+                // Send actual email via Edge Function
+                try {
+                    const { data: emailResponse, error: emailError } = await benchBalancerSupabase.functions.invoke(
+                        'send-game-stats-email',
+                        {
+                            body: { email, gameData }
+                        }
+                    );
+
+                    if (emailError) {
+                        console.error('Email send error:', emailError);
+                    } else {
+                        console.log('✅ Stats email sent successfully to:', email);
+                    }
+                } catch (emailErr) {
+                    console.error('Failed to send email:', emailErr);
+                }
+
+            } catch (error) {
+                console.error('Error saving email to Supabase:', error);
+                const savedEmails = JSON.parse(localStorage.getItem('benchbalancer_guest_emails') || '[]');
+                savedEmails.push({ email, gameData, timestamp: new Date().toISOString() });
+                localStorage.setItem('benchbalancer_guest_emails', JSON.stringify(savedEmails));
+                console.log('📋 Email saved to localStorage as backup');
+            }
+        }
     </script>
 </body>
 

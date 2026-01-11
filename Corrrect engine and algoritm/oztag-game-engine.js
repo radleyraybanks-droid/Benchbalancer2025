@@ -639,11 +639,9 @@ class OztagGameEngine {
      * Skip to next rotation time
      */
     advanceToNextRotation() {
-        if (currentIdx !== -1 && currentIdx < this.rotations.schedule.length - 1) {
-            this.rotations.nextRotationTime = this.rotations.schedule[currentIdx + 1];
-        } else {
-            this.rotations.nextRotationTime = null;
-        }
+        // Find the next scheduled rotation time after current time
+        const nextTime = this.rotations.schedule.find(t => t > this.state.currentTime);
+        this.rotations.nextRotationTime = nextTime || null;
         this.rotations.warningPlayedForCurrent = false;
     }
 
@@ -885,6 +883,58 @@ class OztagGameEngine {
                     : '--:--'
             }
         };
+    }
+
+    /**
+     * Get complete game stats for reporting/email
+     * @returns {Object} Complete game statistics including times and scores
+     */
+    getStats() {
+        const stats = {
+            players: {},
+            totalPlayers: this.players.all.length,
+            homeScore: this.scoring.home || 0,
+            awayScore: this.scoring.away || 0,
+            homeTeamName: this.scoring.homeTeamName || 'Home',
+            awayTeamName: this.scoring.awayTeamName || 'Opposition',
+            totalGameTime: this.state.currentTime,
+            variance: 0,
+            averageMinutes: 0
+        };
+
+        // Build player stats
+        const activePlayers = this.players.all.filter(p => !this.players.removed.has(p));
+        let totalMinutes = 0;
+        const playTimes = [];
+
+        activePlayers.forEach(player => {
+            const minutes = this.players.minutes[player] || 0;
+            const benchMinutes = this.players.benchMinutes[player] || 0;
+            const tries = this.scoring.playerTries[player] || 0;
+
+            stats.players[player] = {
+                minutes: minutes,
+                benchMinutes: benchMinutes,
+                tries: tries,
+                onField: this.players.field.includes(player),
+                onBench: this.players.bench.includes(player)
+            };
+
+            totalMinutes += minutes;
+            playTimes.push(minutes);
+        });
+
+        // Calculate variance
+        if (playTimes.length > 0) {
+            const mean = playTimes.reduce((a, b) => a + b, 0) / playTimes.length;
+            const squaredDiffs = playTimes.map(time => Math.pow(time - mean, 2));
+            const varianceValue = squaredDiffs.reduce((sum, diff) => sum + diff, 0) / playTimes.length;
+            stats.variance = Math.round(Math.sqrt(varianceValue)); // Standard deviation
+        }
+
+        stats.averageMinutes = activePlayers.length > 0 ? totalMinutes / activePlayers.length : 0;
+
+        return stats;
     }
 
     /**
