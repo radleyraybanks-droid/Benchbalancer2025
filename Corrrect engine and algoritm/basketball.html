@@ -609,23 +609,24 @@
         }
 
         .header-icon-btn {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-primary);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all var(--transition);
+            transition: all 0.3s ease;
         }
 
         .header-icon-btn:hover {
-            background: rgba(0, 255, 224, 0.1);
+            background: rgba(0, 255, 224, 0.15);
             border-color: var(--accent-cyan);
             color: var(--accent-cyan);
+            transform: translateY(-2px);
         }
 
         .header-icon-btn:focus-visible {
@@ -633,9 +634,33 @@
             outline-offset: 2px;
         }
 
+        /* Professional UPGRADE button */
         #headerUpgradeButton {
-            font-size: 11px;
-            padding: 8px 16px;
+            background: #2d3849;
+            border: 2px solid #00ffe0;
+            border-radius: 12px;
+            padding: 10px 24px;
+            color: white;
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.1em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        #headerUpgradeButton::before {
+            content: '💎';
+            font-size: 16px;
+        }
+
+        #headerUpgradeButton:hover {
+            background: rgba(0, 255, 224, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 224, 0.3);
         }
 
         /* ---------- Setup Flow ---------- */
@@ -926,11 +951,20 @@
             max-width: 600px;
             margin: 0 auto;
             aspect-ratio: 1.4;
-            /* Use the 3D court image */
-            background-image: url('assets/basketball-court-3d.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            /* CSS wood floor pattern */
+            background:
+                repeating-linear-gradient(90deg,
+                    transparent 0px,
+                    transparent 48px,
+                    rgba(0, 0, 0, 0.08) 48px,
+                    rgba(0, 0, 0, 0.08) 50px),
+                linear-gradient(180deg,
+                    #C4923F 0%,
+                    #D4A54A 30%,
+                    #C4923F 50%,
+                    #D4A54A 70%,
+                    #C4923F 100%);
+            border: 4px solid rgba(255, 255, 255, 0.9);
             border-radius: 6px;
             transform-style: preserve-3d;
             box-shadow:
@@ -952,8 +986,7 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            display: none;
-            /* Lines are now part of the court image */
+            /* CSS court lines enabled */
         }
 
         /* 3-Point Arc - with subtle glow */
@@ -1917,6 +1950,75 @@
             background: rgba(255, 95, 109, 0.18);
         }
 
+        /* Court player scoring (same style as bench) */
+        .court-player-scoring {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0, 255, 224, 0.12);
+            width: 100%;
+        }
+
+        .court-score-chip {
+            flex: 1 1 80px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(4, 18, 24, 0.8);
+            border: 1px solid rgba(0, 255, 224, 0.22);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .court-score-chip .chip-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+        }
+
+        .court-score-chip .chip-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            color: var(--accent-cyan);
+            letter-spacing: 0.06em;
+        }
+
+        .court-score-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .court-score-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 224, 0.22);
+            background: rgba(0, 255, 224, 0.08);
+            color: var(--accent-cyan);
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .court-score-btn:hover {
+            background: rgba(0, 255, 224, 0.16);
+        }
+
+        .court-score-btn.minus {
+            background: rgba(255, 95, 109, 0.08);
+            border-color: rgba(255, 95, 109, 0.24);
+            color: #ff5f6d;
+        }
+
+        .court-score-btn.minus:hover {
+            background: rgba(255, 95, 109, 0.18);
+        }
+
         /* ---------- Mobile Court Badges ---------- */
         .player-badge {
             background: rgba(4, 12, 22, 0.95);
@@ -2766,6 +2868,21 @@
 </head>
 
 <body>
+    <!-- IMMEDIATE MODE DETECTION - Runs synchronously before any rendering -->
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+
+            // If practice or competitive mode, inject CSS to hide landing screens immediately
+            if (mode === 'practice' || mode === 'competitive') {
+                const style = document.createElement('style');
+                style.textContent = '#landingScreen, #globalLanding { display: none !important; }';
+                document.head.appendChild(style);
+                console.log('🚀 Mode detected:', mode, '- hiding landing screens immediately');
+            }
+        })();
+    </script>
     <div id="globalLanding" class="hidden">
         <div class="global-topbar">
             <div class="global-logo">Bench Balancer.</div>
@@ -2818,7 +2935,7 @@
         <header class="landing-topbar">
             <button type="button" class="landing-logo" id="landingLogoButton">Bench Balancer.</button>
             <div class="landing-top-actions">
-                <button class="landing-pill primary" data-action="start-free-play">Free Play Mode</button>
+                <button class="landing-pill primary" data-action="start-free-play" onclick="document.getElementById('landingScreen').classList.add('hidden'); document.getElementById('mainApp').classList.remove('hidden'); document.getElementById('setup').classList.remove('hidden'); document.getElementById('game-container').classList.add('hidden'); document.getElementById('setup').scrollIntoView({behavior:'smooth'});">Free Play Mode</button>
                 <button class="landing-pill" id="landingUpgradeButton">Upgrade to Pro</button>
                 <button class="landing-pill" id="landingSignInButton">Sign In</button>
             </div>
@@ -2844,7 +2961,7 @@
                     <li class="negative">No data persistence</li>
                     <li class="negative">No team management</li>
                 </ul>
-                <button class="landing-button primary" data-action="start-free-play" id="landingFreePlayButton">
+                <button class="landing-button primary" data-action="start-free-play" id="landingFreePlayButton" onclick="document.getElementById('landingScreen').classList.add('hidden'); document.getElementById('mainApp').classList.remove('hidden'); document.getElementById('setup').classList.remove('hidden'); document.getElementById('game-container').classList.add('hidden'); document.getElementById('setup').scrollIntoView({behavior:'smooth'});">
                     Start Free Play
                 </button>
             </article>
@@ -2872,8 +2989,9 @@
         <div id="appHeader">
             <div class="header-shell">
                 <div class="logo-lockup">
-                    <a href="index.html" id="headerBackButton" class="landing-pill" style="text-decoration: none;">🏠 PLAY AGAIN</a>
-                    <button class="landing-pill primary" id="headerUpgradeButton">UPGRADE</button>
+                    <a href="index.html" id="headerBackButton" class="landing-pill" style="text-decoration: none;">🏠
+                        PLAY AGAIN</a>
+                    <button id="headerUpgradeButton">UPGRADE</button>
                     <button type="button" class="logo-link" id="headerLogoButton">
                         <span class="header-logo-text">benchbalancer</span>
                     </button>
@@ -3182,31 +3300,39 @@
                     <h3 style="color: var(--accent-cyan); margin-bottom: 20px;">Game Help</h3>
                     <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
                         <div style="margin-bottom: 20px;">
-                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">⏱️ Timer Controls</h4>
+                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">⏱️ Timer
+                                Controls</h4>
                             <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
-                                Use START/STOP to control game time. The timer automatically tracks quarter/half progress.
+                                Use START/STOP to control game time. The timer automatically tracks quarter/half
+                                progress.
                             </p>
                         </div>
                         <div style="margin-bottom: 20px;">
-                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">🔄 Substitutions</h4>
+                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">🔄 Substitutions
+                            </h4>
                             <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
-                                Click on player names to make substitutions. The app will alert you when it's time to rotate for fair playing time.
+                                Click on player names to make substitutions. The app will alert you when it's time to
+                                rotate for fair playing time.
                             </p>
                         </div>
                         <div style="margin-bottom: 20px;">
-                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">🏀 Quick Score</h4>
+                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">🏀 Quick Score
+                            </h4>
                             <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
                                 Use the Quick Score panel to track player points without stopping the game flow.
                             </p>
                         </div>
                         <div style="margin-bottom: 20px;">
-                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">📊 Variance Tracking</h4>
+                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">📊 Variance
+                                Tracking</h4>
                             <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
-                                The variance meter shows playing time fairness. Keep it in the green zone (0-60s) for perfect balance.
+                                The variance meter shows playing time fairness. Keep it in the green zone (0-60s) for
+                                perfect balance.
                             </p>
                         </div>
                         <div style="margin-bottom: 20px;">
-                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">🚨 Emergency Sub</h4>
+                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">🚨 Emergency Sub
+                            </h4>
                             <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
                                 Use for injuries or urgent player changes. Access from the substitution controls.
                             </p>
@@ -3223,7 +3349,8 @@
                 <div class="modal-content" style="max-width: 400px;">
                     <h3 style="color: var(--accent-cyan); margin-bottom: 20px;">Game Settings</h3>
                     <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(0, 255, 224, 0.05); border-radius: 10px; border: 1px solid rgba(0, 255, 224, 0.1);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(0, 255, 224, 0.05); border-radius: 10px; border: 1px solid rgba(0, 255, 224, 0.1);">
                             <div>
                                 <h4 style="color: var(--text-primary); font-size: 15px; margin-bottom: 4px;">Theme</h4>
                                 <p style="color: var(--text-secondary); font-size: 12px;">Dark / Light mode</p>
@@ -3232,7 +3359,8 @@
                                 <span id="themeLabel">Dark</span>
                             </button>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(0, 255, 224, 0.05); border-radius: 10px; border: 1px solid rgba(0, 255, 224, 0.1);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(0, 255, 224, 0.05); border-radius: 10px; border: 1px solid rgba(0, 255, 224, 0.1);">
                             <div>
                                 <h4 style="color: var(--text-primary); font-size: 15px; margin-bottom: 4px;">Sound</h4>
                                 <p style="color: var(--text-secondary); font-size: 12px;">Audio alerts</p>
@@ -3241,8 +3369,10 @@
                                 <span id="soundLabel">ON</span>
                             </button>
                         </div>
-                        <div style="padding: 16px; background: rgba(255, 178, 63, 0.05); border-radius: 10px; border: 1px solid rgba(255, 178, 63, 0.2);">
-                            <a href="index.html" id="settingsBackButton" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; display: block; text-align: center;">
+                        <div
+                            style="padding: 16px; background: rgba(255, 178, 63, 0.05); border-radius: 10px; border: 1px solid rgba(255, 178, 63, 0.2);">
+                            <a href="index.html" id="settingsBackButton"
+                                style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; display: block; text-align: center;">
                                 🏠 Back to Home
                             </a>
                         </div>
@@ -3259,10 +3389,11 @@
         <!-- Basketball Scripts -->
         <!-- jsPDF Library for PDF Generation -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
         <!-- Main ES Module Integration -->
-        <script type="module" src="basketball-integration-main.js?v=20260111T082800"></script>
+        <script type="module" src="basketball-integration-main.js?v=20260112T145028"></script>
 
         <!-- Inline logic (module) to ensure it runs after main integration -->
         <script type="module">
@@ -3632,14 +3763,78 @@
                         }
                     })();
 
+                } else if (modeParam === 'competitive') {
+                    // ============================================================================
+                    // COMPETITIVE MATCH FLOW - Skip landing, load saved lineup
+                    // ============================================================================
+                    console.log('🏆 Competitive mode detected! Loading lineup...');
+
+                    // 1. FORCE HIDE LANDING SCREENS IMMEDIATELY
+                    if (globalLanding) globalLanding.classList.add('hidden');
+                    if (landingScreen) landingScreen.classList.add('hidden');
+
+                    // 2. Show a loading state
+                    const compLoadingDiv = document.createElement('div');
+                    compLoadingDiv.id = 'competitiveLoader';
+                    compLoadingDiv.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); color:#00ffe0; font-family:"Russo One"; font-size:24px; text-align:center; z-index:9999;';
+                    compLoadingDiv.innerHTML = 'LOADING COMPETITIVE MATCH...<br><span style="font-size:16px; font-family:sans-serif; color:#ccc;">Preparing your lineup</span>';
+                    document.body.appendChild(compLoadingDiv);
+
+                    // 3. Load lineup asynchronously
+                    (async () => {
+                        try {
+                            // Wait for Supabase (max 3 seconds)
+                            let attempts = 0;
+                            while (!window.supabaseReady && attempts < 30) {
+                                await new Promise(r => setTimeout(r, 100));
+                                attempts++;
+                            }
+
+                            if (window.benchBalancerSupabase) {
+                                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                                if (user) {
+                                    console.log('✅ User authenticated. Loading saved lineup for competitive match...');
+                                    compLoadingDiv.innerHTML = 'LOADING YOUR SQUAD...';
+
+                                    // Load lineup and show setup
+                                    await skipToSetupWithSavedLineup(user.id);
+
+                                    // Pre-fill opponent name if available
+                                    const matchData = sessionStorage.getItem('competitiveMatchData');
+                                    if (matchData) {
+                                        try {
+                                            const parsed = JSON.parse(matchData);
+                                            const opponentInput = document.getElementById('opponentName');
+                                            if (opponentInput && parsed.opponent) {
+                                                opponentInput.value = parsed.opponent;
+                                                console.log('📋 Pre-filled opponent:', parsed.opponent);
+                                            }
+                                        } catch (e) {
+                                            console.warn('Could not parse competitive match data:', e);
+                                        }
+                                    }
+
+                                    compLoadingDiv.remove();
+                                    return;
+                                }
+                            }
+
+                            // Fallback if not authenticated
+                            console.warn('⚠️ User not authenticated for competitive match');
+                            revealMainApp();
+                            scrollToSetup();
+                            compLoadingDiv.remove();
+
+                        } catch (err) {
+                            console.error('❌ Error in competitive flow:', err);
+                            revealMainApp();
+                            if (compLoadingDiv) compLoadingDiv.remove();
+                        }
+                    })();
+
                 } else {
-                    // Normal Load - No Practice Mode
-                    if (modeParam === 'competitive') {
-                        console.log('🏀 Competitive mode detected - skipping to setup');
-                        revealMainApp();
-                    } else {
-                        // Default: Show Landing (Implicit)
-                    }
+                    // Default: Show Landing Page (No mode parameter)
                 }
 
                 async function skipToSetupWithSavedLineup(userId) {
@@ -3738,8 +3933,6 @@
                     const setupSection = document.getElementById('setup');
                     if (setupSection) setupSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-
-            })();
         </script>
 </body>
 
