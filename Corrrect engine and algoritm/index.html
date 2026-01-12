@@ -47,35 +47,36 @@
 
         /* Header */
         .header {
-            background: linear-gradient(180deg, rgba(38, 50, 56, 0.95) 0%, rgba(26, 38, 43, 0.95) 100%);
-            padding: 15px 30px;
+            background: linear-gradient(90deg,
+                rgba(26, 38, 43, 1) 0%,
+                rgba(0, 180, 160, 0.3) 30%,
+                rgba(0, 200, 180, 0.4) 50%,
+                rgba(0, 180, 160, 0.3) 70%,
+                rgba(26, 38, 43, 1) 100%);
+            padding: 20px 30px;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            border-bottom: 1px solid rgba(0, 255, 224, 0.1);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            height: 80px;
+            border-bottom: 1px solid rgba(0, 255, 224, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            min-height: 90px;
         }
 
-        .header-logo-text {
-            height: 40px;
-            /* Adjust size to be readable */
-            width: auto;
-            object-fit: contain;
-            filter: drop-shadow(0 0 8px rgba(0, 255, 224, 0.4));
-            /* Glow for readability */
-        }
-
-        .corner-logo {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+        .header-logo {
             height: 50px;
             width: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Text-based logo fallback with styling matching the brand */
+        .header-logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 400;
+            color: #ffffff;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         /* Main Content */
@@ -235,19 +236,14 @@
         /* Mobile specific adjustments */
         @media (max-width: 480px) {
             .header {
-                padding: 10px 15px;
-                height: 70px;
-                justify-content: flex-end;
-                /* Push text logo right */
+                padding: 15px;
+                min-height: 70px;
+                justify-content: center;
             }
 
             .header-logo-text {
-                height: 32px;
-            }
-
-            .corner-logo {
-                left: 15px;
-                height: 40px;
+                font-size: 2rem;
+                letter-spacing: 2px;
             }
 
             .hero-title {
@@ -263,11 +259,7 @@
 
 <body>
     <header class="header">
-        <!-- Square Logo in Corner -->
-        <img src="assets/landing/square-logo.png" alt="LB" class="corner-logo">
-
-        <!-- Main Text Logo Centered -->
-        <img src="assets/landing/text-logo-new.png" alt="benchbalancer" class="header-logo-text">
+        <span class="header-logo-text">BENCHBALANCER</span>
     </header>
 
     <main class="main-content">
