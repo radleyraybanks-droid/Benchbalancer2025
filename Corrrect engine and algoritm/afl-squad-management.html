@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bench Balancer - AFL Squad Management</title>
+
+    <!-- Supabase CDN for authentication and database -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Modern Dark Theme Variables */
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #060b14;
+            --bg-850: #08101a;
+            --bg-secondary: #0a1220;
+            --bg-card: #0d1626;
+            --bg-overlay: rgba(4, 7, 13, 0.85);
+
+            --border-strong: rgba(255, 255, 255, 0.18);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --border-faint: rgba(255, 255, 255, 0.06);
+
+            --accent-cyan: #00ffe0;
+            --accent-cyan-strong: #00cdb8;
+            --accent-green: #1dd1a1;
+            --accent-red: #ff5f6d;
+            --accent-orange: #ff9966;
+
+            --text-primary: #f5fbff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.5);
+            --shadow-strong: 0 20px 40px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 30px rgba(0, 255, 224, 0.3);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header Section */
+        #appHeader {
+            background: linear-gradient(180deg, rgba(0, 255, 224, 0.08) 0%, rgba(6, 12, 22, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-faint);
+            padding: 24px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #appHeader::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .header-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .app-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 20px rgba(0, 255, 224, 0.4);
+            line-height: 1;
+        }
+
+        .app-subtitle {
+            font-family: 'Russo One', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .header-icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-icon-btn:hover {
+            background: rgba(0, 255, 224, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-medium);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            padding-bottom: 100px;
+        }
+
+        /* Team Name Header */
+        .team-header-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .team-name-wrapper {
+            position: relative;
+            background: rgba(4, 7, 13, 0.6);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 8px;
+            padding: 16px 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 300px;
+            box-shadow: 0 0 20px rgba(0, 255, 224, 0.15);
+        }
+
+        .team-name-display {
+            font-family: 'Russo One', sans-serif;
+            font-size: 20px;
+            text-transform: uppercase;
+            color: #fff;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .team-name-input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Russo One', sans-serif;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-align: center;
+            width: 100%;
+            outline: none;
+            display: none;
+        }
+
+        .edit-icon {
+            width: 18px;
+            height: 18px;
+            margin-left: 8px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .team-name-wrapper:hover .edit-icon {
+            opacity: 1;
+        }
+
+        /* Squad Grid */
+        .squad-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        /* Player Card */
+        .player-card {
+            background: linear-gradient(145deg, #1a202c, #2d3748);
+            border-radius: 16px;
+            padding: 16px;
+            position: relative;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 255, 224, 0.15);
+            border-color: rgba(0, 255, 224, 0.3);
+        }
+
+        .player-silhouette {
+            width: 80px;
+            height: 80px;
+            background: #0d1117;
+            border-radius: 50%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .player-silhouette::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 60px;
+            background: #2d3748;
+            border-radius: 50%;
+            margin-bottom: -20px;
+        }
+
+        .player-silhouette::before {
+            content: '';
+            position: absolute;
+            display: block;
+            width: 30px;
+            height: 30px;
+            background: #2d3748;
+            border-radius: 50%;
+            top: 15px;
+        }
+
+        .player-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .player-card-name {
+            font-family: 'Russo One', sans-serif;
+            font-size: 20px;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .player-position {
+            font-size: 12px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: rgba(0, 255, 224, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        .player-joined-date {
+            font-size: 10px;
+            color: #a0aec0;
+            margin-top: 4px;
+        }
+
+        .player-notes-preview {
+            font-size: 10px;
+            color: #cbd5e0;
+            line-height: 1.3;
+            margin-top: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .edit-card-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            font-size: 18px;
+        }
+
+        .edit-card-btn:hover {
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        /* Add Player Card */
+        .add-player-card {
+            background: rgba(4, 7, 13, 0.4);
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-player-card:hover {
+            background: rgba(4, 7, 13, 0.8);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 30px rgba(0, 255, 224, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .add-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            box-shadow: 0 0 20px rgba(0, 255, 224, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .add-player-card:hover .add-icon {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 224, 0.7);
+        }
+
+        .add-text {
+            font-family: 'Russo One', sans-serif;
+            color: var(--accent-cyan);
+            font-size: 16px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 255, 224, 0.2);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-strong);
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-faint);
+            padding-bottom: 16px;
+        }
+
+        .modal-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            padding: 0;
+            opacity: 0.7;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* Form Styling */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            background: rgba(0, 255, 224, 0.05);
+            box-shadow: 0 0 15px rgba(0, 255, 224, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Toggle Switch */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-faint);
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-850);
+            border: 1px solid var(--border-medium);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: var(--text-muted);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: rgba(29, 209, 161, 0.2);
+            border-color: var(--accent-green);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            background-color: var(--accent-green);
+        }
+
+        /* Parent Section */
+        .parent-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-faint);
+        }
+
+        .parent-header {
+            font-size: 12px;
+            color: var(--accent-cyan);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Action Buttons */
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-cyan-strong) 100%);
+            color: var(--bg-900);
+            box-shadow: 0 4px 15px rgba(0, 255, 224, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 224, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: rgba(255, 95, 109, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(255, 95, 109, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 95, 109, 0.2);
+        }
+
+        /* Checkbox Custom */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .whatsapp-check {
+            accent-color: #25D366;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Footer Navigation */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0 16px;
+            display: flex;
+            justify-content: space-around;
+            background: #08101a;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: #666;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--accent-cyan);
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .nav-icon-img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            opacity: 0.5;
+            transition: opacity 0.2s, filter 0.2s;
+        }
+
+        .nav-item.active .nav-icon-img {
+            opacity: 1;
+            filter: drop-shadow(0 0 4px var(--accent-cyan));
+        }
+
+        /* Player View Modal */
+        .player-view-modal-content {
+            background: #1a222e;
+            border: none;
+            border-radius: 20px;
+            padding: 0;
+            width: 95%;
+            max-width: 750px;
+            text-align: left;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .pv-left-col {
+            background: #252e3e;
+            width: 38%;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pv-right-col {
+            background: #1a222e;
+            width: 62%;
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .pv-avatar {
+            width: 140px;
+            height: 140px;
+            background: #000;
+            border-radius: 50%;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pv-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            background: #4a5568;
+            border-radius: 50%;
+        }
+
+        .pv-avatar::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: #4a5568;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .pv-section-title {
+            color: #ff5f6d;
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            text-transform: uppercase;
+            width: 100%;
+            margin-bottom: 12px;
+            margin-top: 8px;
+        }
+
+        .pv-contact-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 8px;
+            color: #fff;
+            gap: 10px;
+        }
+
+        .pv-icon {
+            width: 16px;
+            text-align: center;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .pv-contact-name {
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.02em;
+        }
+
+        .pv-contact-phone {
+            font-family: 'Russo One', sans-serif;
+            font-size: 18px;
+            letter-spacing: 0.05em;
+        }
+
+        .pv-name {
+            font-family: 'Russo One', sans-serif;
+            font-size: 48px;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .pv-joined {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 24px;
+        }
+
+        .pv-stat-row {
+            font-size: 16px;
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .pv-stat-label {
+            font-weight: 400;
+            color: #a0aec0;
+            margin-right: 6px;
+        }
+
+        .pv-notes-label {
+            font-size: 14px;
+            color: #fff;
+            font-weight: 700;
+            margin-top: 24px;
+            margin-bottom: 8px;
+        }
+
+        .pv-notes-text {
+            font-size: 13px;
+            color: #e2e8f0;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .pv-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            filter: invert(1);
+            opacity: 0.5;
+            cursor: pointer;
+            transition: 0.2s;
+            z-index: 10;
+        }
+
+        .pv-close-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 650px) {
+            .player-view-modal-content {
+                flex-direction: column;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .pv-left-col, .pv-right-col {
+                width: 100%;
+            }
+
+            .pv-right-col {
+                padding-top: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header id="appHeader">
+        <div class="header-brand">
+            <div class="app-title">
+                <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" style="height: 36px; width: auto;">
+            </div>
+            <div class="app-subtitle">AFL Squad Manager</div>
+        </div>
+        <div class="header-actions">
+            <button class="header-icon-btn" onclick="window.location.reload()" aria-label="Reload">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+            </button>
+            <a href="afl.html" class="btn-nav">Back to AFL</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="team-header-container">
+            <div class="team-name-wrapper" onclick="toggleTeamNameEdit()">
+                <div class="team-name-display" id="teamNameDisplay">
+                    YOUR TEAM NAME <img src="assets/icon-edit.png" class="edit-icon" alt="Edit">
+                </div>
+                <input type="text" class="team-name-input" id="teamNameInput" maxlength="25"
+                    onblur="saveTeamName(this.value)" onkeydown="if(event.key === 'Enter') this.blur()">
+            </div>
+        </div>
+
+        <div class="squad-grid" id="squadGrid">
+            <!-- Player Cards will be injected here via JS -->
+        </div>
+    </div>
+
+    <!-- Player View Modal -->
+    <div class="modal-overlay" id="playerViewModal">
+        <div class="player-view-modal-content" onclick="event.stopPropagation()">
+            <img src="assets/icon-close.png" class="pv-close-btn" alt="Close" onclick="closePlayerViewModal()">
+
+            <div class="pv-left-col">
+                <div class="pv-avatar"></div>
+
+                <div class="pv-section-title">Emergency contact:</div>
+
+                <div class="pv-contact-row">
+                    <div class="pv-icon">&#128100;</div>
+                    <div class="pv-contact-name" id="viewEmergencyName">-</div>
+                </div>
+                <div class="pv-contact-row">
+                    <div class="pv-icon">&#128222;</div>
+                    <div class="pv-contact-phone" id="viewEmergencyPhone">-</div>
+                </div>
+            </div>
+
+            <div class="pv-right-col">
+                <div class="pv-name" id="viewPlayerName">Player</div>
+                <div class="pv-joined" id="viewJoinedDate">-</div>
+
+                <div class="pv-stat-row">
+                    <span class="pv-stat-label">Line:</span> <span id="viewPlayerPosition">-</span>
+                </div>
+                <div class="pv-stat-row">
+                    <span class="pv-stat-label">Jersey Number:</span> <span id="viewPlayerJersey">-</span>
+                </div>
+
+                <div class="pv-notes-label">Notes:</div>
+                <div class="pv-notes-text" id="viewNotes">-</div>
+
+                <button id="editProfileBtn" class="btn btn-primary"
+                    style="width:auto; align-self: flex-end; margin-top:20px; padding: 10px 24px;">
+                    EDIT PROFILE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Player Modal -->
+    <div class="modal-overlay" id="playerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Player Profile</h2>
+                <img src="assets/icon-close.png" class="close-btn" alt="Close" onclick="closePlayerModal()">
+            </div>
+
+            <form id="playerForm" onsubmit="handleSavePlayer(event)">
+                <input type="hidden" id="playerId">
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Full Name</label>
+                        <input type="text" id="playerName" class="form-control" placeholder="e.g. Dustin Martin" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Line / Position</label>
+                        <select id="playerPosition" class="form-control">
+                            <option value="Ruck">Ruck</option>
+                            <option value="Midfield">Midfield</option>
+                            <option value="Forward">Forward</option>
+                            <option value="Back">Back</option>
+                            <option value="Utility">Utility</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="playerDob" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Jersey Number</label>
+                        <input type="text" id="playerJersey" class="form-control" placeholder="#" maxlength="2">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Address</label>
+                        <input type="text" id="playerAddress" class="form-control" placeholder="Street Address, Suburb">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="toggle-wrapper">
+                            <span class="toggle-label">Parental Consent (Publish Name)</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="parentalConsent">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Parent 1 -->
+                    <div class="parent-section full-width">
+                        <div class="parent-header">Parent / Guardian 1</div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" id="parent1Name" class="form-control" placeholder="Name">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="parent1Phone" class="form-control" placeholder="0400...">
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" id="parent1Whatsapp" class="whatsapp-check">
+                                    <span style="font-size: 13px; color: var(--text-secondary);">Add to WhatsApp Group</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parent 2 -->
+                    <div class="parent-section full-width">
+                        <div class="parent-header">Parent / Guardian 2 (Optional)</div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" id="parent2Name" class="form-control" placeholder="Name">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="parent2Phone" class="form-control" placeholder="0400...">
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" id="parent2Whatsapp" class="whatsapp-check">
+                                    <span style="font-size: 13px; color: var(--text-secondary);">Add to WhatsApp Group</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Coach Notes</label>
+                        <textarea id="playerNotes" class="form-control"
+                            placeholder="Strengths, weaknesses, medical info..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" onclick="deletePlayer()" id="deletePlayerBtn" style="display:none;">Delete</button>
+                    <button type="button" class="btn btn-secondary" onclick="closePlayerModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Player</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config/env.js"></script>
+    <script type="module" src="config/simple-supabase.js"></script>
+    <script type="module">
+        import { initAuth } from './config/simple-supabase.js';
+        initAuth();
+    </script>
+
+    <script>
+        // AFL Squad Manager Logic
+        const STORAGE_KEY = 'benchbalancer_afl_squad';
+        const TEAM_NAME_KEY = 'benchbalancer_afl_team_name';
+
+        let players = [];
+        let teamName = "YOUR AFL TEAM";
+        let currentViewingPlayer = null;
+
+        // UUID Generator
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            loadTeamName();
+            await loadPlayers();
+
+            // Setup edit button
+            document.getElementById('editProfileBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (currentViewingPlayer) {
+                    closePlayerViewModal();
+                    openPlayerModal(currentViewingPlayer);
+                }
+            });
+        });
+
+        // Team Name Logic
+        async function loadTeamName() {
+            if (window.benchBalancerSupabase) {
+                try {
+                    const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                    if (user && user.user_metadata?.afl_team_name) {
+                        teamName = user.user_metadata.afl_team_name;
+                        updateTeamNameUI();
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('[AFL Team] Error loading team name:', err.message);
+                }
+            }
+
+            const savedName = localStorage.getItem(TEAM_NAME_KEY);
+            if (savedName) {
+                teamName = savedName;
+            }
+            updateTeamNameUI();
+        }
+
+        async function saveTeamName(newName) {
+            if (newName && newName.trim() !== "") {
+                teamName = newName.trim();
+                localStorage.setItem(TEAM_NAME_KEY, teamName);
+
+                if (window.benchBalancerSupabase) {
+                    try {
+                        const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                        if (user) {
+                            await window.benchBalancerSupabase.auth.updateUser({
+                                data: { afl_team_name: teamName }
+                            });
+                        }
+                    } catch (err) {
+                        console.error('[AFL Team] Error saving team name:', err.message);
+                    }
+                }
+            }
+            updateTeamNameUI();
+            toggleTeamNameEdit(false);
+        }
+
+        function updateTeamNameUI() {
+            document.getElementById('teamNameDisplay').innerHTML = `${teamName} <img src="assets/icon-edit.png" class="edit-icon" alt="Edit">`;
+            document.getElementById('teamNameInput').value = teamName;
+        }
+
+        function toggleTeamNameEdit(forceEdit) {
+            const display = document.getElementById('teamNameDisplay');
+            const input = document.getElementById('teamNameInput');
+
+            if (forceEdit === false) {
+                display.style.display = 'flex';
+                input.style.display = 'none';
+            } else if (forceEdit === true) {
+                display.style.display = 'none';
+                input.style.display = 'block';
+                input.focus();
+            } else {
+                if (input.style.display === 'none' || input.style.display === '') {
+                    display.style.display = 'none';
+                    input.style.display = 'block';
+                    input.focus();
+                } else {
+                    display.style.display = 'flex';
+                    input.style.display = 'none';
+                }
+            }
+        }
+
+        // Player Loading
+        async function loadPlayers() {
+            if (window.benchBalancerSupabase) {
+                try {
+                    const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                    if (user) {
+                        const { data, error } = await window.benchBalancerSupabase
+                            .from('teams_roster')
+                            .select('*')
+                            .eq('user_id', user.id)
+                            .eq('sport', 'afl')
+                            .order('name', { ascending: true });
+
+                        if (!error && data && data.length > 0) {
+                            players = data.map(row => {
+                                const contact = row.parent_contact || {};
+                                return {
+                                    id: row.id,
+                                    name: row.name,
+                                    jersey: row.jersey_number,
+                                    position: row.position || 'Midfield',
+                                    notes: row.notes || '',
+                                    dob: contact.dob || '',
+                                    address: contact.address || '',
+                                    consent: contact.consent || false,
+                                    parent1Name: contact.parent1Name || '',
+                                    parent1Phone: contact.parent1Phone || '',
+                                    parent1Whatsapp: contact.parent1Whatsapp || false,
+                                    parent2Name: contact.parent2Name || '',
+                                    parent2Phone: contact.parent2Phone || '',
+                                    parent2Whatsapp: contact.parent2Whatsapp || false,
+                                    createdAt: row.created_at
+                                };
+                            });
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+                            renderSquad();
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('[AFL Team] Error loading from Supabase:', err.message);
+                }
+            }
+
+            // Fallback to localStorage
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                players = JSON.parse(saved);
+            }
+            renderSquad();
+        }
+
+        async function savePlayers() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+            renderSquad();
+            await syncWithSupabase();
+        }
+
+        async function syncWithSupabase() {
+            if (!window.benchBalancerSupabase) return;
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                if (!user) return;
+
+                // Get existing roster
+                const { data: existingRoster } = await window.benchBalancerSupabase
+                    .from('teams_roster')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('sport', 'afl');
+
+                const existingIds = (existingRoster || []).map(r => r.id);
+                const currentIds = players.map(p => p.id);
+
+                // Delete removed players
+                const toDelete = existingIds.filter(id => !currentIds.includes(id));
+                if (toDelete.length > 0) {
+                    await window.benchBalancerSupabase
+                        .from('teams_roster')
+                        .delete()
+                        .in('id', toDelete);
+                }
+
+                // Upsert current players
+                const rosterData = players.map(p => ({
+                    id: p.id,
+                    user_id: user.id,
+                    sport: 'afl',
+                    name: p.name,
+                    jersey_number: p.jersey || null,
+                    position: p.position,
+                    notes: p.notes || null,
+                    parent_contact: {
+                        dob: p.dob,
+                        address: p.address,
+                        consent: p.consent,
+                        parent1Name: p.parent1Name,
+                        parent1Phone: p.parent1Phone,
+                        parent1Whatsapp: p.parent1Whatsapp,
+                        parent2Name: p.parent2Name,
+                        parent2Phone: p.parent2Phone,
+                        parent2Whatsapp: p.parent2Whatsapp
+                    }
+                }));
+
+                await window.benchBalancerSupabase
+                    .from('teams_roster')
+                    .upsert(rosterData, { onConflict: 'id' });
+
+                console.log('[AFL Team] Synced to Supabase');
+            } catch (err) {
+                console.error('[AFL Team] Sync error:', err.message);
+            }
+        }
+
+        function renderSquad() {
+            const grid = document.getElementById('squadGrid');
+            grid.innerHTML = '';
+
+            players.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                card.onclick = () => openPlayerViewModal(player);
+
+                card.innerHTML = `
+                    <div class="player-silhouette"></div>
+                    <div class="player-info">
+                        <div class="player-card-name">${player.name}</div>
+                        <div class="player-position">${player.position || 'Midfield'}</div>
+                        ${player.jersey ? `<div class="player-joined-date">#${player.jersey}</div>` : ''}
+                        ${player.notes ? `<div class="player-notes-preview">${player.notes}</div>` : ''}
+                    </div>
+                    <div class="edit-card-btn" onclick="event.stopPropagation(); openPlayerModal('${player.id}')">&#9998;</div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            // Add Player card
+            const addCard = document.createElement('div');
+            addCard.className = 'add-player-card';
+            addCard.onclick = () => openPlayerModal();
+            addCard.innerHTML = `
+                <div class="add-icon">+</div>
+                <div class="add-text">Add Player</div>
+            `;
+            grid.appendChild(addCard);
+        }
+
+        // Player Modal
+        function openPlayerModal(playerId = null) {
+            const modal = document.getElementById('playerModal');
+            const form = document.getElementById('playerForm');
+            const deleteBtn = document.getElementById('deletePlayerBtn');
+
+            form.reset();
+
+            if (playerId) {
+                const player = players.find(p => p.id === playerId);
+                if (player) {
+                    document.getElementById('playerId').value = player.id;
+                    document.getElementById('playerName').value = player.name || '';
+                    document.getElementById('playerPosition').value = player.position || 'Midfield';
+                    document.getElementById('playerDob').value = player.dob || '';
+                    document.getElementById('playerJersey').value = player.jersey || '';
+                    document.getElementById('playerAddress').value = player.address || '';
+                    document.getElementById('parentalConsent').checked = player.consent || false;
+                    document.getElementById('parent1Name').value = player.parent1Name || '';
+                    document.getElementById('parent1Phone').value = player.parent1Phone || '';
+                    document.getElementById('parent1Whatsapp').checked = player.parent1Whatsapp || false;
+                    document.getElementById('parent2Name').value = player.parent2Name || '';
+                    document.getElementById('parent2Phone').value = player.parent2Phone || '';
+                    document.getElementById('parent2Whatsapp').checked = player.parent2Whatsapp || false;
+                    document.getElementById('playerNotes').value = player.notes || '';
+                    deleteBtn.style.display = 'block';
+                }
+            } else {
+                document.getElementById('playerId').value = '';
+                deleteBtn.style.display = 'none';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closePlayerModal() {
+            document.getElementById('playerModal').classList.remove('active');
+        }
+
+        function handleSavePlayer(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('playerId').value || generateUUID();
+            const playerData = {
+                id: id,
+                name: document.getElementById('playerName').value,
+                position: document.getElementById('playerPosition').value,
+                dob: document.getElementById('playerDob').value,
+                jersey: document.getElementById('playerJersey').value,
+                address: document.getElementById('playerAddress').value,
+                consent: document.getElementById('parentalConsent').checked,
+                parent1Name: document.getElementById('parent1Name').value,
+                parent1Phone: document.getElementById('parent1Phone').value,
+                parent1Whatsapp: document.getElementById('parent1Whatsapp').checked,
+                parent2Name: document.getElementById('parent2Name').value,
+                parent2Phone: document.getElementById('parent2Phone').value,
+                parent2Whatsapp: document.getElementById('parent2Whatsapp').checked,
+                notes: document.getElementById('playerNotes').value,
+                createdAt: new Date().toISOString()
+            };
+
+            const existingIndex = players.findIndex(p => p.id === id);
+            if (existingIndex >= 0) {
+                playerData.createdAt = players[existingIndex].createdAt;
+                players[existingIndex] = playerData;
+            } else {
+                players.push(playerData);
+            }
+
+            savePlayers();
+            closePlayerModal();
+        }
+
+        function deletePlayer() {
+            const id = document.getElementById('playerId').value;
+            if (!id) return;
+
+            if (confirm('Are you sure you want to remove this player from the squad?')) {
+                players = players.filter(p => p.id !== id);
+                savePlayers();
+                closePlayerModal();
+            }
+        }
+
+        // Player View Modal
+        function openPlayerViewModal(player) {
+            currentViewingPlayer = player.id;
+
+            document.getElementById('viewPlayerName').textContent = player.name;
+            document.getElementById('viewJoinedDate').textContent = player.createdAt
+                ? `Added ${new Date(player.createdAt).toLocaleDateString()}`
+                : '';
+            document.getElementById('viewPlayerPosition').textContent = player.position || 'Midfield';
+            document.getElementById('viewPlayerJersey').textContent = player.jersey || '-';
+            document.getElementById('viewEmergencyName').textContent = player.parent1Name || '-';
+            document.getElementById('viewEmergencyPhone').textContent = player.parent1Phone || '-';
+            document.getElementById('viewNotes').textContent = player.notes || 'No notes';
+
+            document.getElementById('playerViewModal').classList.add('active');
+        }
+
+        function closePlayerViewModal() {
+            document.getElementById('playerViewModal').classList.remove('active');
+            currentViewingPlayer = null;
+        }
+
+        // Close modals on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+
+    <!-- Bottom Navigation -->
+    <nav class="footer-nav">
+        <a href="afl.html" class="nav-item">
+            <img src="assets/icon-home.png" class="nav-icon-img" alt="Home">
+            <span class="nav-label">HOME</span>
+        </a>
+        <a href="afl-squad-management.html" class="nav-item active">
+            <img src="assets/icon-teams.png" class="nav-icon-img" alt="Teams">
+            <span class="nav-label">SQUAD</span>
+        </a>
+        <a href="afl-schedule-management.html" class="nav-item">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="Schedule">
+            <span class="nav-label">SCHEDULE</span>
+        </a>
+        <a href="afl-match-history.html" class="nav-item">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="History">
+            <span class="nav-label">HISTORY</span>
+        </a>
+    </nav>
+</body>
+
+</html>

@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFL Match History - Bench Balancer</title>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config/env.js"></script>
+    <script type="module" src="config/simple-supabase.js"></script>
+    <script type="module">
+        import { initAuth } from './config/simple-supabase.js';
+        initAuth();
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #060b14;
+            --bg-850: #08101a;
+            --bg-secondary: #0a1220;
+            --bg-card: #0d1626;
+            --border-strong: rgba(255, 255, 255, 0.18);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --border-faint: rgba(255, 255, 255, 0.06);
+            --accent-cyan: #00ffe0;
+            --accent-success: #4be9a6;
+            --accent-danger: #ff5f6d;
+            --accent-warning: #ffb23f;
+            --text-primary: #f5fbff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --radius-md: 12px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        #appHeader {
+            background: linear-gradient(180deg, rgba(0, 255, 224, 0.08) 0%, rgba(6, 12, 22, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-faint);
+            padding: 24px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo {
+            height: 32px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: rgba(0, 255, 224, 0.1);
+            border: 1px solid rgba(0, 255, 224, 0.3);
+            color: var(--accent-cyan);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 224, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            letter-spacing: 0.1em;
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(0, 255, 224, 0.4);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        /* Stats Summary */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 32px;
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Filters */
+        .filters {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            color: var(--accent-cyan);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            background: rgba(4, 7, 13, 0.6);
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        /* Match List */
+        .match-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .match-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .match-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 224, 0.2);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .match-date {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .result-badge {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-badge.win {
+            background: rgba(75, 233, 166, 0.2);
+            color: var(--accent-success);
+            border: 1px solid var(--accent-success);
+        }
+
+        .result-badge.loss {
+            background: rgba(255, 95, 109, 0.2);
+            color: var(--accent-danger);
+            border: 1px solid var(--accent-danger);
+        }
+
+        .result-badge.draw {
+            background: rgba(255, 178, 63, 0.2);
+            color: var(--accent-warning);
+            border: 1px solid var(--accent-warning);
+        }
+
+        .match-opponent {
+            font-family: 'Russo One', sans-serif;
+            font-size: 24px;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .match-score {
+            font-size: 20px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .score-breakdown {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .match-meta {
+            display: flex;
+            gap: 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Player Stats Expansion */
+        .player-stats {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-faint);
+            display: none;
+        }
+
+        .player-stats.expanded {
+            display: block;
+        }
+
+        .player-stats h3 {
+            color: var(--accent-cyan);
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+
+        .player-stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .player-stats-table th {
+            background: rgba(0, 255, 224, 0.1);
+            color: var(--accent-cyan);
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .player-stats-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-faint);
+            color: var(--text-secondary);
+        }
+
+        .player-stats-table tr:hover {
+            background: rgba(0, 255, 224, 0.05);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Footer Nav */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 18, 32, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-faint);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--accent-cyan);
+        }
+
+        .nav-icon-img {
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+        }
+
+        .nav-item.active .nav-icon-img {
+            opacity: 1;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--border-medium);
+            border-top: 3px solid var(--accent-cyan);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <header id="appHeader">
+        <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" class="header-logo">
+        <div class="header-actions">
+            <a href="afl.html" class="back-btn">Back to AFL</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>AFL MATCH HISTORY</h1>
+        <p class="subtitle">Review all your AFL/Auskick matches and performance</p>
+
+        <!-- Stats Summary -->
+        <div class="stats-summary" id="statsSummary">
+            <div class="stat-card">
+                <div class="stat-value" id="totalMatches">0</div>
+                <div class="stat-label">Total Matches</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="winRecord">0-0-0</div>
+                <div class="stat-label">W-L-D</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="winRate">0%</div>
+                <div class="stat-label">Win Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgScore">0.0</div>
+                <div class="stat-label">Avg Score</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>Search Opponent</label>
+                <input type="text" id="searchOpponent" placeholder="Enter team name...">
+            </div>
+            <div class="filter-group">
+                <label>Filter by Result</label>
+                <select id="filterResult">
+                    <option value="all">All Results</option>
+                    <option value="win">Wins Only</option>
+                    <option value="loss">Losses Only</option>
+                    <option value="draw">Draws Only</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Home/Away</label>
+                <select id="filterHomeAway">
+                    <option value="all">All Matches</option>
+                    <option value="home">Home Only</option>
+                    <option value="away">Away Only</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Match List -->
+        <div id="matchListContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading match history...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+        <a href="afl.html" class="nav-item">
+            <img src="assets/icon-home.png" class="nav-icon-img" alt="Home">
+            <span>HOME</span>
+        </a>
+        <a href="afl-squad-management.html" class="nav-item">
+            <img src="assets/icon-teams.png" class="nav-icon-img" alt="Teams">
+            <span>SQUAD</span>
+        </a>
+        <a href="afl-match-history.html" class="nav-item active">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="History">
+            <span>HISTORY</span>
+        </a>
+        <a href="afl-team-analytics.html" class="nav-item">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="Analytics">
+            <span>ANALYTICS</span>
+        </a>
+    </nav>
+
+    <script>
+        let allMatches = [];
+        let filteredMatches = [];
+
+        // AFL Scoring: Convert raw score to G.B (Total) format
+        // Assuming team_score stores total points (goals*6 + behinds)
+        // We need to store goals and behinds separately for proper display
+        // For now we'll estimate or use stored values
+        function formatAFLScore(goals, behinds) {
+            const total = (goals * 6) + behinds;
+            return `${goals}.${behinds} (${total})`;
+        }
+
+        // Parse AFL score from total or stored values
+        function parseAFLScore(teamScore, aflData) {
+            // If we have AFL-specific data with goals/behinds
+            if (aflData && aflData.goals !== undefined) {
+                return {
+                    goals: aflData.goals,
+                    behinds: aflData.behinds,
+                    total: (aflData.goals * 6) + aflData.behinds,
+                    display: formatAFLScore(aflData.goals, aflData.behinds)
+                };
+            }
+            // Fallback: estimate from total (assume 60% goals, 40% behinds ratio)
+            const estimatedGoals = Math.floor(teamScore / 8);
+            const remainder = teamScore - (estimatedGoals * 6);
+            const estimatedBehinds = Math.max(0, remainder);
+            return {
+                goals: estimatedGoals,
+                behinds: estimatedBehinds,
+                total: teamScore,
+                display: formatAFLScore(estimatedGoals, estimatedBehinds)
+            };
+        }
+
+        async function loadMatchHistory() {
+            if (!window.benchBalancerSupabase) {
+                showError('Database not connected');
+                return;
+            }
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                if (!user) {
+                    window.location.href = 'afl.html';
+                    return;
+                }
+
+                // Fetch all AFL matches
+                const { data: matches, error } = await window.benchBalancerSupabase
+                    .from('match_results')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('sport', 'afl')
+                    .order('match_date', { ascending: false })
+                    .order('match_time', { ascending: false });
+
+                if (error) throw error;
+
+                allMatches = matches || [];
+                filteredMatches = [...allMatches];
+
+                updateStats();
+                renderMatches();
+
+            } catch (error) {
+                console.error('Error loading matches:', error);
+                showError('Failed to load match history');
+            }
+        }
+
+        function updateStats() {
+            const total = allMatches.length;
+            const wins = allMatches.filter(m => m.result === 'win').length;
+            const losses = allMatches.filter(m => m.result === 'loss').length;
+            const draws = allMatches.filter(m => m.result === 'draw').length;
+            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+
+            // Calculate average score
+            const totalScore = allMatches.reduce((sum, m) => sum + (m.team_score || 0), 0);
+            const avgScore = total > 0 ? (totalScore / total).toFixed(1) : '0.0';
+
+            document.getElementById('totalMatches').textContent = total;
+            document.getElementById('winRecord').textContent = `${wins}-${losses}-${draws}`;
+            document.getElementById('winRate').textContent = `${winRate}%`;
+            document.getElementById('avgScore').textContent = avgScore;
+        }
+
+        function renderMatches() {
+            const container = document.getElementById('matchListContainer');
+
+            if (filteredMatches.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#127944;</div>
+                        <h3>No matches found</h3>
+                        <p>Play your first AFL match to see it here!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = filteredMatches.map(match => {
+                const date = new Date(match.match_date).toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                const homeAway = match.home_away ? 'Home' : 'Away';
+                const venue = match.venue ? match.venue : '';
+
+                // Parse AFL scores
+                const teamScore = parseAFLScore(match.team_score, match.afl_data);
+                const oppScore = parseAFLScore(match.opponent_score, match.opponent_afl_data);
+
+                return `
+                    <div class="match-card" onclick="toggleMatchDetails('${match.id}')">
+                        <div class="match-header">
+                            <span class="match-date">${date}</span>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <span class="result-badge ${match.result}">${match.result.toUpperCase()}</span>
+                            </div>
+                        </div>
+                        <div class="match-opponent">vs ${match.opponent}</div>
+                        <div class="match-score">${teamScore.display} - ${oppScore.display}</div>
+                        <div class="score-breakdown">
+                            Your team: ${teamScore.goals} goals, ${teamScore.behinds} behinds |
+                            Opponent: ${oppScore.goals} goals, ${oppScore.behinds} behinds
+                        </div>
+                        <div class="match-meta">
+                            <span>${homeAway}</span>
+                            ${venue ? `<span>${venue}</span>` : ''}
+                            <span>${match.match_time || 'N/A'}</span>
+                        </div>
+                        <div class="player-stats" id="stats-${match.id}">
+                            <h3>Player Statistics</h3>
+                            <div id="player-table-${match.id}">Loading...</div>
+                            <button
+                                onclick="event.stopPropagation(); confirmDeleteMatch('${match.id}', '${match.opponent.replace(/'/g, "\\'")}', '${teamScore.display}')"
+                                style="
+                                    margin-top: 16px;
+                                    background: rgba(255, 95, 109, 0.1);
+                                    border: 1px solid var(--accent-danger);
+                                    color: var(--accent-danger);
+                                    padding: 10px 16px;
+                                    border-radius: 8px;
+                                    font-size: 12px;
+                                    font-weight: bold;
+                                    cursor: pointer;
+                                    text-transform: uppercase;
+                                "
+                            >Reset This Match</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="match-list">${html}</div>`;
+        }
+
+        async function toggleMatchDetails(matchId) {
+            const statsDiv = document.getElementById(`stats-${matchId}`);
+            const tableDiv = document.getElementById(`player-table-${matchId}`);
+
+            if (statsDiv.classList.contains('expanded')) {
+                statsDiv.classList.remove('expanded');
+                return;
+            }
+
+            statsDiv.classList.add('expanded');
+
+            // Load player stats if not already loaded
+            if (tableDiv.innerHTML === 'Loading...') {
+                try {
+                    const { data: playerStats, error } = await window.benchBalancerSupabase
+                        .from('match_player_stats')
+                        .select('*')
+                        .eq('match_result_id', matchId)
+                        .order('time_on_field', { ascending: false });
+
+                    if (error) throw error;
+
+                    if (playerStats && playerStats.length > 0) {
+                        tableDiv.innerHTML = `
+                            <table class="player-stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>#</th>
+                                        <th>Line</th>
+                                        <th>Field Time</th>
+                                        <th>Disposals</th>
+                                        <th>Goals</th>
+                                        <th>Behinds</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${playerStats.map(p => `
+                                        <tr>
+                                            <td><strong>${p.player_name}</strong></td>
+                                            <td>${p.jersey_number || '-'}</td>
+                                            <td>${p.position || '-'}</td>
+                                            <td>${formatTime(p.time_on_field || p.time_on_court || 0)}</td>
+                                            <td>${p.disposals || 0}</td>
+                                            <td>${p.goals || 0}</td>
+                                            <td>${p.behinds || 0}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    } else {
+                        tableDiv.innerHTML = '<p style="color: var(--text-secondary);">No player stats available</p>';
+                    }
+                } catch (error) {
+                    console.error('Error loading player stats:', error);
+                    tableDiv.innerHTML = '<p style="color: var(--accent-danger);">Error loading stats</p>';
+                }
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function filterMatches() {
+            const search = document.getElementById('searchOpponent').value.toLowerCase();
+            const resultFilter = document.getElementById('filterResult').value;
+            const homeAwayFilter = document.getElementById('filterHomeAway').value;
+
+            filteredMatches = allMatches.filter(match => {
+                const matchesSearch = match.opponent.toLowerCase().includes(search);
+                const matchesResult = resultFilter === 'all' || match.result === resultFilter;
+                const matchesHomeAway = homeAwayFilter === 'all' ||
+                    (homeAwayFilter === 'home' && match.home_away) ||
+                    (homeAwayFilter === 'away' && !match.home_away);
+
+                return matchesSearch && matchesResult && matchesHomeAway;
+            });
+
+            renderMatches();
+        }
+
+        function confirmDeleteMatch(matchId, opponent, score) {
+            const confirmed = confirm(
+                `RESET MATCH\n\n` +
+                `Reset the match against ${opponent} (${score})?\n\n` +
+                `This will remove all match and player statistics.\n\n` +
+                `Proceed?`
+            );
+
+            if (confirmed) {
+                deleteMatch(matchId);
+            }
+        }
+
+        async function deleteMatch(matchId) {
+            if (!window.benchBalancerSupabase) {
+                alert('Database not connected');
+                return;
+            }
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                if (!user) {
+                    alert('Not authenticated');
+                    return;
+                }
+
+                // Delete player stats first
+                await window.benchBalancerSupabase
+                    .from('match_player_stats')
+                    .delete()
+                    .eq('match_result_id', matchId);
+
+                // Delete match result
+                const { error: matchError } = await window.benchBalancerSupabase
+                    .from('match_results')
+                    .delete()
+                    .eq('id', matchId)
+                    .eq('user_id', user.id);
+
+                if (matchError) {
+                    throw new Error(`Failed to delete match: ${matchError.message}`);
+                }
+
+                // Remove from local arrays and re-render
+                allMatches = allMatches.filter(m => m.id !== matchId);
+                filteredMatches = filteredMatches.filter(m => m.id !== matchId);
+                updateStats();
+                renderMatches();
+
+                alert('Match reset successfully');
+
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('Failed to reset match: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('matchListContainer').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#9888;</div>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Event Listeners
+        document.getElementById('searchOpponent').addEventListener('input', filterMatches);
+        document.getElementById('filterResult').addEventListener('change', filterMatches);
+        document.getElementById('filterHomeAway').addEventListener('change', filterMatches);
+
+        // Wait for Supabase to be ready before loading
+        function waitForSupabase(callback, maxAttempts = 20) {
+            let attempts = 0;
+            const checkInterval = setInterval(() => {
+                attempts++;
+                if (window.benchBalancerSupabase) {
+                    clearInterval(checkInterval);
+                    callback();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+                    showError('Database connection timed out. Please refresh the page.');
+                }
+            }, 250);
+        }
+
+        // Load on page load
+        if (window.benchBalancerSupabase) {
+            loadMatchHistory();
+        } else {
+            window.addEventListener('supabaseReady', () => loadMatchHistory());
+            waitForSupabase(() => {
+                if (!window._matchesLoadAttempted) {
+                    window._matchesLoadAttempted = true;
+                    loadMatchHistory();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

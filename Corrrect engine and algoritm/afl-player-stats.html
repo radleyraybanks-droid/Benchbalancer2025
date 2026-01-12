@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFL Player Stats - Bench Balancer</title>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config/env.js"></script>
+    <script type="module" src="config/simple-supabase.js"></script>
+    <script type="module">
+        import { initAuth } from './config/simple-supabase.js';
+        initAuth();
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #060b14;
+            --bg-850: #08101a;
+            --bg-secondary: #0a1220;
+            --bg-card: #0d1626;
+            --border-strong: rgba(255, 255, 255, 0.18);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --border-faint: rgba(255, 255, 255, 0.06);
+            --accent-cyan: #00ffe0;
+            --accent-success: #4be9a6;
+            --accent-warning: #ffb23f;
+            --text-primary: #f5fbff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --radius-md: 12px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        #appHeader {
+            background: linear-gradient(180deg, rgba(0, 255, 224, 0.08) 0%, rgba(6, 12, 22, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-faint);
+            padding: 24px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo {
+            height: 32px;
+        }
+
+        .back-btn {
+            background: rgba(0, 255, 224, 0.1);
+            border: 1px solid rgba(0, 255, 224, 0.3);
+            color: var(--accent-cyan);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 224, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            letter-spacing: 0.1em;
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(0, 255, 224, 0.4);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .sort-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sort-btn.active {
+            background: rgba(0, 255, 224, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .sort-btn:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        /* Player Grid */
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .player-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-cyan), rgba(0, 255, 224, 0.3));
+        }
+
+        .player-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 255, 224, 0.2);
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .player-name {
+            font-family: 'Russo One', sans-serif;
+            font-size: 22px;
+            color: var(--text-primary);
+        }
+
+        .jersey-badge {
+            background: rgba(0, 255, 224, 0.15);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .line-badge {
+            display: inline-block;
+            background: rgba(124, 92, 255, 0.15);
+            border: 1px solid #7c5cff;
+            color: #7c5cff;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-faint);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .stat-value.highlight {
+            color: var(--accent-cyan);
+            font-size: 20px;
+        }
+
+        .trend-indicator {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        .trend-up {
+            color: var(--accent-success);
+        }
+
+        .trend-down {
+            color: #ff5f6d;
+        }
+
+        /* AFL-specific stat highlights */
+        .afl-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-faint);
+        }
+
+        .afl-stat-item {
+            text-align: center;
+            padding: 12px 8px;
+            background: rgba(0, 255, 224, 0.05);
+            border-radius: 8px;
+        }
+
+        .afl-stat-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 24px;
+            color: var(--accent-cyan);
+        }
+
+        .afl-stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--border-medium);
+            border-top: 3px solid var(--accent-cyan);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer Nav */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 18, 32, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-faint);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--accent-cyan);
+        }
+
+        .nav-icon-img {
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+        }
+
+        .nav-item.active .nav-icon-img {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <header id="appHeader">
+        <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" class="header-logo">
+        <a href="afl.html" class="back-btn">Back to AFL</a>
+    </header>
+
+    <div class="container">
+        <h1>AFL PLAYER STATISTICS</h1>
+        <p class="subtitle">Season performance and analytics for each player</p>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="sort-btn active" onclick="sortBy('games', this)">Sort by Games</button>
+            <button class="sort-btn" onclick="sortBy('goals', this)">Sort by Goals</button>
+            <button class="sort-btn" onclick="sortBy('disposals', this)">Sort by Disposals</button>
+            <button class="sort-btn" onclick="sortBy('fieldTime', this)">Sort by Field Time</button>
+        </div>
+
+        <!-- Player Grid -->
+        <div id="playerGridContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading player statistics...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+        <a href="afl.html" class="nav-item">
+            <img src="assets/icon-home.png" class="nav-icon-img" alt="Home">
+            <span>HOME</span>
+        </a>
+        <a href="afl-squad-management.html" class="nav-item">
+            <img src="assets/icon-teams.png" class="nav-icon-img" alt="Teams">
+            <span>SQUAD</span>
+        </a>
+        <a href="afl-match-history.html" class="nav-item">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="History">
+            <span>HISTORY</span>
+        </a>
+        <a href="afl-player-stats.html" class="nav-item active">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="Stats">
+            <span>PLAYERS</span>
+        </a>
+    </nav>
+
+    <script>
+        let playerStats = [];
+        let currentSort = 'games';
+
+        async function loadPlayerStats() {
+            if (!window.benchBalancerSupabase) {
+                showError('Database not connected');
+                return;
+            }
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                if (!user) {
+                    window.location.href = 'afl.html';
+                    return;
+                }
+
+                // Fetch all AFL player stats joined with match results
+                const { data, error } = await window.benchBalancerSupabase
+                    .from('match_player_stats')
+                    .select(`
+                        *,
+                        match_results!inner(user_id, match_date, sport)
+                    `)
+                    .eq('match_results.user_id', user.id)
+                    .eq('match_results.sport', 'afl');
+
+                if (error) throw error;
+
+                // Aggregate stats by player
+                const playerMap = {};
+
+                (data || []).forEach(stat => {
+                    const key = `${stat.player_name}_${stat.jersey_number}`;
+
+                    if (!playerMap[key]) {
+                        playerMap[key] = {
+                            name: stat.player_name,
+                            jersey: stat.jersey_number || '-',
+                            position: stat.position || 'Utility',
+                            gamesPlayed: 0,
+                            totalFieldTime: 0,
+                            totalBenchTime: 0,
+                            totalGoals: 0,
+                            totalBehinds: 0,
+                            totalDisposals: 0,
+                            totalKicks: 0,
+                            totalHandballs: 0,
+                            totalMarks: 0,
+                            totalTackles: 0,
+                            matches: []
+                        };
+                    }
+
+                    playerMap[key].gamesPlayed++;
+                    playerMap[key].totalFieldTime += stat.time_on_field || stat.time_on_court || 0;
+                    playerMap[key].totalBenchTime += stat.time_on_bench || 0;
+                    playerMap[key].totalGoals += stat.goals || 0;
+                    playerMap[key].totalBehinds += stat.behinds || 0;
+                    playerMap[key].totalDisposals += stat.disposals || 0;
+                    playerMap[key].totalKicks += stat.kicks || 0;
+                    playerMap[key].totalHandballs += stat.handballs || 0;
+                    playerMap[key].totalMarks += stat.marks || 0;
+                    playerMap[key].totalTackles += stat.tackles || 0;
+
+                    playerMap[key].matches.push({
+                        date: stat.match_results.match_date,
+                        fieldTime: stat.time_on_field || stat.time_on_court || 0,
+                        goals: stat.goals || 0,
+                        disposals: stat.disposals || 0
+                    });
+                });
+
+                // Convert to array and calculate averages
+                playerStats = Object.values(playerMap).map(p => ({
+                    ...p,
+                    avgFieldTime: p.gamesPlayed > 0 ? Math.round(p.totalFieldTime / p.gamesPlayed) : 0,
+                    avgGoals: p.gamesPlayed > 0 ? (p.totalGoals / p.gamesPlayed).toFixed(1) : 0,
+                    avgDisposals: p.gamesPlayed > 0 ? (p.totalDisposals / p.gamesPlayed).toFixed(1) : 0,
+                    totalScore: (p.totalGoals * 6) + p.totalBehinds
+                }));
+
+                sortBy(currentSort);
+
+            } catch (error) {
+                console.error('Error loading player stats:', error);
+                showError('Failed to load player statistics');
+            }
+        }
+
+        function sortBy(criteria, eventTarget) {
+            currentSort = criteria;
+
+            // Update button states
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            if (eventTarget) {
+                eventTarget.classList.add('active');
+            } else {
+                const btn = document.querySelector(`[onclick*="sortBy('${criteria}')"]`);
+                if (btn) btn.classList.add('active');
+            }
+
+            switch (criteria) {
+                case 'games':
+                    playerStats.sort((a, b) => b.gamesPlayed - a.gamesPlayed);
+                    break;
+                case 'goals':
+                    playerStats.sort((a, b) => b.totalGoals - a.totalGoals);
+                    break;
+                case 'disposals':
+                    playerStats.sort((a, b) => b.totalDisposals - a.totalDisposals);
+                    break;
+                case 'fieldTime':
+                    playerStats.sort((a, b) => b.totalFieldTime - a.totalFieldTime);
+                    break;
+            }
+
+            renderPlayerCards();
+        }
+
+        function renderPlayerCards() {
+            const container = document.getElementById('playerGridContainer');
+
+            if (playerStats.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#127944;</div>
+                        <h3>No player statistics yet</h3>
+                        <p>Play AFL matches to start tracking player performance!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = playerStats.map(player => {
+                const trend = calculateTrend(player);
+
+                return `
+                    <div class="player-card">
+                        <div class="player-header">
+                            <div class="player-name">${player.name}</div>
+                            <div class="jersey-badge">#${player.jersey}</div>
+                        </div>
+
+                        <div class="line-badge">${player.position}</div>
+
+                        <div class="stat-row">
+                            <span class="stat-label">Games Played</span>
+                            <span class="stat-value highlight">${player.gamesPlayed}</span>
+                        </div>
+
+                        <div class="stat-row">
+                            <span class="stat-label">Total Score</span>
+                            <span class="stat-value">${player.totalGoals}.${player.totalBehinds} (${player.totalScore})</span>
+                        </div>
+
+                        <div class="stat-row">
+                            <span class="stat-label">Avg Goals/Game</span>
+                            <span class="stat-value">${player.avgGoals}</span>
+                        </div>
+
+                        <div class="stat-row">
+                            <span class="stat-label">Total Field Time</span>
+                            <span class="stat-value">${formatTime(player.totalFieldTime)}</span>
+                        </div>
+
+                        <div class="stat-row">
+                            <span class="stat-label">Avg Field Time</span>
+                            <span class="stat-value">
+                                ${formatTime(player.avgFieldTime)}
+                                <span class="trend-indicator ${trend.class}">${trend.icon}</span>
+                            </span>
+                        </div>
+
+                        <!-- AFL-specific stats -->
+                        <div class="afl-stat-grid">
+                            <div class="afl-stat-item">
+                                <div class="afl-stat-value">${player.totalDisposals}</div>
+                                <div class="afl-stat-label">Disposals</div>
+                            </div>
+                            <div class="afl-stat-item">
+                                <div class="afl-stat-value">${player.totalMarks}</div>
+                                <div class="afl-stat-label">Marks</div>
+                            </div>
+                            <div class="afl-stat-item">
+                                <div class="afl-stat-value">${player.totalTackles}</div>
+                                <div class="afl-stat-label">Tackles</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="player-grid">${html}</div>`;
+        }
+
+        function calculateTrend(player) {
+            if (player.matches.length < 2) {
+                return { icon: '', class: '' };
+            }
+
+            // Compare last 2 games
+            const sorted = player.matches.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const recent = sorted.slice(0, 2);
+
+            if (recent[0].fieldTime > recent[1].fieldTime) {
+                return { icon: '&#8593;', class: 'trend-up' };
+            } else if (recent[0].fieldTime < recent[1].fieldTime) {
+                return { icon: '&#8595;', class: 'trend-down' };
+            }
+
+            return { icon: '&#8594;', class: '' };
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function showError(message) {
+            document.getElementById('playerGridContainer').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#9888;</div>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Wait for Supabase to be ready before loading stats
+        function waitForSupabase(callback, maxAttempts = 20) {
+            let attempts = 0;
+            const checkInterval = setInterval(() => {
+                attempts++;
+                if (window.benchBalancerSupabase) {
+                    clearInterval(checkInterval);
+                    callback();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+                    showError('Database connection timed out. Please refresh the page.');
+                }
+            }, 250);
+        }
+
+        // Load on page load
+        if (window.benchBalancerSupabase) {
+            loadPlayerStats();
+        } else {
+            window.addEventListener('supabaseReady', () => loadPlayerStats());
+            waitForSupabase(() => {
+                if (!window._statsLoadAttempted) {
+                    window._statsLoadAttempted = true;
+                    loadPlayerStats();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

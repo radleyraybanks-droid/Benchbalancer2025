@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFL Team Analytics - Bench Balancer</title>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config/env.js"></script>
+    <script type="module" src="config/simple-supabase.js"></script>
+    <script type="module">
+        import { initAuth } from './config/simple-supabase.js';
+        initAuth();
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #060b14;
+            --bg-850: #08101a;
+            --bg-secondary: #0a1220;
+            --bg-card: #0d1626;
+            --border-strong: rgba(255, 255, 255, 0.18);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --border-faint: rgba(255, 255, 255, 0.06);
+            --accent-cyan: #00ffe0;
+            --accent-success: #4be9a6;
+            --accent-danger: #ff5f6d;
+            --accent-warning: #ffb23f;
+            --accent-purple: #7c5cff;
+            --text-primary: #f5fbff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --radius-md: 12px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        #appHeader {
+            background: linear-gradient(180deg, rgba(0, 255, 224, 0.08) 0%, rgba(6, 12, 22, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-faint);
+            padding: 24px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo {
+            height: 32px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-icon-btn:hover {
+            background: rgba(0, 255, 224, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            background: rgba(0, 255, 224, 0.1);
+            border: 1px solid rgba(0, 255, 224, 0.3);
+            color: var(--accent-cyan);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 224, 0.2);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            letter-spacing: 0.1em;
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(0, 255, 224, 0.4);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        /* Analytics Grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .analytics-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .analytics-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 224, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 16px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card-icon {
+            font-size: 24px;
+        }
+
+        .big-stat {
+            font-family: 'Russo One', sans-serif;
+            font-size: 48px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Chart Container */
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* Best Performances */
+        .performance-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .performance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0, 255, 224, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        .performance-opponent {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .performance-score {
+            color: var(--accent-success);
+            font-weight: 700;
+        }
+
+        /* Line Time Distribution */
+        .line-time-bar {
+            margin-bottom: 12px;
+        }
+
+        .line-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .line-name {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .line-percentage {
+            color: var(--accent-cyan);
+        }
+
+        .line-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .line-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--border-medium);
+            border-top: 3px solid var(--accent-cyan);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer Nav */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 18, 32, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-faint);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--accent-cyan);
+        }
+
+        .nav-icon-img {
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+        }
+
+        .nav-item.active .nav-icon-img {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <header id="appHeader">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto;">
+            <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" class="header-logo">
+            <div class="header-actions" style="display: flex; gap: 12px; align-items: center;">
+                <button class="header-icon-btn" onclick="window.location.reload()" aria-label="Reload">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                </button>
+                <a href="afl.html" class="back-btn">Back to AFL</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>AFL TEAM ANALYTICS</h1>
+        <p class="subtitle">Comprehensive season performance and insights for your AFL/Auskick team</p>
+
+        <div id="analyticsContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading analytics...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+        <a href="afl.html" class="nav-item">
+            <img src="assets/icon-home.png" class="nav-icon-img" alt="Home">
+            <span>HOME</span>
+        </a>
+        <a href="afl-match-history.html" class="nav-item">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="History">
+            <span>HISTORY</span>
+        </a>
+        <a href="afl-player-stats.html" class="nav-item">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="Stats">
+            <span>PLAYERS</span>
+        </a>
+        <a href="afl-team-analytics.html" class="nav-item active">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="Analytics">
+            <span>ANALYTICS</span>
+        </a>
+    </nav>
+
+    <script>
+        let matchData = [];
+        let charts = {};
+
+        // AFL Scoring helper
+        function formatAFLScore(goals, behinds) {
+            const total = (goals * 6) + behinds;
+            return `${goals}.${behinds} (${total})`;
+        }
+
+        async function loadAnalytics() {
+            if (!window.benchBalancerSupabase) {
+                showError('Database not connected');
+                return;
+            }
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                if (!user) {
+                    window.location.href = 'afl.html';
+                    return;
+                }
+
+                // Fetch all AFL matches
+                const { data: matches, error } = await window.benchBalancerSupabase
+                    .from('match_results')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('sport', 'afl')
+                    .order('match_date', { ascending: true });
+
+                if (error) throw error;
+
+                matchData = matches || [];
+                renderAnalytics();
+
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                showError('Failed to load analytics');
+            }
+        }
+
+        function renderAnalytics() {
+            if (matchData.length === 0) {
+                document.getElementById('analyticsContainer').innerHTML = `
+                    <div class="empty-state" style="text-align:center; padding:60px 20px; color:var(--text-secondary);">
+                        <div style="font-size:64px; margin-bottom:16px; opacity:0.5;">&#127944;</div>
+                        <h3>No data yet</h3>
+                        <p>Play AFL matches to see team analytics!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const stats = calculateStats();
+
+            const html = `
+                <!-- Summary Cards -->
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <div class="card-title">Win Rate</div>
+                            <div class="card-icon">&#127942;</div>
+                        </div>
+                        <div class="big-stat">${stats.winRate}%</div>
+                        <div class="stat-label">${stats.wins} wins out of ${stats.total} matches</div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <div class="card-title">Avg Goals Per Game</div>
+                            <div class="card-icon">&#127945;</div>
+                        </div>
+                        <div class="big-stat">${stats.avgGoals}</div>
+                        <div class="stat-label">Per game average</div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <div class="card-title">Avg Behinds Per Game</div>
+                            <div class="card-icon">&#127919;</div>
+                        </div>
+                        <div class="big-stat">${stats.avgBehinds}</div>
+                        <div class="stat-label">Per game average</div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <div class="card-title">Scoring Accuracy</div>
+                            <div class="card-icon">${stats.accuracy >= 50 ? '&#128200;' : '&#128201;'}</div>
+                        </div>
+                        <div class="big-stat" style="color: ${stats.accuracy >= 50 ? 'var(--accent-success)' : 'var(--accent-warning)'}">
+                            ${stats.accuracy}%
+                        </div>
+                        <div class="stat-label">Goals / (Goals + Behinds)</div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <div class="card-title">Home Record</div>
+                            <div class="card-icon">&#127968;</div>
+                        </div>
+                        <div class="big-stat" style="font-size:32px;">${stats.homeWins}-${stats.homeLosses}</div>
+                        <div class="stat-label">${stats.homeWinRate}% win rate</div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <div class="card-title">Away Record</div>
+                            <div class="card-icon">&#9992;</div>
+                        </div>
+                        <div class="big-stat" style="font-size:32px;">${stats.awayWins}-${stats.awayLosses}</div>
+                        <div class="stat-label">${stats.awayWinRate}% win rate</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="chart-card">
+                    <div class="card-title">Win/Loss Distribution</div>
+                    <div class="chart-wrapper">
+                        <canvas id="winLossChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="card-title">Scoring Trend (Last 10 Games)</div>
+                    <div class="chart-wrapper">
+                        <canvas id="scoringTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Line Time Distribution -->
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <div class="card-title">Scoring Efficiency by Line</div>
+                        <div style="margin-top: 20px;">
+                            ${renderLineTimeDistribution(stats.lineStats)}
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="card-title">Best Wins</div>
+                        <div class="performance-list" style="margin-top:20px;">
+                            ${stats.bestWins.map(w => `
+                                <div class="performance-item">
+                                    <span class="performance-opponent">${w.opponent}</span>
+                                    <span class="performance-score">${w.displayScore}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Form -->
+                <div class="analytics-card" style="margin-top: 20px;">
+                    <div class="card-title">Recent Form (Last 5 Games)</div>
+                    <div style="margin-top:20px; font-size:32px; text-align:center;">
+                        ${stats.recentForm.map(r => r === 'W' ? '&#128994;' : r === 'L' ? '&#128308;' : '&#128993;').join(' ')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('analyticsContainer').innerHTML = html;
+
+            // Render charts
+            setTimeout(() => {
+                renderWinLossChart(stats);
+                renderScoringTrendChart();
+            }, 100);
+        }
+
+        function calculateStats() {
+            const total = matchData.length;
+            const wins = matchData.filter(m => m.result === 'win').length;
+            const losses = matchData.filter(m => m.result === 'loss').length;
+            const draws = matchData.filter(m => m.result === 'draw').length;
+
+            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+
+            // Calculate total goals and behinds
+            let totalGoals = 0;
+            let totalBehinds = 0;
+
+            matchData.forEach(m => {
+                // Try to get from afl_data first, otherwise estimate
+                if (m.afl_data && m.afl_data.goals !== undefined) {
+                    totalGoals += m.afl_data.goals;
+                    totalBehinds += m.afl_data.behinds;
+                } else {
+                    // Estimate from total score
+                    const estimatedGoals = Math.floor(m.team_score / 8);
+                    const remainder = m.team_score - (estimatedGoals * 6);
+                    totalGoals += estimatedGoals;
+                    totalBehinds += Math.max(0, remainder);
+                }
+            });
+
+            const avgGoals = total > 0 ? (totalGoals / total).toFixed(1) : 0;
+            const avgBehinds = total > 0 ? (totalBehinds / total).toFixed(1) : 0;
+            const accuracy = (totalGoals + totalBehinds) > 0
+                ? Math.round((totalGoals / (totalGoals + totalBehinds)) * 100)
+                : 0;
+
+            // Home/Away
+            const homeMatches = matchData.filter(m => m.home_away === true);
+            const awayMatches = matchData.filter(m => m.home_away === false);
+            const homeWins = homeMatches.filter(m => m.result === 'win').length;
+            const homeLosses = homeMatches.filter(m => m.result === 'loss').length;
+            const awayWins = awayMatches.filter(m => m.result === 'win').length;
+            const awayLosses = awayMatches.filter(m => m.result === 'loss').length;
+            const homeWinRate = homeMatches.length > 0 ? Math.round((homeWins / homeMatches.length) * 100) : 0;
+            const awayWinRate = awayMatches.length > 0 ? Math.round((awayWins / awayMatches.length) * 100) : 0;
+
+            // Best wins (sorted by margin)
+            const winsData = matchData.filter(m => m.result === 'win')
+                .map(m => {
+                    const margin = m.team_score - m.opponent_score;
+                    // Parse AFL display score
+                    let goals = 0, behinds = 0;
+                    if (m.afl_data && m.afl_data.goals !== undefined) {
+                        goals = m.afl_data.goals;
+                        behinds = m.afl_data.behinds;
+                    } else {
+                        goals = Math.floor(m.team_score / 8);
+                        behinds = Math.max(0, m.team_score - (goals * 6));
+                    }
+                    return {
+                        ...m,
+                        margin,
+                        displayScore: formatAFLScore(goals, behinds)
+                    };
+                })
+                .sort((a, b) => b.margin - a.margin)
+                .slice(0, 3);
+
+            // Recent form (last 5)
+            const recentForm = matchData.slice(-5).map(m => m.result === 'win' ? 'W' : m.result === 'loss' ? 'L' : 'D');
+
+            // Line stats (mock data for now - would come from player stats)
+            const lineStats = {
+                'Forward': { goals: Math.round(totalGoals * 0.6), color: '#4be9a6' },
+                'Midfield': { goals: Math.round(totalGoals * 0.25), color: '#00ffe0' },
+                'Ruck': { goals: Math.round(totalGoals * 0.1), color: '#7c5cff' },
+                'Back': { goals: Math.round(totalGoals * 0.05), color: '#ff9966' }
+            };
+
+            return {
+                total, wins, losses, draws, winRate,
+                avgGoals, avgBehinds, accuracy,
+                homeWins, homeLosses, homeWinRate,
+                awayWins, awayLosses, awayWinRate,
+                bestWins: winsData,
+                recentForm,
+                lineStats,
+                totalGoals
+            };
+        }
+
+        function renderLineTimeDistribution(lineStats) {
+            const stats = calculateStats();
+            const totalGoals = stats.totalGoals || 1;
+
+            return Object.entries(lineStats).map(([line, data]) => {
+                const percentage = Math.round((data.goals / totalGoals) * 100);
+                return `
+                    <div class="line-time-bar">
+                        <div class="line-label">
+                            <span class="line-name">${line}</span>
+                            <span class="line-percentage">${data.goals} goals (${percentage}%)</span>
+                        </div>
+                        <div class="line-bar">
+                            <div class="line-bar-fill" style="width: ${percentage}%; background: ${data.color};"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderWinLossChart(stats) {
+            const ctx = document.getElementById('winLossChart');
+            if (!ctx) return;
+
+            charts.winLoss = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Wins', 'Losses', 'Draws'],
+                    datasets: [{
+                        data: [stats.wins, stats.losses, stats.draws],
+                        backgroundColor: ['#4be9a6', '#ff5f6d', '#ffb23f'],
+                        borderColor: '#0d1626',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { size: 14 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderScoringTrendChart() {
+            const ctx = document.getElementById('scoringTrendChart');
+            if (!ctx) return;
+
+            const last10 = matchData.slice(-10);
+            const labels = last10.map(m => m.opponent);
+            const teamScores = last10.map(m => m.team_score);
+            const opponentScores = last10.map(m => m.opponent_score);
+
+            charts.scoringTrend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Team Score',
+                            data: teamScores,
+                            borderColor: '#00ffe0',
+                            backgroundColor: 'rgba(0, 255, 224, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Opponent Score',
+                            data: opponentScores,
+                            borderColor: '#ff5f6d',
+                            backgroundColor: 'rgba(255, 95, 109, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255, 255, 255, 0.06)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255, 255, 255, 0.06)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#94a3b8', font: { size: 14 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function showError(message) {
+            document.getElementById('analyticsContainer').innerHTML = `
+                <div style="text-align:center; padding:60px 20px; color:var(--text-secondary);">
+                    <div style="font-size:64px; margin-bottom:16px; opacity:0.5;">&#9888;</div>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Wait for Supabase to be ready before loading
+        function waitForSupabase(callback, maxAttempts = 20) {
+            let attempts = 0;
+            const checkInterval = setInterval(() => {
+                attempts++;
+                if (window.benchBalancerSupabase) {
+                    clearInterval(checkInterval);
+                    callback();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+                    showError('Database connection timed out. Please refresh the page.');
+                }
+            }, 250);
+        }
+
+        // Load on page load
+        if (window.benchBalancerSupabase) {
+            loadAnalytics();
+        } else {
+            window.addEventListener('supabaseReady', () => loadAnalytics());
+            waitForSupabase(() => {
+                if (!window._analyticsLoadAttempted) {
+                    window._analyticsLoadAttempted = true;
+                    loadAnalytics();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

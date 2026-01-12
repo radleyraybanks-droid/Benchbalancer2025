@@ -254,6 +254,296 @@ DROP INDEX IF EXISTS idx_player_stats_user_player;
 DROP INDEX IF EXISTS idx_games_user_team;
         `,
     },
+    {
+        version: '1.5.0',
+        name: 'Add Last Login Tracking',
+        description: 'Adds last_login to profiles and syncs with Auth',
+        up: `
+-- Migration 1.5.0: Last Login Tracking
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_login TIMESTAMPTZ;
+
+-- Create function to sync last_login from auth.users
+CREATE OR REPLACE FUNCTION public.handle_user_login()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE public.profiles
+    SET last_login = NEW.last_sign_in_at
+    WHERE id = NEW.id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger on auth.users update
+DROP TRIGGER IF EXISTS on_auth_user_login ON auth.users;
+CREATE TRIGGER on_auth_user_login
+    AFTER UPDATE OF last_sign_in_at ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_user_login();
+        `,
+        down: `
+-- Revert Migration 1.5.0
+DROP TRIGGER IF EXISTS on_auth_user_login ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_user_login();
+ALTER TABLE profiles DROP COLUMN IF EXISTS last_login;
+        `,
+    },
+    {
+        version: '1.6.0',
+        name: 'Add Rosters and Schedules',
+        description: 'Adds teams_roster and scheduled_matches tables',
+        up: `
+-- Migration 1.6.0: Rosters and Schedules
+-- 1. Teams Roster (Players)
+CREATE TABLE IF NOT EXISTS teams_roster (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    jersey_number VARCHAR(10), -- String to allow "00" or similar
+    position VARCHAR(50),
+    notes TEXT,
+    parent_contact JSONB, -- Stores parent name/phone
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS for Rosters
+ALTER TABLE teams_roster ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own roster" ON teams_roster FOR ALL USING (auth.uid() = user_id);
+CREATE INDEX IF NOT EXISTS idx_teams_roster_user ON teams_roster(user_id);
+
+-- 2. Scheduled Matches
+CREATE TABLE IF NOT EXISTS scheduled_matches (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    opponent_name VARCHAR(100),
+    match_date VARCHAR(20), -- Store as YYYY-MM-DD string for simplicity or DATE type
+    match_time VARCHAR(10), -- HH:MM
+    is_home BOOLEAN DEFAULT false,
+    venue VARCHAR(150),
+    status VARCHAR(20) DEFAULT 'scheduled', -- scheduled, completed, cancelled
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS for Schedules
+ALTER TABLE scheduled_matches ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own schedule" ON scheduled_matches FOR ALL USING (auth.uid() = user_id);
+CREATE INDEX IF NOT EXISTS idx_scheduled_matches_user_date ON scheduled_matches(user_id, match_date);
+        `,
+        down: `
+-- Revert Migration 1.6.0
+DROP TABLE IF EXISTS scheduled_matches;
+DROP TABLE IF EXISTS teams_roster;
+        `,
+    },
+    {
+        version: '1.7.0',
+        name: 'Add Leads Capture',
+        description: 'Adds leads table for marketing',
+        up: `
+-- Migration 1.7.0: Leads Capture
+CREATE TABLE IF NOT EXISTS leads (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    source VARCHAR(50) DEFAULT 'match_report',
+    converted BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS (Public Insert, Admin View)
+ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
+-- Allow anyone to insert (public lead magnet)
+CREATE POLICY "Public insert leads" ON leads FOR INSERT WITH CHECK (true);
+-- Only authenticated users (admins usually, but here maybe just self? simplified for now)
+-- Actually, we likely only want service_role to view/export, or specific admin.
+-- For now, let's keep it locked down.
+        `,
+        down: `
+-- Revert Migration 1.7.0
+DROP TABLE IF EXISTS leads;
+        `,
+    },
+    {
+        version: '1.8.0',
+        name: 'Add Admin Role',
+        description: 'Adds role column to profiles and admin RLS policies',
+        up: `
+-- Migration 1.8.0: Add Admin Role
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user';
+
+-- Create index for faster role lookups
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
+
+-- RLS: Allow Admins to View ALL Profiles (for counting stats)
+CREATE POLICY "Admins can view all profiles"
+    ON profiles FOR SELECT
+    USING (
+        auth.uid() IN (
+            SELECT id FROM profiles WHERE role = 'admin'
+        )
+    );
+
+-- RLS: Allow Admins to View ALL Games (for counting stats)
+-- Note: We need to check if a policy already exists that conflicts, 
+-- but generally adding a new permitted policy is additive.
+CREATE POLICY "Admins can view all games"
+    ON games FOR SELECT
+    USING (
+        auth.uid() IN (
+            SELECT id FROM profiles WHERE role = 'admin'
+        )
+    );
+        `,
+        down: `
+-- Revert Migration 1.8.0
+DROP POLICY IF EXISTS "Admins can view all games" ON games;
+DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
+DROP INDEX IF EXISTS idx_profiles_role;
+ALTER TABLE profiles DROP COLUMN IF EXISTS role;
+        `,
+    },
+    {
+        version: '1.9.0',
+        name: 'Add Home Club Field',
+        description: 'Adds home_club column to profiles for organization tracking',
+        up: `
+-- Migration 1.9.0: Add Home Club Field
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS home_club VARCHAR(150);
+
+-- Update the profile creation trigger to capture home_club
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, email, full_name, home_club)
+    VALUES (
+        NEW.id,
+        NEW.email,
+        NEW.raw_user_meta_data->>'full_name',
+        NEW.raw_user_meta_data->>'home_club'
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+        `,
+        down: `
+-- Revert Migration 1.9.0
+ALTER TABLE profiles DROP COLUMN IF EXISTS home_club;
+
+-- Restore original trigger without home_club
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, email, full_name)
+    VALUES (
+        NEW.id,
+        NEW.email,
+        NEW.raw_user_meta_data->>'full_name'
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+        `,
+    },
+    {
+        version: '2.0.0',
+        name: 'Add AFL Support',
+        description: 'Adds AFL-specific columns for Goals/Behinds scoring and detailed player stats',
+        up: `
+-- Migration 2.0.0: Add AFL Support
+-- Adds AFL-specific scoring (Goals/Behinds) and player statistics
+
+-- Add AFL scoring columns to games table
+ALTER TABLE games ADD COLUMN IF NOT EXISTS home_goals INTEGER DEFAULT 0;
+ALTER TABLE games ADD COLUMN IF NOT EXISTS home_behinds INTEGER DEFAULT 0;
+ALTER TABLE games ADD COLUMN IF NOT EXISTS away_goals INTEGER DEFAULT 0;
+ALTER TABLE games ADD COLUMN IF NOT EXISTS away_behinds INTEGER DEFAULT 0;
+
+-- Add AFL-specific columns to player_stats table
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS goals INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS behinds INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS disposals INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS kicks INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS handballs INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS marks INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS tackles INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS hitouts INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS clearances INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS inside_50s INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS turnovers INTEGER DEFAULT 0;
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS line_played VARCHAR(20);
+
+-- Add field size and age group to games table for AFL
+ALTER TABLE games ADD COLUMN IF NOT EXISTS field_size INTEGER DEFAULT 13;
+ALTER TABLE games ADD COLUMN IF NOT EXISTS age_group VARCHAR(20);
+
+-- Add sport column to teams_roster for sport-specific squads
+ALTER TABLE teams_roster ADD COLUMN IF NOT EXISTS sport VARCHAR(50) DEFAULT 'basketball';
+CREATE INDEX IF NOT EXISTS idx_teams_roster_sport ON teams_roster(sport);
+
+-- Add sport column to scheduled_matches for sport-specific schedules
+ALTER TABLE scheduled_matches ADD COLUMN IF NOT EXISTS sport VARCHAR(50) DEFAULT 'basketball';
+CREATE INDEX IF NOT EXISTS idx_scheduled_matches_sport ON scheduled_matches(sport);
+
+-- Add index for AFL games
+CREATE INDEX IF NOT EXISTS idx_games_afl ON games(sport) WHERE sport = 'afl';
+
+-- Add constraints for AFL scoring (non-negative)
+ALTER TABLE games ADD CONSTRAINT IF NOT EXISTS games_home_goals_non_negative
+    CHECK (home_goals >= 0);
+ALTER TABLE games ADD CONSTRAINT IF NOT EXISTS games_home_behinds_non_negative
+    CHECK (home_behinds >= 0);
+ALTER TABLE games ADD CONSTRAINT IF NOT EXISTS games_away_goals_non_negative
+    CHECK (away_goals >= 0);
+ALTER TABLE games ADD CONSTRAINT IF NOT EXISTS games_away_behinds_non_negative
+    CHECK (away_behinds >= 0);
+ALTER TABLE player_stats ADD CONSTRAINT IF NOT EXISTS player_stats_goals_non_negative
+    CHECK (goals >= 0);
+ALTER TABLE player_stats ADD CONSTRAINT IF NOT EXISTS player_stats_behinds_non_negative
+    CHECK (behinds >= 0);
+        `,
+        down: `
+-- Revert Migration 2.0.0
+-- Remove AFL-specific columns
+
+-- Drop constraints
+ALTER TABLE games DROP CONSTRAINT IF EXISTS games_home_goals_non_negative;
+ALTER TABLE games DROP CONSTRAINT IF EXISTS games_home_behinds_non_negative;
+ALTER TABLE games DROP CONSTRAINT IF EXISTS games_away_goals_non_negative;
+ALTER TABLE games DROP CONSTRAINT IF EXISTS games_away_behinds_non_negative;
+ALTER TABLE player_stats DROP CONSTRAINT IF EXISTS player_stats_goals_non_negative;
+ALTER TABLE player_stats DROP CONSTRAINT IF EXISTS player_stats_behinds_non_negative;
+
+-- Drop indexes
+DROP INDEX IF EXISTS idx_games_afl;
+DROP INDEX IF EXISTS idx_teams_roster_sport;
+DROP INDEX IF EXISTS idx_scheduled_matches_sport;
+
+-- Drop columns from games
+ALTER TABLE games DROP COLUMN IF EXISTS home_goals;
+ALTER TABLE games DROP COLUMN IF EXISTS home_behinds;
+ALTER TABLE games DROP COLUMN IF EXISTS away_goals;
+ALTER TABLE games DROP COLUMN IF EXISTS away_behinds;
+ALTER TABLE games DROP COLUMN IF EXISTS field_size;
+ALTER TABLE games DROP COLUMN IF EXISTS age_group;
+
+-- Drop columns from player_stats
+ALTER TABLE player_stats DROP COLUMN IF EXISTS goals;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS behinds;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS disposals;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS kicks;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS handballs;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS marks;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS tackles;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS hitouts;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS clearances;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS inside_50s;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS turnovers;
+ALTER TABLE player_stats DROP COLUMN IF EXISTS line_played;
+
+-- Drop sport columns from related tables
+ALTER TABLE teams_roster DROP COLUMN IF EXISTS sport;
+ALTER TABLE scheduled_matches DROP COLUMN IF EXISTS sport;
+        `,
+    },
 ];
 
 // ============================================================================

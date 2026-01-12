@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bench Balancer - AFL / Auskick</title>
+
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Supabase Initialization -->
+    <script src="config/env.js"></script>
+
+    <style>
+        /* ---------- Typeface Imports ---------- */
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@500;700&display=swap');
+
+        /* ---------- Theme Tokens ---------- */
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #08101a;
+            --bg-850: #0e1625;
+            --bg-800: rgba(18, 28, 45, 0.75);
+            --bg-700: rgba(24, 34, 53, 0.65);
+            --bg-card: rgba(23, 34, 58, 0.85);
+            --bg-card-soft: rgba(28, 42, 66, 0.65);
+            --bg-highlight: rgba(0, 255, 224, 0.08);
+            --border-strong: rgba(0, 255, 224, 0.35);
+            --border-soft: rgba(0, 255, 224, 0.18);
+            --border-faint: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00ffe0;
+            --accent-cyan-strong: #00cdb8;
+            --accent-blue: #73a7ff;
+            --accent-purple: #7c5cff;
+            --accent-warm: #ffb23f;
+            --accent-success: #4be9a6;
+            --accent-danger: #ff5f6d;
+            --accent-afl-red: #cc2222;
+            --accent-afl-gold: #ffcc00;
+            --text-primary: #f5fbff;
+            --text-secondary: #9fb7d6;
+            --text-muted: #6f829e;
+            --shadow-soft: 0 24px 60px -32px rgba(0, 0, 0, 0.8);
+            --shadow-strong: 0 32px 90px -40px rgba(0, 0, 0, 0.85);
+            --radius-lg: 28px;
+            --radius-md: 20px;
+            --radius-sm: 12px;
+            --transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ---------- Landing Experience ---------- */
+        #landingScreen {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 48px;
+            padding: 56px 20px 72px;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.08), transparent 50%),
+                radial-gradient(circle at 80% 0%, rgba(204, 34, 34, 0.12), transparent 52%),
+                linear-gradient(160deg, var(--bg-900) 0%, #050913 55%, #02050b 100%);
+        }
+
+        .landing-topbar {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .landing-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(36px, 6vw, 52px);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 26px rgba(0, 255, 224, 0.6);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .landing-top-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .landing-pill {
+            border-radius: 999px;
+            padding: 10px 24px;
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid rgba(0, 255, 224, 0.35);
+            color: var(--accent-cyan);
+            background: rgba(4, 12, 22, 0.6);
+            transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+        }
+
+        .landing-pill.primary {
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.95) 0%, rgba(0, 205, 184, 0.95) 100%);
+            color: #041018;
+            border-color: transparent;
+            box-shadow: 0 16px 40px -24px rgba(0, 255, 224, 0.75);
+        }
+
+        .landing-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 42px -28px rgba(0, 255, 224, 0.65);
+        }
+
+        .landing-hero {
+            width: 100%;
+            max-width: 960px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .landing-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(42px, 10vw, 68px);
+            letter-spacing: 0.26em;
+            margin: 0;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+
+        .landing-subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(16px, 3vw, 20px);
+            line-height: 1.6;
+            margin: 0 auto;
+            max-width: 720px;
+        }
+
+        .landing-card-grid {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        .landing-card {
+            position: relative;
+            background: var(--bg-card);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-lg);
+            padding: 32px 28px;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 340px;
+        }
+
+        .landing-card.pro {
+            border: 1px solid rgba(0, 255, 224, 0.45);
+            background: linear-gradient(180deg, rgba(0, 255, 224, 0.18) 0%, rgba(6, 12, 22, 0.92) 100%);
+        }
+
+        .landing-card h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(26px, 5vw, 36px);
+            letter-spacing: 0.2em;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .landing-badge {
+            position: absolute;
+            top: 22px;
+            right: 22px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            background: rgba(0, 255, 224, 0.15);
+            border: 1px solid rgba(0, 255, 224, 0.35);
+        }
+
+        .landing-feature-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .landing-feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .landing-feature-list li::before {
+            content: '✓';
+            color: var(--accent-success);
+            font-weight: 700;
+        }
+
+        .landing-feature-list li.negative {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .landing-feature-list li.negative::before {
+            content: '✕';
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .landing-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border-radius: 999px;
+            padding: 14px 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.22em;
+            font-weight: 700;
+            font-size: 13px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+            margin-top: auto;
+        }
+
+        .landing-button.primary {
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.95) 0%, rgba(0, 205, 184, 0.95) 100%);
+            color: #041018;
+            box-shadow: 0 20px 48px -28px rgba(0, 255, 224, 0.7);
+        }
+
+        .landing-button.secondary {
+            background: transparent;
+            border-color: rgba(0, 255, 224, 0.45);
+            color: var(--accent-cyan);
+        }
+
+        .landing-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 22px 48px -26px rgba(0, 255, 224, 0.7);
+        }
+
+        .landing-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .landing-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.12);
+            margin: 12px 0;
+        }
+
+        /* ---------- Header ---------- */
+        #appHeader {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            padding: 18px 22px;
+            background: linear-gradient(180deg, rgba(8, 16, 26, 0.9) 0%, rgba(8, 16, 26, 0.78) 100%);
+            border-bottom: 1px solid var(--border-strong);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .header-shell {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-lockup {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-link {
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .header-logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(28px, 5vw, 36px);
+            letter-spacing: 0.15em;
+            text-transform: lowercase;
+            color: var(--text-primary);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-icon-btn:hover {
+            background: rgba(0, 255, 224, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        #headerUpgradeButton {
+            background: #2d3849;
+            border: 2px solid #00ffe0;
+            border-radius: 12px;
+            padding: 10px 24px;
+            color: white;
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.1em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        #headerUpgradeButton::before {
+            content: '💎';
+            font-size: 16px;
+        }
+
+        #headerUpgradeButton:hover {
+            background: rgba(0, 255, 224, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 224, 0.3);
+        }
+
+        /* ---------- Setup Flow ---------- */
+        #setup {
+            max-width: 520px;
+            margin: 36px auto 48px;
+            padding: 0 20px;
+        }
+
+        h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(32px, 9vw, 42px);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            text-align: center;
+            color: var(--accent-cyan);
+            margin: 32px 0 24px;
+            text-shadow: 0 0 26px rgba(0, 255, 224, 0.45);
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 22px;
+            padding: 20px 20px 18px;
+            border-radius: var(--radius-md);
+            background: var(--bg-700);
+            border: 1px solid var(--border-soft);
+            box-shadow: var(--shadow-soft);
+            transition: transform var(--transition), border var(--transition), box-shadow var(--transition);
+        }
+
+        .form-group:focus-within {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 28px 60px -42px rgba(0, 255, 224, 0.45);
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: var(--accent-cyan);
+            margin-bottom: 12px;
+        }
+
+        .player-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-input-row+.player-input-row {
+            margin-top: 12px;
+        }
+
+        .line-label {
+            min-width: 60px;
+            font-weight: 700;
+            font-size: 12px;
+            text-align: center;
+            color: var(--accent-cyan);
+            padding: 10px 8px;
+            border-radius: 12px;
+            background: rgba(0, 255, 224, 0.1);
+            border: 1px solid rgba(0, 255, 224, 0.25);
+        }
+
+        .line-label.ruck { background: rgba(255, 204, 0, 0.15); color: #ffcc00; border-color: rgba(255, 204, 0, 0.35); }
+        .line-label.midfield { background: rgba(0, 255, 224, 0.1); color: #00ffe0; border-color: rgba(0, 255, 224, 0.25); }
+        .line-label.forward { background: rgba(204, 34, 34, 0.15); color: #ff6666; border-color: rgba(204, 34, 34, 0.35); }
+        .line-label.back { background: rgba(115, 167, 255, 0.15); color: #73a7ff; border-color: rgba(115, 167, 255, 0.35); }
+
+        .player-name-input,
+        .jersey-number-input,
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            background: rgba(4, 7, 13, 0.6);
+            border: 1px solid rgba(0, 255, 224, 0.16);
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 16px;
+            color: var(--text-primary);
+            transition: border var(--transition), box-shadow var(--transition), background var(--transition);
+        }
+
+        .player-name-input:focus,
+        .jersey-number-input:focus,
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 255, 224, 0.18);
+            background: rgba(10, 18, 32, 0.9);
+        }
+
+        .jersey-number-input {
+            max-width: 72px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
+
+        .small-note {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        #getPlanButton,
+        #confirmSetupButton {
+            border-radius: 999px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong));
+            color: #041018;
+            border: none;
+            padding: 16px 30px;
+            font-family: 'Russo One', sans-serif;
+            font-size: 16px;
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        #getPlanButton {
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.18), rgba(115, 167, 255, 0.32));
+            color: var(--accent-cyan);
+            border: 1px solid var(--border-soft);
+            font-family: 'Roboto', sans-serif;
+            letter-spacing: 0.12em;
+            padding: 12px 22px;
+        }
+
+        #preliminaryPlanOutput {
+            margin-top: 14px;
+            padding: 18px;
+            border-radius: var(--radius-sm);
+            background: rgba(4, 11, 18, 0.7);
+            border: 1px solid rgba(0, 255, 224, 0.12);
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        #setupError {
+            margin-top: 12px;
+            text-align: center;
+            color: var(--accent-danger);
+            font-weight: 600;
+        }
+
+        /* ---------- Game Shell ---------- */
+        #game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 80px;
+        }
+
+        #game-header {
+            margin-top: 36px;
+        }
+
+        #game-info {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .info-box {
+            position: relative;
+            padding: 18px 20px 22px;
+            border-radius: var(--radius-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-faint);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            transition: transform var(--transition), border var(--transition);
+        }
+
+        .info-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(0, 255, 224, 0.12), transparent 55%);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .info-box h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            letter-spacing: 0.22em;
+            color: var(--text-secondary);
+            margin: 0 0 12px;
+        }
+
+        .info-box p {
+            font-family: 'Russo One', sans-serif;
+            font-size: 32px;
+            color: var(--text-primary);
+            margin: 0;
+            letter-spacing: 0.06em;
+        }
+
+        .timer-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #gameTimer {
+            font-size: clamp(42px, 10vw, 58px);
+            letter-spacing: 0.1em;
+        }
+
+        #periodTimer {
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 0.14em;
+        }
+
+        #startStopButton {
+            width: 100%;
+            padding: 16px 18px;
+            font-size: 14px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #ff5f6d, #ff9966);
+            color: #041018;
+            font-family: 'Russo One', sans-serif;
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+            box-shadow: 0 18px 35px -16px rgba(255, 99, 102, 0.7);
+        }
+
+        #startStopButton.stop {
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+            box-shadow: 0 18px 36px -18px rgba(17, 172, 132, 0.55);
+            color: #01231d;
+        }
+
+        #statusMessage {
+            margin: 24px 0 0;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+        }
+
+        /* ---------- AFL Scoreboard (G.B Format) ---------- */
+        .scoreboard-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .scoreboard-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .team-score {
+            text-align: center;
+        }
+
+        .team-name {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background var(--transition);
+        }
+
+        .team-name:hover {
+            background: rgba(0, 255, 224, 0.1);
+        }
+
+        .score-display {
+            font-family: 'Russo One', sans-serif;
+            font-size: clamp(24px, 6vw, 36px);
+            color: var(--accent-cyan);
+            letter-spacing: 0.08em;
+        }
+
+        .score-breakdown {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+
+        .score-divider {
+            font-size: 24px;
+            color: var(--text-muted);
+            align-self: center;
+        }
+
+        /* ---------- AFL Oval Field ---------- */
+        .afl-oval-container {
+            perspective: 800px;
+            perspective-origin: center 120%;
+            margin: 16px 0 24px;
+            padding: 0 12px;
+        }
+
+        .afl-oval {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            aspect-ratio: 1.6;
+            background: linear-gradient(180deg, #228B22 0%, #1a6b1a 30%, #228B22 50%, #1a6b1a 70%, #228B22 100%);
+            border: 4px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            box-shadow:
+                0 35px 70px rgba(0, 0, 0, 0.55),
+                0 15px 30px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        .afl-oval::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 40px,
+                rgba(0, 0, 0, 0.03) 40px,
+                rgba(0, 0, 0, 0.03) 42px
+            );
+            pointer-events: none;
+        }
+
+        /* Oval field lines */
+        .oval-lines {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        /* Center circle */
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+        }
+
+        /* Center square */
+        .center-square {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40%;
+            height: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+        }
+
+        /* Goal squares */
+        .goal-square {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .goal-square.home {
+            left: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .goal-square.away {
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Goal posts indicators */
+        .goal-posts {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+            height: 80%;
+            top: 10%;
+        }
+
+        .goal-posts.home {
+            left: 2%;
+        }
+
+        .goal-posts.away {
+            right: 2%;
+        }
+
+        .goal-post {
+            width: 8px;
+            height: 20px;
+            background: linear-gradient(135deg, #fff, #ccc);
+            border-radius: 2px;
+        }
+
+        .goal-post.behind {
+            background: linear-gradient(135deg, #aaa, #888);
+            width: 6px;
+            height: 16px;
+        }
+
+        #ovalPlayers {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            padding: 20px;
+            gap: 8px;
+        }
+
+        .player-position {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: rgba(4, 12, 22, 0.85);
+            border-radius: 12px;
+            padding: 6px;
+            border: 1px solid rgba(0, 255, 224, 0.2);
+            transition: all var(--transition);
+        }
+
+        .player-position.rotating-off {
+            border-color: #ff5f6d;
+            box-shadow: 0 0 15px rgba(255, 95, 109, 0.4);
+        }
+
+        .player-name-top {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            text-align: center;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .player-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .afl-ball {
+            width: 20px;
+            height: 14px;
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            border-radius: 50%;
+            border: 1px solid #5c3317;
+        }
+
+        .player-time-box {
+            background: rgba(0, 255, 224, 0.1);
+            border-radius: 6px;
+            padding: 2px 6px;
+        }
+
+        .player-time-value {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .player-position-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .player-score-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: linear-gradient(135deg, #ffcc00, #ff9900);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        .next-out-badge {
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff5f6d, #ff9966);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+
+        /* ---------- Next Substitution Box ---------- */
+        .next-sub-section {
+            margin: 24px 0;
+            padding: 24px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+            text-align: center;
+        }
+
+        .next-sub-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            letter-spacing: 0.22em;
+            color: var(--text-secondary);
+            margin: 0 0 16px;
+        }
+
+        #nextSubCountdown {
+            font-family: 'Russo One', sans-serif;
+            font-size: 42px;
+            color: orange;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+        }
+
+        .sub-players-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sub-player-box {
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+        }
+
+        .sub-player-box h4 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            margin: 0 0 8px;
+        }
+
+        .sub-arrows {
+            font-size: 24px;
+            color: var(--accent-cyan);
+        }
+
+        .player-chip {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(0, 255, 224, 0.1);
+            border: 1px solid rgba(0, 255, 224, 0.3);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 4px;
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        #confirmSubButton {
+            margin-top: 16px;
+            padding: 12px 28px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-strong));
+            color: #041018;
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        #confirmSubButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -12px rgba(0, 255, 224, 0.6);
+        }
+
+        /* ---------- Player Lists ---------- */
+        #player-lists {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            margin: 24px 0;
+        }
+
+        .player-list-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-faint);
+            padding: 20px;
+        }
+
+        .player-list-header h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            letter-spacing: 0.2em;
+            color: var(--accent-cyan);
+            margin: 0 0 16px;
+        }
+
+        .player-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bench-players {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bench-player {
+            background: rgba(4, 12, 22, 0.6);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(0, 255, 224, 0.1);
+        }
+
+        .bench-player-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .bench-player-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 255, 224, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .bench-player-name {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .line-tag {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            background: rgba(0, 255, 224, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 255, 224, 0.25);
+        }
+
+        .next-in-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            background: linear-gradient(135deg, #4be9a6, #39d98a);
+            color: #041018;
+        }
+
+        .bench-player-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .bench-chip {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(4, 18, 24, 0.8);
+            border: 1px solid rgba(0, 255, 224, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .bench-chip .chip-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+        }
+
+        .bench-chip .chip-value {
+            font-family: 'Russo One', sans-serif;
+            font-size: 16px;
+            color: var(--accent-cyan);
+        }
+
+        /* ---------- Scoring Pad (AFL G.B format) ---------- */
+        .scoring-pad-toggle {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            color: #041018;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 255, 224, 0.4);
+            z-index: 29;
+            transition: transform var(--transition);
+        }
+
+        .scoring-pad-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .quick-score-button {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00e5d0, #00c8d8);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            box-shadow: 0 6px 20px rgba(0, 255, 224, 0.6);
+            z-index: 900;
+            transition: all 0.3s ease;
+        }
+
+        .quick-score-icon {
+            font-size: 32px;
+        }
+
+        .quick-score-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .scoring-pad-box {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            box-shadow: var(--shadow-strong);
+            z-index: 30;
+            max-width: 320px;
+            width: calc(100vw - 40px);
+            transition: transform var(--transition);
+        }
+
+        .scoring-pad-box.hidden {
+            transform: translateX(calc(100% + 40px));
+        }
+
+        .scoring-pad-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .scoring-pad-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 22px;
+            letter-spacing: 0.2em;
+            color: var(--accent-cyan);
+        }
+
+        .scoring-pad-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scoring-pad-player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .scoring-pad-player {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(4, 12, 22, 0.6);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 224, 0.1);
+        }
+
+        .scoring-pad-player-name {
+            flex: 1;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .scoring-pad-player-score {
+            padding: 4px 8px;
+            background: rgba(255, 204, 0, 0.15);
+            border-radius: 8px;
+            font-weight: 700;
+            color: #ffcc00;
+            font-size: 12px;
+        }
+
+        .scoring-pad-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .scoring-pad-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 224, 0.3);
+            background: rgba(0, 255, 224, 0.1);
+            color: var(--accent-cyan);
+            font-weight: 700;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .scoring-pad-btn.goal {
+            background: rgba(75, 233, 166, 0.15);
+            border-color: rgba(75, 233, 166, 0.4);
+            color: #4be9a6;
+        }
+
+        .scoring-pad-btn.behind {
+            background: rgba(255, 178, 63, 0.15);
+            border-color: rgba(255, 178, 63, 0.4);
+            color: #ffb23f;
+        }
+
+        .scoring-pad-opposition {
+            padding: 12px;
+            background: rgba(255, 178, 63, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 178, 63, 0.2);
+            margin-top: 12px;
+        }
+
+        /* ---------- Bottom Sections ---------- */
+        .bottom-sections {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            margin: 24px 0;
+        }
+
+        .section-box {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-faint);
+            padding: 20px;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            margin: 0 0 16px;
+        }
+
+        /* ---------- Game Controls ---------- */
+        .game-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .control-button {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            border: 1px solid var(--border-soft);
+            background: rgba(0, 255, 224, 0.08);
+            color: var(--accent-cyan);
+            font-family: 'Russo One', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .control-button:hover {
+            background: rgba(0, 255, 224, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .control-button.emergency-sub {
+            border-color: rgba(255, 95, 109, 0.4);
+            background: rgba(255, 95, 109, 0.1);
+            color: #ff5f6d;
+        }
+
+        /* ---------- Stats Panel ---------- */
+        .stats-panel {
+            margin: 30px 0;
+            padding: 24px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-faint);
+        }
+
+        .stats-panel-header {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 24px;
+            letter-spacing: 0.22em;
+            color: var(--accent-cyan);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+
+        .stat-card {
+            padding: 12px;
+            background: rgba(4, 12, 22, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 224, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-player-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-player-score {
+            font-family: 'Russo One', sans-serif;
+            font-size: 18px;
+            color: #ffcc00;
+        }
+
+        /* ---------- Modals ---------- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            max-width: 420px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            letter-spacing: 0.2em;
+            color: var(--accent-cyan);
+            margin: 0 0 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-actions .control-button {
+            flex: 1;
+        }
+
+        /* ---------- Mobile Responsive ---------- */
+        @media (max-width: 768px) {
+            .landing-topbar {
+                justify-content: center;
+            }
+
+            .landing-top-actions {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .landing-pill {
+                width: 100%;
+                text-align: center;
+            }
+
+            .header-shell {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .logo-lockup {
+                width: 100%;
+                justify-content: center;
+            }
+
+            #game-info {
+                grid-template-columns: 1fr;
+            }
+
+            .scoreboard-content {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .score-divider {
+                transform: rotate(90deg);
+            }
+
+            .afl-oval {
+                aspect-ratio: 1.2;
+            }
+
+            #ovalPlayers {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+            }
+
+            .player-position {
+                padding: 4px;
+            }
+
+            .player-name-top {
+                font-size: 8px;
+            }
+
+            .player-time-value {
+                font-size: 8px;
+            }
+
+            .player-position-label {
+                font-size: 7px;
+            }
+        }
+
+        @keyframes goalCelebration {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.15); background: rgba(75, 233, 166, 0.3); }
+            50% { transform: scale(1.1); }
+            75% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="landingScreen">
+        <header class="landing-topbar">
+            <button type="button" class="landing-logo" id="landingLogoButton">Bench Balancer.</button>
+            <div class="landing-top-actions">
+                <button class="landing-pill primary" data-action="start-free-play">Free Play Mode</button>
+                <button class="landing-pill" id="landingUpgradeButton">Upgrade to Pro</button>
+                <button class="landing-pill" id="landingSignInButton">Sign In</button>
+            </div>
+        </header>
+
+        <section class="landing-hero">
+            <h1 class="landing-title">AFL Bench Balancer</h1>
+            <p class="landing-subtitle">
+                Professional Auskick and junior AFL rotation management with line-based substitutions and Goals.Behinds scoring.
+            </p>
+        </section>
+
+        <section class="landing-card-grid">
+            <article class="landing-card free">
+                <h3>🏉 Free Play</h3>
+                <p>Start managing fair rotations for your AFL team immediately without an account.</p>
+                <div class="landing-divider"></div>
+                <ul class="landing-feature-list">
+                    <li>Complete rotation management</li>
+                    <li>Goals & Behinds scoring</li>
+                    <li>Line rotation tracking</li>
+                    <li>Age group configurations</li>
+                    <li class="negative">No data persistence</li>
+                    <li class="negative">No team management</li>
+                </ul>
+                <button class="landing-button primary" data-action="start-free-play" id="landingFreePlayButton">
+                    Start Free Play
+                </button>
+            </article>
+
+            <article class="landing-card pro" id="landingProTile">
+                <span class="landing-badge">Recommended</span>
+                <h3>⭐ Pro Coach</h3>
+                <p>Everything in Free, plus season stats, saved rosters, and export-ready reports.</p>
+                <div class="landing-divider"></div>
+                <ul class="landing-feature-list">
+                    <li>Permanent match history</li>
+                    <li>Team & player management</li>
+                    <li>Season analytics & trends</li>
+                    <li>Performance insights</li>
+                    <li>PDF export & sharing</li>
+                </ul>
+                <button class="landing-button secondary" id="landingProButton">
+                    Get Pro Access
+                </button>
+            </article>
+        </section>
+    </div>
+
+    <div id="mainApp" class="hidden">
+        <div id="appHeader">
+            <div class="header-shell">
+                <div class="logo-lockup">
+                    <a href="index.html" id="headerBackButton" class="landing-pill" style="text-decoration: none;">🏠 PLAY AGAIN</a>
+                    <button id="headerUpgradeButton">UPGRADE</button>
+                    <button type="button" class="logo-link" id="headerLogoButton">
+                        <span class="header-logo-text">benchbalancer</span>
+                    </button>
+                </div>
+                <div class="header-icons">
+                    <button class="header-icon-btn" id="headerHelpButton" aria-label="Help">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </button>
+                    <button class="header-icon-btn" id="headerSettingsButton" aria-label="Settings">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M12 1v6m0 6v6m6-7h-6m-6 0h6m4.65-4.65L14 10m-4 4-2.65 2.65m9.3 0L14 14m-4-4-2.65-2.65"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Setup Section -->
+        <div id="setup">
+            <h2>🏉 AFL Game Setup</h2>
+
+            <div class="form-group">
+                <label for="ageGroup">Age Group:</label>
+                <select id="ageGroup">
+                    <option value="u9">Under 9 (9 on field)</option>
+                    <option value="u10">Under 10 (11 on field)</option>
+                    <option value="u11" selected>Under 11 (13 on field)</option>
+                    <option value="u12">Under 12 (15 on field)</option>
+                    <option value="senior">Senior (18 on field)</option>
+                </select>
+                <p class="small-note">Field size adjusts based on age group.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="minsPerPeriod">Minutes per Quarter:</label>
+                <input type="number" id="minsPerPeriod" min="1" value="12">
+            </div>
+
+            <div class="form-group">
+                <label for="numOnField">Players on Field: <span id="fieldSizeIndicator" style="color: var(--accent-cyan); font-weight: normal;">(13)</span></label>
+                <input type="number" id="numOnField" min="9" max="18" value="13" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="numReserves">Number of Interchange Players: <span id="rosterSizeIndicator" style="color: var(--accent-cyan); font-weight: normal;">(Total Roster: 19)</span></label>
+                <select id="numReserves">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6" selected>6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                </select>
+                <p class="small-note">Rolling interchange - unlimited substitutions.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="warningSoundToggle">
+                    <input type="checkbox" id="warningSoundToggle" checked>
+                    Enable 10-second sub warning sound
+                </label>
+            </div>
+
+            <h2>🏉 Player Names</h2>
+
+            <div class="form-group">
+                <label for="starterNamesContainer">Starting Field Players:</label>
+                <div id="starterNamesContainer">
+                    <!-- Inputs will be dynamically generated here with line labels -->
+                </div>
+                <p class="small-note">Players are distributed across Ruck, Midfield, Forward, and Back lines.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="reserveNamesContainer">Interchange Players:</label>
+                <div id="reserveNamesContainer">
+                    <!-- Inputs will be dynamically generated here -->
+                </div>
+            </div>
+
+            <div class="preliminary-plan-section">
+                <button id="getPlanButton" type="button">Show Preliminary Sub Plan</button>
+                <div id="preliminaryPlanOutput">
+                    <!-- Plan details will appear here -->
+                </div>
+            </div>
+
+            <button id="confirmSetupButton">Confirm Setup & Start Game</button>
+            <p id="setupError" class="error-message"></p>
+        </div>
+
+        <!-- Game Display Section -->
+        <div id="game-container" class="hidden">
+            <!-- Game Header -->
+            <div id="game-header">
+                <div id="game-info" class="info-section">
+                    <div class="info-box">
+                        <h3>Quarter</h3>
+                        <p id="periodDisplay">Q1/4</p>
+                    </div>
+                    <div class="info-box timer-box">
+                        <p id="gameTimer">00:00</p>
+                        <p id="periodTimer">(Quarter: 00:00)</p>
+                        <button id="startStopButton" class="timer-box-button start">START</button>
+                    </div>
+                    <div class="info-box scoreboard-box">
+                        <div class="scoreboard-content">
+                            <div class="team-score">
+                                <div class="team-name" id="homeTeamName" data-editable="true">Home</div>
+                                <div class="score-display" id="homeScore">0.0 (0)</div>
+                            </div>
+                            <div class="score-divider">vs</div>
+                            <div class="team-score">
+                                <div class="team-name" id="awayTeamName" data-editable="true">Opposition</div>
+                                <div class="score-display" id="awayScore">0.0 (0)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <h3>Variance</h3>
+                        <p id="varianceDisplay">0s</p>
+                    </div>
+                </div>
+                <p id="statusMessage" class="game-status-top"></p>
+            </div>
+
+            <!-- Next Substitution Box -->
+            <div id="nextSubBox" class="next-sub-section">
+                <h3 class="next-sub-title">Next Interchange</h3>
+                <div id="nextSubCountdown">--:--</div>
+                <div class="sub-players-container">
+                    <div class="sub-player-box">
+                        <h4>OFF</h4>
+                        <div id="playersComingOff">No rotation scheduled</div>
+                    </div>
+                    <div class="sub-arrows">⟷</div>
+                    <div class="sub-player-box">
+                        <h4>ON</h4>
+                        <div id="playersComingOn">No rotation scheduled</div>
+                    </div>
+                </div>
+                <button id="confirmSubButton" class="control-button hidden">CONFIRM SUB</button>
+            </div>
+
+            <!-- AFL Oval Field -->
+            <div class="afl-oval-container">
+                <div class="afl-oval" id="aflOval">
+                    <div class="oval-lines">
+                        <div class="center-circle"></div>
+                        <div class="center-square"></div>
+                        <div class="goal-square home"></div>
+                        <div class="goal-square away"></div>
+                    </div>
+                    <div id="ovalPlayers">
+                        <!-- Player positions will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Lists Section -->
+            <div id="player-lists">
+                <div class="player-list-section">
+                    <div class="player-list-header">
+                        <h3>On Field (<span id="onFieldCount">13</span>)</h3>
+                    </div>
+                    <ul id="onFieldList" class="player-list">
+                        <!-- Players on field will be populated here -->
+                    </ul>
+                </div>
+
+                <div class="player-list-section bench-overview">
+                    <div class="player-list-header">
+                        <h3>Interchange (<span id="onBenchCount">0</span>)</h3>
+                    </div>
+                    <div class="bench-players" id="benchList">
+                        <!-- Bench players will be added dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Panel -->
+            <div class="stats-panel" id="statsPanel">
+                <h3 class="stats-panel-header">Player Scoring</h3>
+                <div class="stats-grid" id="statsGrid">
+                    <!-- Stats will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Bottom Sections -->
+            <div class="bottom-sections">
+                <div class="section-box">
+                    <h3 class="section-title">FREEZE</h3>
+                    <div class="bench-players" id="freezeList">
+                        <!-- Frozen players will be added here -->
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <h3 class="section-title">OUT</h3>
+                    <div class="bench-players" id="outList">
+                        <!-- Removed players will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Controls -->
+            <div id="game-controls" class="game-controls">
+                <button id="emergencySubButton" class="control-button emergency-sub">EMERGENCY SUB</button>
+                <button id="manageRemovedButton" class="control-button">MANAGE REMOVED</button>
+                <button id="resetButton" class="control-button">RESET GAME</button>
+            </div>
+
+            <!-- Scoring Pad -->
+            <button class="scoring-pad-toggle" id="scoringPadToggle">🏉</button>
+            <button class="quick-score-button" onclick="document.getElementById('scoringPadToggle').click()">
+                <div class="quick-score-icon">🏉</div>
+                <div class="quick-score-label">Quick score</div>
+            </button>
+            <div class="scoring-pad-box hidden" id="scoringPad">
+                <div class="scoring-pad-header">
+                    <span class="scoring-pad-title">Quick score</span>
+                    <button type="button" class="scoring-pad-close" id="scoringPadClose" aria-label="Close">✕</button>
+                </div>
+                <div class="scoring-pad-player-list" id="scoringPadPlayers">
+                    <!-- Players will be added dynamically -->
+                </div>
+                <div class="scoring-pad-opposition">
+                    <div class="scoring-pad-player">
+                        <span class="scoring-pad-player-name" id="oppositionNamePad">Opposition</span>
+                        <span class="scoring-pad-player-score" id="oppositionScorePad">0.0 (0)</span>
+                        <div class="scoring-pad-controls">
+                            <button class="scoring-pad-btn goal" onclick="aflUI.recordOppositionGoal()">GOAL</button>
+                            <button class="scoring-pad-btn behind" onclick="aflUI.recordOppositionBehind()">BHND</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Sub Modal -->
+            <div id="emergencySubModal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <h3>Emergency Substitution</h3>
+                    <p>Select players for emergency interchange.</p>
+                    <div class="form-group">
+                        <label for="subOutPlayer">Player to Come OFF (from Field):</label>
+                        <select id="subOutPlayer"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subInPlayer">Player to Come ON (from Bench):</label>
+                        <select id="subInPlayer"></select>
+                    </div>
+                    <h4>What happens to the player coming OFF?</h4>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="injuredFate" value="bench" checked> Return to Interchange Rotation
+                        </label>
+                        <label>
+                            <input type="radio" name="injuredFate" value="remove"> Remove from Game (Injury)
+                        </label>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="confirmEmergencySubButton" class="control-button">Confirm Swap</button>
+                        <button id="cancelEmergencySubButton" class="control-button">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Removed Modal -->
+            <div id="manageRemovedModal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <h3>Manage Removed Players</h3>
+                    <p>Toggle players between removed and active status.</p>
+                    <div id="removedPlayerList"></div>
+                    <div class="modal-actions">
+                        <button id="confirmManageRemovedButton" class="control-button">Update Status</button>
+                        <button id="cancelManageRemovedButton" class="control-button">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Modal -->
+            <div id="helpModal" class="modal-overlay hidden">
+                <div class="modal-content" style="max-width: 500px;">
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 20px;">AFL Game Help</h3>
+                    <div style="max-height: 60vh; overflow-y: auto;">
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">⏱️ Timer Controls</h4>
+                            <p style="color: var(--text-secondary); font-size: 14px;">Use START/STOP to control game time. The timer automatically tracks quarter progress.</p>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">🔄 Interchange</h4>
+                            <p style="color: var(--text-secondary); font-size: 14px;">Rolling interchange is unlimited. The app suggests rotations for fair playing time.</p>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">🏉 Scoring (G.B)</h4>
+                            <p style="color: var(--text-secondary); font-size: 14px;">Track Goals (6 pts) and Behinds (1 pt). Score displays as Goals.Behinds (Total).</p>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 8px;">📊 Lines</h4>
+                            <p style="color: var(--text-secondary); font-size: 14px;">Players are organized by lines: Ruck, Midfield, Forward, and Back.</p>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="closeHelpButton" class="control-button">Got it!</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Modal -->
+            <div id="settingsModal" class="modal-overlay hidden">
+                <div class="modal-content" style="max-width: 400px;">
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 20px;">Game Settings</h3>
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(0, 255, 224, 0.05); border-radius: 10px;">
+                            <div>
+                                <h4 style="color: var(--text-primary); font-size: 15px; margin-bottom: 4px;">Sound</h4>
+                                <p style="color: var(--text-secondary); font-size: 12px;">Audio alerts</p>
+                            </div>
+                            <button id="soundToggle" class="control-button" style="padding: 8px 16px; min-width: 80px;">
+                                <span id="soundLabel">ON</span>
+                            </button>
+                        </div>
+                        <div style="padding: 16px; background: rgba(255, 178, 63, 0.05); border-radius: 10px;">
+                            <a href="index.html" id="settingsBackButton" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; display: block; text-align: center;">
+                                🏠 Back to Home
+                            </a>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="closeSettingsButton" class="control-button">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jsPDF Library for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Main ES Module Integration -->
+    <script type="module" src="afl-integration-main.js"></script>
+
+    <!-- Inline navigation logic -->
+    <script type="module">
+        (function() {
+            const landingScreen = document.getElementById('landingScreen');
+            const mainApp = document.getElementById('mainApp');
+            const freePlayButtons = document.querySelectorAll('[data-action="start-free-play"]');
+            const landingLogoButton = document.getElementById('landingLogoButton');
+            const headerLogoButton = document.getElementById('headerLogoButton');
+            const headerHelpButton = document.getElementById('headerHelpButton');
+            const headerSettingsButton = document.getElementById('headerSettingsButton');
+            const helpModal = document.getElementById('helpModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const closeHelpButton = document.getElementById('closeHelpButton');
+            const closeSettingsButton = document.getElementById('closeSettingsButton');
+            const headerBackButton = document.getElementById('headerBackButton');
+            const settingsBackButton = document.getElementById('settingsBackButton');
+            const gameContainer = document.getElementById('game-container');
+
+            // Update navigation buttons based on authentication status
+            async function updateNavigationButtons() {
+                let isAuthenticated = false;
+
+                if (window.benchBalancerSupabase) {
+                    try {
+                        const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                        isAuthenticated = !!user;
+                    } catch (e) {
+                        console.log('Auth check failed:', e);
+                    }
+                }
+
+                if (headerBackButton) {
+                    if (isAuthenticated) {
+                        headerBackButton.href = 'afl-dashboard.html';
+                        headerBackButton.textContent = '← BACK TO DASHBOARD';
+                    } else {
+                        headerBackButton.href = 'index.html';
+                        headerBackButton.textContent = '🏠 PLAY AGAIN';
+                    }
+                }
+
+                if (settingsBackButton) {
+                    if (isAuthenticated) {
+                        settingsBackButton.href = 'afl-dashboard.html';
+                        settingsBackButton.textContent = '← Back to Dashboard';
+                    } else {
+                        settingsBackButton.href = 'index.html';
+                        settingsBackButton.textContent = '🏠 Back to Home';
+                    }
+                }
+            }
+
+            function revealMainApp() {
+                if (landingScreen) {
+                    landingScreen.classList.add('hidden');
+                }
+                if (mainApp) {
+                    mainApp.classList.remove('hidden');
+                }
+                const setupSection = document.getElementById('setup');
+                if (setupSection) {
+                    setupSection.classList.remove('hidden');
+                }
+                if (gameContainer) {
+                    gameContainer.classList.add('hidden');
+                }
+                if (setupSection) {
+                    setupSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                updateNavigationButtons();
+            }
+
+            function showLanding() {
+                if (mainApp) {
+                    mainApp.classList.add('hidden');
+                }
+                if (landingScreen) {
+                    landingScreen.classList.remove('hidden');
+                    landingScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            // Free Play buttons
+            freePlayButtons.forEach(btn => {
+                btn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    revealMainApp();
+                });
+            });
+
+            // Logo buttons
+            if (landingLogoButton) {
+                landingLogoButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    window.location.href = 'index.html';
+                });
+            }
+
+            if (headerLogoButton) {
+                headerLogoButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    showLanding();
+                });
+            }
+
+            // Help button
+            if (headerHelpButton) {
+                headerHelpButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    if (helpModal) helpModal.classList.remove('hidden');
+                });
+            }
+
+            // Settings button
+            if (headerSettingsButton) {
+                headerSettingsButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    if (settingsModal) settingsModal.classList.remove('hidden');
+                });
+            }
+
+            // Close modals
+            if (closeHelpButton) {
+                closeHelpButton.addEventListener('click', () => {
+                    if (helpModal) helpModal.classList.add('hidden');
+                });
+            }
+
+            if (closeSettingsButton) {
+                closeSettingsButton.addEventListener('click', () => {
+                    if (settingsModal) settingsModal.classList.add('hidden');
+                });
+            }
+
+            // Close modals when clicking outside
+            [helpModal, settingsModal].forEach(modal => {
+                if (modal) {
+                    modal.addEventListener('click', (event) => {
+                        if (event.target === modal) {
+                            modal.classList.add('hidden');
+                        }
+                    });
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bench Balancer - AFL Schedule Management</title>
+
+    <!-- Supabase CDN for authentication and database -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Russo+One&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Modern Dark Theme Variables */
+        :root {
+            --bg-900: #04070d;
+            --bg-880: #060b14;
+            --bg-850: #08101a;
+            --bg-secondary: #0a1220;
+            --bg-card: #0d1626;
+            --bg-overlay: rgba(4, 7, 13, 0.85);
+
+            --border-strong: rgba(255, 255, 255, 0.18);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --border-faint: rgba(255, 255, 255, 0.06);
+
+            --accent-cyan: #00ffe0;
+            --accent-cyan-strong: #00cdb8;
+            --accent-green: #1dd1a1;
+            --accent-red: #ff5f6d;
+            --accent-orange: #ff9966;
+
+            --text-primary: #f5fbff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.5);
+            --shadow-strong: 0 20px 40px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 30px rgba(0, 255, 224, 0.3);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            background: radial-gradient(circle at 20% 20%, rgba(0, 255, 224, 0.06), transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(124, 92, 255, 0.08), transparent 50%),
+                linear-gradient(140deg, var(--bg-900) 0%, var(--bg-880) 55%, #0a0f1d 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header Section */
+        #appHeader {
+            background: linear-gradient(180deg, rgba(0, 255, 224, 0.08) 0%, rgba(6, 12, 22, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-faint);
+            padding: 24px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #appHeader::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .header-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .app-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 20px rgba(0, 255, 224, 0.4);
+            line-height: 1;
+        }
+
+        .app-subtitle {
+            font-family: 'Russo One', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-medium);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            padding-bottom: 100px;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-strong);
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-faint);
+            padding-bottom: 16px;
+        }
+
+        .modal-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            padding: 0;
+            opacity: 0.7;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* Form Styling */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            background: rgba(0, 255, 224, 0.05);
+            box-shadow: 0 0 15px rgba(0, 255, 224, 0.1);
+        }
+
+        /* Toggle Switch */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-faint);
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-850);
+            border: 1px solid var(--border-medium);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: var(--text-muted);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: rgba(29, 209, 161, 0.2);
+            border-color: var(--accent-green);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            background-color: var(--accent-green);
+        }
+
+        /* Action Buttons */
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-cyan-strong) 100%);
+            color: var(--bg-900);
+            box-shadow: 0 4px 15px rgba(0, 255, 224, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 224, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Game List Styles */
+        .game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .game-card {
+            background: rgba(4, 7, 13, 0.6);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(4, 7, 13, 0.8);
+            transform: translateX(4px);
+        }
+
+        .game-info-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .game-opponent {
+            font-family: 'Russo One', sans-serif;
+            color: var(--text-primary);
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .game-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .game-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-home {
+            background: rgba(29, 209, 161, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(29, 209, 161, 0.2);
+        }
+
+        .badge-away {
+            background: rgba(255, 153, 102, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(255, 153, 102, 0.2);
+        }
+
+        .map-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .map-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer Navigation - Bottom Tabs */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0 16px;
+            display: flex;
+            justify-content: space-around;
+            background: #08101a;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: #666;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--accent-cyan);
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .nav-icon-img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            opacity: 0.5;
+            transition: opacity 0.2s, filter 0.2s;
+        }
+
+        .nav-item.active .nav-icon-img {
+            opacity: 1;
+            filter: drop-shadow(0 0 4px var(--accent-cyan));
+        }
+    </style>
+</head>
+
+<body>
+
+    <header id="appHeader">
+        <div class="header-brand">
+            <div class="app-title">
+                <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" style="height: 36px; width: auto;">
+            </div>
+            <div class="app-subtitle">AFL Schedule Manager</div>
+        </div>
+        <div class="header-actions">
+            <a href="afl.html" class="btn-nav">Back to AFL</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <h1 style="margin-bottom:16px;">MANAGE SCHEDULE</h1>
+
+        <div style="margin-bottom:24px;">
+            <label style="display:block; color:var(--text-secondary); margin-bottom:4px; font-size:12px;">SEASON NAME</label>
+            <input type="text" id="seasonNameInput" class="form-control" placeholder="e.g. Winter Season 2024"
+                onchange="updateSeasonName(this.value)">
+        </div>
+
+        <div class="game-list" id="gameListContainer">
+            <!-- Games injected here -->
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="openGameDetailModal()"
+            style="width:100%; margin-top:24px;">+ ADD MATCH</button>
+    </div>
+
+    <!-- Game Detail Modal -->
+    <div class="modal-overlay" id="gameDetailModal" style="z-index: 1001;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">MATCH DETAILS</h2>
+                <img src="assets/icon-close.png" class="close-btn" alt="Close" onclick="closeGameDetailModal()">
+            </div>
+
+            <form id="gameForm" onsubmit="handleSaveGame(event)">
+                <input type="hidden" id="gameId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="gameDate" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" id="gameTime" class="form-control" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Opposition</label>
+                        <input type="text" id="gameOpposition" class="form-control" placeholder="e.g. Richmond Tigers" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="toggle-wrapper">
+                            <span class="toggle-label" id="homeAwayLabel">Home Game</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="gameHomeAway" onchange="toggleHomeAwayLabel(this)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Venue Name</label>
+                        <input type="text" id="gameVenue" class="form-control" placeholder="e.g. MCG">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Address</label>
+                        <input type="text" id="gameAddress" class="form-control" placeholder="Brunton Ave, Richmond VIC">
+                        <a href="#" target="_blank" id="mapPreviewLink" class="map-link" style="display:none; margin-top:8px;">
+                            <span>View on Map</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="deleteGame()" id="deleteGameBtn"
+                        style="color: var(--accent-red); border-color: rgba(255, 95, 109, 0.3);">Delete</button>
+                    <button type="button" class="btn btn-secondary" onclick="confirmResetMatch()" id="resetMatchBtn"
+                        style="color: var(--accent-orange); border-color: rgba(255, 153, 102, 0.3); display: none;">Reset Match</button>
+                    <button type="submit" class="btn btn-primary">Save Match</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config/env.js"></script>
+    <script type="module" src="config/simple-supabase.js"></script>
+    <script type="module">
+        import { initAuth } from './config/simple-supabase.js';
+        initAuth();
+    </script>
+
+    <script>
+        // --- AFL SCHEDULE MANAGER LOGIC ---
+        const STORAGE_KEY = 'benchbalancer_afl_schedule';
+
+        // UUID Generator for Game IDs
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // State
+        let schedule = {
+            seasonName: "",
+            games: []
+        };
+
+        // Track which matches have been played (schedule_id -> result data)
+        let playedMatches = {};
+
+        // UI References
+        const gameDetailModal = document.getElementById('gameDetailModal');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadSchedule();
+            await loadPlayedMatches();
+        });
+
+        async function loadSchedule() {
+            console.log('[AFL Schedule] Loading schedule...');
+
+            // Try to load from Supabase first
+            if (window.benchBalancerSupabase) {
+                try {
+                    const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                    if (user) {
+                        const { data, error } = await window.benchBalancerSupabase
+                            .from('scheduled_matches')
+                            .select('*')
+                            .eq('user_id', user.id)
+                            .eq('sport', 'afl')
+                            .order('match_date', { ascending: false });
+
+                        if (!error && data && data.length > 0) {
+                            console.log(`[AFL Schedule] Loaded ${data.length} matches from Supabase`);
+
+                            schedule.games = data.map(row => ({
+                                id: row.id,
+                                date: row.match_date,
+                                time: row.match_time,
+                                opponent: row.opponent_name,
+                                homeAway: row.is_home,
+                                venue: row.venue || '',
+                                address: row.venue || ''
+                            }));
+
+                            if (user.user_metadata?.afl_season_name) {
+                                schedule.seasonName = user.user_metadata.afl_season_name;
+                            }
+
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
+                            renderScheduleList();
+
+                            const seasonInput = document.getElementById('seasonNameInput');
+                            if (seasonInput) seasonInput.value = schedule.seasonName || "";
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('[AFL Schedule] Error loading from Supabase:', err.message);
+                }
+            }
+
+            // Fallback: Load from localStorage
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    schedule = JSON.parse(saved);
+                    if (!Array.isArray(schedule.games)) schedule.games = [];
+                } catch (e) {
+                    console.error("Schedule load error", e);
+                }
+            }
+            renderScheduleList();
+
+            const seasonInput = document.getElementById('seasonNameInput');
+            if (seasonInput) seasonInput.value = schedule.seasonName || "";
+        }
+
+        async function loadPlayedMatches() {
+            if (!window.benchBalancerSupabase) return;
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                if (!user) return;
+
+                const { data, error } = await window.benchBalancerSupabase
+                    .from('match_results')
+                    .select('id, scheduled_match_id, team_score, opponent_score, result')
+                    .eq('user_id', user.id)
+                    .eq('sport', 'afl');
+
+                if (error) {
+                    console.error('[AFL Played Matches] Error loading:', error.message);
+                    return;
+                }
+
+                playedMatches = {};
+                (data || []).forEach(match => {
+                    if (match.scheduled_match_id) {
+                        playedMatches[match.scheduled_match_id] = {
+                            matchResultId: match.id,
+                            teamScore: match.team_score,
+                            opponentScore: match.opponent_score,
+                            result: match.result
+                        };
+                    }
+                });
+
+                console.log(`[AFL Played Matches] Loaded ${Object.keys(playedMatches).length} played matches`);
+                renderScheduleList();
+
+            } catch (err) {
+                console.error('[AFL Played Matches] Exception:', err.message);
+            }
+        }
+
+        async function saveSchedule() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
+            renderScheduleList();
+            await syncScheduleToSupabase();
+        }
+
+        async function syncScheduleToSupabase() {
+            if (!window.benchBalancerSupabase) return;
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                if (!user) return;
+
+                // Save season name to user metadata
+                if (schedule.seasonName) {
+                    await window.benchBalancerSupabase.auth.updateUser({
+                        data: { afl_season_name: schedule.seasonName }
+                    });
+                }
+
+                // Get existing matches from Supabase
+                const { data: existingMatches } = await window.benchBalancerSupabase
+                    .from('scheduled_matches')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('sport', 'afl');
+
+                const existingIds = (existingMatches || []).map(m => m.id);
+                const currentIds = schedule.games.map(g => g.id);
+
+                // Delete removed matches
+                const toDelete = existingIds.filter(id => !currentIds.includes(id));
+                if (toDelete.length > 0) {
+                    await window.benchBalancerSupabase
+                        .from('scheduled_matches')
+                        .delete()
+                        .in('id', toDelete);
+                }
+
+                // Upsert all current matches
+                const matchesToSync = schedule.games.map(game => ({
+                    id: game.id,
+                    user_id: user.id,
+                    sport: 'afl',
+                    opponent_name: game.opponent,
+                    match_date: game.date,
+                    match_time: game.time,
+                    is_home: game.homeAway,
+                    venue: game.venue || null,
+                    status: 'scheduled'
+                }));
+
+                await window.benchBalancerSupabase
+                    .from('scheduled_matches')
+                    .upsert(matchesToSync, { onConflict: 'id' });
+
+                console.log('[AFL Schedule] Synced to Supabase');
+            } catch (err) {
+                console.error('[AFL Schedule] Sync error:', err.message);
+            }
+        }
+
+        function updateSeasonName(val) {
+            schedule.seasonName = val;
+            saveSchedule();
+        }
+
+        function renderScheduleList(highlightId = null) {
+            const container = document.getElementById('gameListContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            // Sort by date ASCENDING (Nearest/upcoming matches first)
+            const sortedGames = [...schedule.games].sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
+
+            if (sortedGames.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:#666; padding:20px;">No matches scheduled yet.</div>`;
+                return;
+            }
+
+            sortedGames.forEach(game => {
+                const el = document.createElement('div');
+                el.className = 'game-card';
+                el.onclick = () => openGameDetailModal(game.id);
+
+                const isHome = game.homeAway;
+                const badgeClass = isHome ? 'badge-home' : 'badge-away';
+                const badgeText = isHome ? 'HOME' : 'AWAY';
+
+                let dateStr = game.date;
+                try {
+                    const d = new Date(game.date);
+                    dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                } catch (e) { }
+
+                const played = playedMatches[game.id];
+                let actionHtml = '';
+
+                if (played) {
+                    const resultIcon = played.result === 'win' ? '&#127942;' :
+                        played.result === 'loss' ? '&#128546;' : '&#129309;';
+                    actionHtml = `
+                        <div style="
+                            background: ${played.result === 'win' ? 'rgba(75, 233, 166, 0.15)' :
+                            played.result === 'loss' ? 'rgba(255, 95, 109, 0.15)' :
+                                'rgba(255, 178, 63, 0.15)'};
+                            border: 1px solid ${played.result === 'win' ? 'var(--accent-green)' :
+                            played.result === 'loss' ? 'var(--accent-red)' :
+                                'var(--accent-orange)'};
+                            color: ${played.result === 'win' ? 'var(--accent-green)' :
+                            played.result === 'loss' ? 'var(--accent-red)' :
+                                'var(--accent-orange)'};
+                            padding: 8px 16px;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            text-align: center;
+                        ">
+                            ${resultIcon} ${played.teamScore} - ${played.opponentScore}
+                        </div>
+                    `;
+                } else {
+                    actionHtml = `
+                        <button
+                            class="play-match-btn"
+                            onclick="event.stopPropagation(); playMatch('${game.id}')"
+                            style="
+                                background: var(--accent-cyan);
+                                color: #0a0f1a;
+                                border: none;
+                                padding: 8px 16px;
+                                border-radius: 8px;
+                                font-size: 12px;
+                                font-weight: bold;
+                                cursor: pointer;
+                                text-transform: uppercase;
+                                transition: all 0.2s;
+                            "
+                        >
+                            Play Match
+                        </button>
+                    `;
+                }
+
+                el.innerHTML = `
+                    <div class="game-info-left">
+                        <div class="game-opponent">${game.opponent}</div>
+                        <div class="game-meta">
+                            <span>${dateStr}</span>
+                            <span>${game.time}</span>
+                             ${game.venue ? `<span>${game.venue}</span>` : ''}
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                        <div class="game-badge ${badgeClass}">${badgeText}</div>
+                        ${actionHtml}
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        // Game Details Logic
+        let currentEditingGameId = null;
+
+        function openGameDetailModal(existingGameId) {
+            const form = document.getElementById('gameForm');
+            const deleteBtn = document.getElementById('deleteGameBtn');
+            const resetBtn = document.getElementById('resetMatchBtn');
+            if (form) form.reset();
+
+            if (existingGameId && typeof existingGameId === 'string') {
+                currentEditingGameId = existingGameId;
+                const game = schedule.games.find(g => g.id === existingGameId);
+                if (game) {
+                    document.getElementById('gameId').value = game.id;
+                    document.getElementById('gameDate').value = game.date;
+                    document.getElementById('gameTime').value = game.time;
+                    document.getElementById('gameOpposition').value = game.opponent;
+                    document.getElementById('gameHomeAway').checked = game.homeAway;
+                    document.getElementById('gameVenue').value = game.venue || '';
+                    document.getElementById('gameAddress').value = game.address || '';
+
+                    toggleHomeAwayLabel(document.getElementById('gameHomeAway'));
+                    if (deleteBtn) deleteBtn.style.display = 'block';
+
+                    const isPlayed = playedMatches[existingGameId];
+                    if (resetBtn) {
+                        resetBtn.style.display = isPlayed ? 'block' : 'none';
+                    }
+
+                    updateMapLink();
+                }
+            } else {
+                currentEditingGameId = null;
+                document.getElementById('gameId').value = '';
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+
+                document.getElementById('gameDate').value = `${year}-${month}-${day}`;
+                document.getElementById('gameTime').value = "12:00";
+                document.getElementById('gameHomeAway').checked = false;
+                toggleHomeAwayLabel(document.getElementById('gameHomeAway'));
+                if (deleteBtn) deleteBtn.style.display = 'none';
+                if (resetBtn) resetBtn.style.display = 'none';
+                updateMapLink();
+            }
+
+            if (gameDetailModal) gameDetailModal.classList.add('active');
+        }
+
+        function closeGameDetailModal() {
+            if (gameDetailModal) gameDetailModal.classList.remove('active');
+        }
+
+        function confirmResetMatch() {
+            if (!currentEditingGameId) return;
+
+            const played = playedMatches[currentEditingGameId];
+            if (!played) {
+                alert('This match has not been played yet.');
+                return;
+            }
+
+            const game = schedule.games.find(g => g.id === currentEditingGameId);
+            const opponentName = game ? game.opponent : 'this match';
+
+            const confirmed = confirm(
+                `RESET MATCH DATA\n\n` +
+                `This will permanently delete all saved statistics from the match against ${opponentName}.\n\n` +
+                `This action CANNOT be undone. Proceed?`
+            );
+
+            if (confirmed) {
+                resetMatch(currentEditingGameId);
+            }
+        }
+
+        async function resetMatch(scheduleId) {
+            if (!window.benchBalancerSupabase) {
+                alert('Database not connected. Cannot reset match.');
+                return;
+            }
+
+            const played = playedMatches[scheduleId];
+            if (!played || !played.matchResultId) {
+                alert('Match result not found.');
+                return;
+            }
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+                if (!user) throw new Error('Not authenticated');
+
+                // Delete player stats first
+                await window.benchBalancerSupabase
+                    .from('match_player_stats')
+                    .delete()
+                    .eq('match_result_id', played.matchResultId);
+
+                // Delete match result
+                await window.benchBalancerSupabase
+                    .from('match_results')
+                    .delete()
+                    .eq('id', played.matchResultId)
+                    .eq('user_id', user.id);
+
+                delete playedMatches[scheduleId];
+
+                closeGameDetailModal();
+                renderScheduleList();
+
+                alert('Match data has been reset. You can now replay this match.');
+
+            } catch (err) {
+                console.error('[Reset] Exception:', err.message);
+                alert('Failed to reset match: ' + err.message);
+            }
+        }
+
+        function toggleHomeAwayLabel(checkbox) {
+            if (!checkbox) return;
+            const label = document.getElementById('homeAwayLabel');
+            if (!label) return;
+
+            label.innerText = checkbox.checked ? "Home Game" : "Away Game";
+            if (checkbox.checked) {
+                label.style.color = 'var(--accent-green)';
+            } else {
+                label.style.color = 'var(--accent-orange)';
+            }
+        }
+
+        function handleSaveGame(e) {
+            e.preventDefault();
+            const idInput = document.getElementById('gameId');
+            const id = (idInput && idInput.value) ? idInput.value : generateUUID();
+
+            const gameData = {
+                id: id,
+                date: document.getElementById('gameDate').value,
+                time: document.getElementById('gameTime').value,
+                opponent: document.getElementById('gameOpposition').value,
+                homeAway: document.getElementById('gameHomeAway').checked,
+                venue: document.getElementById('gameVenue').value,
+                address: document.getElementById('gameAddress').value
+            };
+
+            const idx = schedule.games.findIndex(g => g.id === id);
+            if (idx >= 0) {
+                schedule.games[idx] = gameData;
+            } else {
+                schedule.games.push(gameData);
+            }
+
+            saveSchedule();
+            closeGameDetailModal();
+        }
+
+        function deleteGame() {
+            const id = document.getElementById('gameId').value;
+            if (!id) return;
+
+            if (confirm("Remove this match from schedule?")) {
+                schedule.games = schedule.games.filter(g => g.id !== id);
+                saveSchedule();
+                closeGameDetailModal();
+            }
+        }
+
+        function updateMapLink() {
+            const addrInput = document.getElementById('gameAddress');
+            const link = document.getElementById('mapPreviewLink');
+            if (!addrInput || !link) return;
+
+            const addr = addrInput.value;
+            if (addr && addr.length > 5) {
+                link.style.display = 'inline-flex';
+                link.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
+            } else {
+                link.style.display = 'none';
+            }
+        }
+
+        const addrEl = document.getElementById('gameAddress');
+        if (addrEl) addrEl.addEventListener('input', updateMapLink);
+
+        // Play Match Function
+        async function playMatch(gameId) {
+            const game = schedule.games.find(g => g.id === gameId);
+            if (!game) {
+                alert('Match not found');
+                return;
+            }
+
+            // Store match context in sessionStorage for the game page
+            sessionStorage.setItem('aflCompetitiveMatchData', JSON.stringify({
+                scheduleId: gameId,
+                opponent: game.opponent,
+                date: game.date,
+                time: game.time,
+                venue: game.venue || '',
+                homeAway: game.homeAway,
+                isCompetitive: true
+            }));
+
+            // Redirect to AFL game with competitive mode
+            window.location.href = 'afl.html?mode=competitive';
+        }
+    </script>
+
+    <!-- Bottom Navigation -->
+    <nav class="footer-nav">
+        <a href="afl.html" class="nav-item">
+            <img src="assets/icon-home.png" class="nav-icon-img" alt="Home">
+            <span class="nav-label">HOME</span>
+        </a>
+        <a href="afl-squad-management.html" class="nav-item">
+            <img src="assets/icon-teams.png" class="nav-icon-img" alt="Teams">
+            <span class="nav-label">SQUAD</span>
+        </a>
+        <a href="afl-schedule-management.html" class="nav-item active">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="Schedule">
+            <span class="nav-label">SCHEDULE</span>
+        </a>
+        <a href="afl-match-history.html" class="nav-item">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="History">
+            <span class="nav-label">HISTORY</span>
+        </a>
+    </nav>
+</body>
+
+</html>
