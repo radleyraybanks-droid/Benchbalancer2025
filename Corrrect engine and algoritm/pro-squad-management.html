@@ -8,6 +8,7 @@
 
     <!-- Supabase CDN for authentication and database -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 
     <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -97,6 +98,112 @@
             animation: pulse 3s ease-in-out infinite;
         }
 
+        /* UPGRADE MODAL SPECIFIC */
+        #upgradeModal .modal-content {
+            border: 3px solid var(--accent-cyan);
+            background: #000;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .upgrade-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 42px;
+            line-height: 1.1;
+            color: #fff;
+            margin-bottom: 24px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .upgrade-list {
+            text-align: left;
+            color: #fff;
+            font-family: 'Russo One', sans-serif;
+            font-size: 18px;
+            list-style: none;
+            padding: 0;
+            margin: 0 auto 32px auto;
+            display: inline-block;
+        }
+
+        .upgrade-list li {
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .upgrade-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #fff;
+        }
+
+        .purchase-btn {
+            background: var(--accent-cyan);
+            color: #000;
+            font-family: 'Russo One', sans-serif;
+            font-size: 28px;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+        }
+
+        .purchase-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent-cyan);
+        }
+
+        .cancel-text {
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 12px;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        /* PRICING STEPS */
+        .pricing-option {
+            border: 3px solid var(--accent-cyan);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            background: rgba(0, 255, 224, 0.05);
+        }
+
+        .pricing-option:hover {
+            background: rgba(0, 255, 224, 0.15);
+            transform: scale(1.02);
+        }
+
+        .pricing-price {
+            font-family: 'Russo One', sans-serif;
+            font-size: 32px;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .pricing-period {
+            font-family: 'Roboto', sans-serif;
+            font-size: 12px;
+            color: #ccc;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .separator-or {
+            font-family: 'Russo One', sans-serif;
+            font-size: 24px;
+            color: #fff;
+            margin: 12px 0;
+            text-transform: uppercase;
+        }
+
         @keyframes pulse {
 
             0%,
@@ -155,6 +262,57 @@
         .btn-nav:hover {
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-primary);
+        }
+
+        /* Professional Header Icon Buttons */
+        .header-icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-icon-btn:hover {
+            background: rgba(0, 255, 224, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        /* Professional UPGRADE Button */
+        .header-upgrade-btn {
+            background: #2d3849;
+            border: 2px solid #00ffe0;
+            border-radius: 12px;
+            padding: 10px 24px;
+            color: white;
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.1em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .header-upgrade-btn::before {
+            content: '💎';
+            font-size: 16px;
+        }
+
+        .header-upgrade-btn:hover {
+            background: rgba(0, 255, 224, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 224, 0.3);
         }
 
         /* Main Container */
@@ -282,47 +440,118 @@
             border: 1px solid rgba(255, 153, 102, 0.3);
         }
 
-        /* Add Player Card */
+        /* Team Name Header */
+        .team-header-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .team-name-wrapper {
+            position: relative;
+            background: rgba(4, 7, 13, 0.6);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 8px;
+            padding: 16px 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 300px;
+            box-shadow: 0 0 20px rgba(0, 255, 224, 0.15);
+        }
+
+        .team-name-display {
+            font-family: 'Russo One', sans-serif;
+            font-size: 20px;
+            /* Reduced to fit 25 chars */
+            text-transform: uppercase;
+            color: #fff;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .team-name-input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Russo One', sans-serif;
+            font-size: 20px;
+            /* Reduced to fit 25 chars */
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-align: center;
+            width: 100%;
+            outline: none;
+            display: none;
+        }
+
+        .edit-icon {
+            width: 18px;
+            height: 18px;
+            margin-left: 8px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .team-name-wrapper:hover .edit-icon {
+            opacity: 1;
+        }
+
+        /* Updated Add Player Card */
         .add-player-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 2px dashed var(--border-medium);
-            border-radius: var(--radius-lg);
+            background: rgba(4, 7, 13, 0.4);
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 200px;
+            min-height: 220px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s ease;
         }
 
         .add-player-card:hover {
-            background: rgba(0, 255, 224, 0.05);
+            background: rgba(4, 7, 13, 0.8);
             border-color: var(--accent-cyan);
-            box-shadow: var(--shadow-glow);
+            box-shadow: 0 0 30px rgba(0, 255, 224, 0.1);
+            transform: translateY(-5px);
         }
 
         .add-icon {
-            width: 48px;
-            height: 48px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: var(--accent-cyan);
-            color: var(--bg-900);
+            color: #000;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            box-shadow: 0 0 15px rgba(0, 255, 224, 0.4);
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            box-shadow: 0 0 20px rgba(0, 255, 224, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .add-player-card:hover .add-icon {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 224, 0.7);
         }
 
         .add-text {
             font-family: 'Russo One', sans-serif;
-            color: var(--text-secondary);
-            font-size: 14px;
+            color: var(--accent-cyan);
+            font-size: 16px;
             letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 255, 224, 0.2);
         }
+
+        /* --- RESTORED MODAL & FORM CSS --- */
 
         /* Modal */
         .modal-overlay {
@@ -384,14 +613,17 @@
         .close-btn {
             background: none;
             border: none;
-            color: var(--text-muted);
-            font-size: 24px;
+            width: 28px;
+            height: 28px;
             cursor: pointer;
-            transition: var(--transition);
+            padding: 0;
+            opacity: 0.7;
+            transition: opacity 0.2s, transform 0.2s;
         }
 
         .close-btn:hover {
-            color: var(--accent-red);
+            opacity: 1;
+            transform: scale(1.1);
         }
 
         /* Form Styling */
@@ -582,30 +814,692 @@
             width: 16px;
             height: 16px;
         }
+
+        /* Schedule Tile Specifics */
+        .schedule-tile-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            gap: 16px;
+        }
+
+        .schedule-icon {
+            font-size: 48px;
+            color: var(--accent-cyan);
+            filter: drop-shadow(0 0 10px rgba(0, 255, 224, 0.4));
+        }
+
+        /* Game List Styles */
+        .game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .game-card {
+            background: rgba(4, 7, 13, 0.6);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(4, 7, 13, 0.8);
+            transform: translateX(4px);
+        }
+
+        .game-info-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .game-opponent {
+            font-family: 'Russo One', sans-serif;
+            color: var(--text-primary);
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .game-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .game-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-home {
+            background: rgba(29, 209, 161, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(29, 209, 161, 0.2);
+        }
+
+        .badge-away {
+            background: rgba(255, 153, 102, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(255, 153, 102, 0.2);
+        }
+
+        .map-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .map-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Updated Player Card Design */
+        .player-card {
+            background: linear-gradient(145deg, #1a202c, #2d3748);
+            border-radius: 16px;
+            padding: 16px;
+            position: relative;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 255, 224, 0.15);
+            border-color: rgba(0, 255, 224, 0.3);
+        }
+
+        .player-silhouette {
+            width: 80px;
+            height: 80px;
+            background: #000;
+            border-radius: 50% 50% 0 0;
+            /* Semi-circle-ish */
+            border-radius: 50%;
+            /* Make it circular for now, effectively */
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #0d1117;
+        }
+
+        .player-silhouette svg {
+            width: 100%;
+            height: 100%;
+            fill: #1a202c;
+            /* lighter dark */
+        }
+
+        /* Using a simple CSS shape for silhouette if no SVG */
+        .player-silhouette::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 60px;
+            background: #2d3748;
+            border-radius: 50%;
+            margin-bottom: -20px;
+        }
+
+        .player-silhouette::before {
+            content: '';
+            position: absolute;
+            display: block;
+            width: 30px;
+            height: 30px;
+            background: #2d3748;
+            border-radius: 50%;
+            margin-top: -35px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+
+        .player-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .player-card-name {
+            font-family: 'Russo One', sans-serif;
+            font-size: 20px;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .player-joined-date {
+            font-size: 10px;
+            color: #a0aec0;
+            margin-bottom: 4px;
+        }
+
+        .player-matches-count {
+            font-family: 'Russo One', sans-serif;
+            font-size: 12px;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .player-notes-preview {
+            font-size: 10px;
+            color: #cbd5e0;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .emergency-contact-label {
+            font-size: 10px;
+            color: #fc8181;
+            /* Red/Orange text */
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .emergency-contact-text {
+            font-family: 'Russo One', sans-serif;
+            font-size: 11px;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .edit-card-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            /* Above card click */
+            font-size: 18px;
+        }
+
+        .edit-card-btn:hover {
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .consent-checkbox-display.checked {
+            background: var(--accent-cyan);
+        }
+
+        /* REDESIGNED PLAYER VIEW MODAL */
+        .player-view-modal-content {
+            background: #1a222e;
+            /* Slate-ish dark */
+            border: none;
+            border-radius: 20px;
+            padding: 0;
+            width: 95%;
+            max-width: 750px;
+            text-align: left;
+            display: flex;
+            flex-direction: row;
+            /* 2 Columns */
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .pv-left-col {
+            background: #252e3e;
+            /* Slightly lighter/different tone for left sidebar */
+            width: 38%;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pv-right-col {
+            background: #1a222e;
+            width: 62%;
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Avatar in Left Col */
+        .pv-avatar {
+            width: 140px;
+            height: 140px;
+            background: #000;
+            border-radius: 50%;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pv-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            background: #4a5568;
+            border-radius: 50%;
+        }
+
+        .pv-avatar::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: #4a5568;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        /* Contact Section */
+        .pv-section-title {
+            color: #ff5f6d;
+            /* Red color from mock */
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            text-transform: uppercase;
+            width: 100%;
+            margin-bottom: 12px;
+            margin-top: 8px;
+        }
+
+        .pv-contact-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 8px;
+            color: #fff;
+            gap: 10px;
+        }
+
+        .pv-icon {
+            width: 16px;
+            text-align: center;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .pv-contact-name {
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.02em;
+        }
+
+        .pv-contact-phone {
+            font-family: 'Russo One', sans-serif;
+            font-size: 18px;
+            letter-spacing: 0.05em;
+        }
+
+        .pv-address {
+            font-size: 11px;
+            color: #e2e8f0;
+            line-height: 1.3;
+        }
+
+        .pv-consent-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .pv-consent-sub {
+            font-size: 9px;
+            color: #a0aec0;
+            display: block;
+            margin-top: -2px;
+        }
+
+        /* Right Col Typography */
+        .pv-name {
+            font-family: 'Russo One', sans-serif;
+            font-size: 48px;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .pv-joined {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 24px;
+        }
+
+        .pv-stat-row {
+            font-size: 16px;
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .pv-stat-label {
+            font-weight: 400;
+            color: #a0aec0;
+            margin-right: 6px;
+        }
+
+        .pv-notes-label {
+            font-size: 14px;
+            color: #fff;
+            font-weight: 700;
+            margin-top: 24px;
+            margin-bottom: 8px;
+        }
+
+        .pv-notes-text {
+            font-size: 13px;
+            color: #e2e8f0;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        /* Close Button Override */
+        .pv-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            filter: invert(1);
+            opacity: 0.5;
+            cursor: pointer;
+            transition: 0.2s;
+            z-index: 10;
+        }
+
+        .pv-close-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 650px) {
+            .player-view-modal-content {
+                flex-direction: column;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .pv-left-col,
+            .pv-right-col {
+                width: 100%;
+            }
+
+            .pv-right-col {
+                padding-top: 0;
+            }
+        }
+
+        /* --- STARTING LINEUP MODAL CSS --- */
+        .lineup-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Responsive side-by-side on larger screens */
+        @media (min-width: 600px) {
+            .lineup-container {
+                flex-direction: row;
+            }
+
+            .lineup-section {
+                flex: 1;
+            }
+        }
+
+        .lineup-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lineup-header {
+            font-family: 'Russo One', sans-serif;
+            color: var(--accent-cyan);
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .lineup-header.bench-header {
+            color: var(--text-secondary);
+        }
+
+        .player-list-drag {
+            min-height: 200px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+
+        .draggable-player {
+            background: var(--bg-card);
+            border: 1px solid var(--border-faint);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            cursor: move;
+            /* Fallback */
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            user-select: none;
+            position: relative;
+        }
+
+        /* Drag handle if needed, but whole card is better for mobile */
+
+        .draggable-player:active {
+            cursor: grabbing;
+            background: rgba(0, 255, 224, 0.15);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .draggable-player.sortable-ghost {
+            opacity: 0.4;
+            background: var(--accent-cyan);
+            border: 2px dashed #fff;
+        }
+
+        .draggable-player.sortable-drag {
+            background: var(--accent-cyan);
+            color: #000;
+            opacity: 1;
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .drag-instruction {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* Footer Navigation - Bottom Tabs */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0 16px;
+            display: flex;
+            justify-content: space-around;
+            background: #08101a;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: #666;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--accent-cyan);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .nav-icon-img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            opacity: 0.5;
+            transition: opacity 0.2s, filter 0.2s;
+        }
+
+        .nav-item.active .nav-icon-img {
+            opacity: 1;
+            filter: drop-shadow(0 0 4px var(--accent-cyan));
+        }
+
+        /* Add bottom padding to main container to avoid footer overlap */
+        .main-container {
+            padding-bottom: 100px;
+        }
     </style>
 </head>
 
 <body>
 
     <header id="appHeader">
-        <div class="header-brand">
-            <div class="app-title">
-                <img src="assets/bench-balancer-logo-v2.png" alt="Bench Balancer" style="height: 36px; width: auto;">
-            </div>
-            <div class="app-subtitle">Pro Coach Dashboard</div>
+        <!-- LEFT SECTION: Back + Upgrade -->
+        <div style="display:flex; align-items:center; gap:12px;">
+            <!-- BACK TO DASHBOARD BUTTON -->
+            <a href="basketball-dashboard.html" style="display:flex; align-items:center; gap:6px; background:none; border:2px solid var(--accent-cyan); border-radius:20px; padding:6px 14px; cursor:pointer; transition:all 0.2s; text-decoration:none;" onmouseover="this.style.background='rgba(0,255,224,0.15)'" onmouseout="this.style.background='none'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#00ffe0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span style="color:#00ffe0; font-family:'Poppins',sans-serif; font-size:12px; font-weight:600;">BACK</span>
+            </a>
+            <!-- UPGRADE BUTTON -->
+            <button class="header-upgrade-btn" onclick="openUpgradeModal()" style="display:flex; align-items:center; gap:8px; background:linear-gradient(135deg, #1a2a3a 0%, #0d1620 100%); border:2px solid var(--accent-cyan); border-radius:25px; padding:8px 16px; cursor:pointer; transition:all 0.2s;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L2 9L12 16L22 9L12 2Z" fill="#5bc0de"/>
+                    <path d="M2 9L12 16L22 9" stroke="#87ceeb" stroke-width="1"/>
+                    <path d="M12 16V22" stroke="#5bc0de" stroke-width="2"/>
+                    <path d="M7 19L12 22L17 19" stroke="#5bc0de" stroke-width="2" fill="none"/>
+                </svg>
+                <span style="color:#fff; font-family:'Russo One',sans-serif; font-size:14px; font-weight:bold; letter-spacing:1px;">UPGRADE</span>
+            </button>
         </div>
-        <div class="header-actions">
-            <a href="index.html" class="btn-nav">Back to Home</a>
-            <button id="logoutBtn" class="btn-nav"
-                style="border-color: var(--accent-red); color: var(--accent-red);">Sign Out</button>
+
+        <div class="app-title" style="font-family: 'Russo One', sans-serif; font-size: 24px; color: #fff; text-shadow: 0 0 15px var(--accent-cyan);">
+            MY TEAM
+        </div>
+
+        <div class="header-actions" style="display: flex; gap: 16px; align-items: center;">
+            <!-- HELP ICON -->
+            <button onclick="alert('Help coming soon!')" style="background:none; border:none; cursor:pointer; padding:4px; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="14" stroke="#00ffe0" stroke-width="2.5" fill="none"/>
+                    <text x="16" y="21" text-anchor="middle" fill="#00ffe0" font-family="Arial, sans-serif" font-size="18" font-weight="bold">?</text>
+                </svg>
+            </button>
+            <!-- SETTINGS ICON -->
+            <button onclick="alert('Settings coming soon!')" style="background:none; border:none; cursor:pointer; padding:4px; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="5" stroke="#00ffe0" stroke-width="2.5" fill="none"/>
+                    <path d="M16 3V7M16 25V29M3 16H7M25 16H29M6.5 6.5L9.5 9.5M22.5 22.5L25.5 25.5M25.5 6.5L22.5 9.5M9.5 22.5L6.5 25.5" stroke="#00ffe0" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </button>
         </div>
     </header>
 
     <div class="main-container">
-        <div class="section-header">
-            <h1>Squad Management</h1>
-            <div class="filter-controls">
-                <!-- Potential filter dropdowns here -->
+        <div class="team-header-container">
+            <div class="team-name-wrapper" onclick="toggleTeamNameEdit()">
+                <div class="team-name-display" id="teamNameDisplay">
+                    YOUR TEAM NAME <img src="assets/icon-edit.png" class="edit-icon" alt="Edit">
+                </div>
+                <input type="text" class="team-name-input" id="teamNameInput" maxlength="25"
+                    onblur="saveTeamName(this.value)" onkeydown="if(event.key === 'Enter') this.blur()">
             </div>
         </div>
 
@@ -614,12 +1508,133 @@
         </div>
     </div>
 
+
+
+
+
+    <!-- Player View Modal (Enlarged) -->
+    <div class="modal-overlay" id="playerViewModal">
+        <div class="player-view-modal-content" onclick="event.stopPropagation()">
+            <img src="assets/icon-close.png" class="pv-close-btn" alt="Close" onclick="closePlayerViewModal()">
+
+            <!-- LEFT COLUMN -->
+            <div class="pv-left-col">
+                <div class="pv-avatar"></div>
+
+                <!-- Emergency Contact 1 -->
+                <div class="pv-section-title">Emergency contact:</div>
+
+                <div class="pv-contact-row">
+                    <div class="pv-icon">👤</div>
+                    <div class="pv-contact-name" id="viewEmergencyName">Steven</div>
+                </div>
+                <div class="pv-contact-row">
+                    <div class="pv-icon">📞</div>
+                    <div class="pv-contact-phone" id="viewEmergencyPhone">0457633422</div>
+                </div>
+                <div class="pv-contact-row">
+                    <div class="pv-icon">🏠</div>
+                    <div class="pv-address" id="viewPlayerAddress">123 street Forresters Beach</div>
+                </div>
+
+                <div class="pv-consent-row">
+                    <div>
+                        Parent Consent
+                        <span class="pv-consent-sub">to store player details</span>
+                    </div>
+                    <div id="viewConsentBox" class="consent-checkbox-display"></div>
+                </div>
+
+                <!-- Emergency Contact 2 -->
+                <div id="viewParent2Section" style="width:100%; margin-top: 20px; display:none;">
+                    <div style="color: #cbd5e0; font-size: 11px; font-weight: bold; margin-bottom: 8px;">Parent/Guardian
+                        2: (optional)</div>
+
+                    <div class="pv-contact-row">
+                        <div class="pv-icon">👤</div>
+                        <div class="pv-contact-name" id="viewParent2Name">Karen</div>
+                    </div>
+                    <div class="pv-contact-row">
+                        <div class="pv-icon">📞</div>
+                        <div class="pv-contact-phone" id="viewParent2Phone">0457633522</div>
+                    </div>
+                    <!-- Optional reuse of address if logic dictates, currently using single address field -->
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="pv-right-col">
+                <div class="pv-name" id="viewPlayerName">Jimbo</div>
+                <div class="pv-joined" id="viewJoinedDate">Joined 6/12/25</div>
+
+                <!-- Stats/Details -->
+                <div class="pv-stat-row">
+                    <span class="pv-stat-label">Age:</span> <span id="viewPlayerAge">12</span>
+                </div>
+                <div class="pv-stat-row">
+                    <span class="pv-stat-label">Position:</span> <span id="viewPlayerPosition">Guard</span>
+                </div>
+                <div class="pv-stat-row">
+                    <span class="pv-stat-label">Jersey Number:</span> <span id="viewPlayerJersey">17</span>
+                </div>
+
+                <div class="pv-notes-label">Notes:</div>
+                <div class="pv-notes-text" id="viewNotes">
+                    Strong shooter, weak defense.
+                </div>
+
+                <!-- Edit Button - Simplified with explicit z-index -->
+                <button id="editProfileBtn" class="btn btn-primary"
+                    style="width:auto; align-self: flex-end; margin-top:20px; padding: 10px 24px; position: relative; z-index: 100; pointer-events: auto; cursor: pointer;">
+                    EDIT PROFILE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Starting Lineup Modal -->
+    <div class="modal-overlay" id="lineupModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">ADJUST STARTING TEAM</h2>
+                <img src="assets/icon-close.png" class="close-btn" alt="Close" onclick="closeLineupModal()">
+            </div>
+
+            <p class="drag-instruction">Drag and drop players between lists to set your default starting lineup.</p>
+
+            <div class="lineup-container">
+                <!-- Starting XI (or whatever number) -->
+                <div class="lineup-section">
+                    <div class="lineup-header">STARTING</div>
+                    <div id="startingList" class="player-list-drag">
+                        <!-- Draggable Items -->
+                    </div>
+                </div>
+
+                <!-- Bench -->
+                <div class="lineup-section">
+                    <div class="lineup-header bench-header">BENCH</div>
+                    <div id="benchList" class="player-list-drag">
+                        <!-- Draggable Items -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 32px;">
+                <button type="button" class="btn btn-secondary" onclick="closeLineupModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveStartingLineup()">Save Default
+                    Lineup</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Add/Edit Player Modal -->
     <div class="modal-overlay" id="playerModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Player Profile</h2>
-                <button class="close-btn" onclick="closePlayerModal()">&times;</button>
+                <img src="assets/icon-close.png" class="close-btn" alt="Close" onclick="closePlayerModal()">
             </div>
 
             <form id="playerForm" onsubmit="handleSavePlayer(event)">
@@ -653,6 +1668,11 @@
                     <div class="form-group">
                         <label>Date of Birth</label>
                         <input type="date" id="playerDob" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Jersey Number</label>
+                        <input type="text" id="playerJersey" class="form-control" placeholder="#" maxlength="2">
                     </div>
 
                     <div class="form-group full-width">
@@ -732,19 +1752,139 @@
     <!-- Scripts -->
     <script src="config/supabase-config.js"></script>
     <script src="auth/auth-manager.js"></script>
-    <script src="config/simple-supabase.js"></script>
+    <script src="config/env.js"></script>
+    <script type="module" src="config/simple-supabase.js"></script>
+    <script type="module">
+        import { initAuth } from './config/simple-supabase.js';
+        initAuth();
+    </script>
 
     <script>
         // Pro Squad Manager Logic
 
         // State
         let players = [];
+        let teamName = "YOUR TEAM NAME";
+
+        // UUID Generator for Player IDs
+        function generateUUID() {
+            // Generate a RFC4122 version 4 UUID
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
             checkAuth();
+            loadTeamName();
             loadPlayers();
+
+            // Auto-open Schedule if requested
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'schedule') {
+                // Short timeout to ensure data loaded
+                setTimeout(() => {
+                    openScheduleModal();
+
+                    if (urlParams.get('action') === 'playNext') {
+                        highlightNextGame();
+                    }
+                }, 100);
+            }
         });
+
+        // Team Name Logic
+        async function loadTeamName() {
+            console.log('[Team Sync] Loading team name...');
+
+            // Try Supabase first
+            if (window.benchBalancerSupabase) {
+                try {
+                    const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                    if (user && user.user_metadata?.team_name) {
+                        teamName = user.user_metadata.team_name;
+                        console.log('[Team Sync] ✅ Loaded team name from Supabase:', teamName);
+                        updateTeamNameUI();
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('[Team Sync] Error loading team name from Supabase:', err.message);
+                }
+            }
+
+            // Fallback to localStorage
+            const savedName = localStorage.getItem('benchbalancer_team_name');
+            if (savedName) {
+                teamName = savedName;
+                console.log('[Team Sync] Loaded team name from localStorage');
+            }
+            updateTeamNameUI();
+        }
+
+        async function saveTeamName(newName) {
+            if (newName && newName.trim() !== "") {
+                teamName = newName.trim();
+
+                // Save to localStorage
+                localStorage.setItem('benchbalancer_team_name', teamName);
+
+                // Save to Supabase user metadata
+                if (window.benchBalancerSupabase) {
+                    try {
+                        const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                        if (user) {
+                            const { error } = await window.benchBalancerSupabase.auth.updateUser({
+                                data: { team_name: teamName }
+                            });
+
+                            if (error) {
+                                console.error('[Team Sync] Failed to save team name:', error.message);
+                            } else {
+                                console.log('[Team Sync] ✅ Team name saved to Supabase');
+                            }
+                        }
+                    } catch (err) {
+                        console.error('[Team Sync] Error saving team name:', err.message);
+                    }
+                }
+            }
+            updateTeamNameUI();
+            toggleTeamNameEdit(false);
+        }
+
+        function updateTeamNameUI() {
+            document.getElementById('teamNameDisplay').innerHTML = `${teamName} <img src="assets/icon-edit.png" class="edit-icon" alt="Edit">`
+            document.getElementById('teamNameInput').value = teamName;
+        }
+
+        function toggleTeamNameEdit(forceEdit) {
+            const display = document.getElementById('teamNameDisplay');
+            const input = document.getElementById('teamNameInput');
+
+            if (forceEdit === false) {
+                display.style.display = 'flex';
+                input.style.display = 'none';
+            } else if (forceEdit === true) {
+                display.style.display = 'none';
+                input.style.display = 'block';
+                input.focus();
+            } else {
+                // Toggle
+                if (input.style.display === 'none' || input.style.display === '') {
+                    display.style.display = 'none';
+                    input.style.display = 'block';
+                    input.focus();
+                } else {
+                    display.style.display = 'flex';
+                    input.style.display = 'none';
+                }
+            }
+        }
 
         async function checkAuth() {
             // Simple check to ensure user is logged in
@@ -755,123 +1895,524 @@
             // or we redirect if no user found in window.benchBalancerSupabase later.
         }
 
-        function loadPlayers() {
-            // Try to load from localStorage first for speed/offline
+        async function loadPlayers() {
+            console.log('[Team Sync] Loading players...');
+
+            // Wait for Supabase to be ready before trying to load
+            if (window.supabaseReady) {
+                try {
+                    await window.supabaseReady;
+                    console.log('[Team Sync] Supabase ready, proceeding with load');
+                } catch (e) {
+                    console.warn('[Team Sync] Supabase initialization failed, using localStorage');
+                }
+            }
+
+            // Try to load from Supabase first (source of truth)
+            if (window.benchBalancerSupabase) {
+                try {
+                    const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                    if (user) {
+                        console.log('[Team Sync] Fetching roster from Supabase for user:', user.id);
+
+                        const { data, error } = await window.benchBalancerSupabase
+                            .from('teams_roster')
+                            .select('*')
+                            .eq('user_id', user.id)
+                            .order('name', { ascending: true });
+
+                        if (error) {
+                            console.warn('[Team Sync] Supabase fetch failed:', error.message);
+                            console.log('[Team Sync] Falling back to localStorage');
+                        } else if (data && data.length > 0) {
+                            console.log(`[Team Sync] ✅ Loaded ${data.length} players from Supabase`);
+
+                            // Convert Supabase format to app format
+                            players = data.map(row => {
+                                const contact = row.parent_contact || {};
+                                return {
+                                    id: row.id,
+                                    name: row.name,
+                                    jersey: row.jersey_number,
+                                    position: row.position || '',
+                                    notes: row.notes || '',
+
+                                    // Extended fields stored in parent_contact JSON
+                                    dob: contact.dob || '',
+                                    address: contact.address || '',
+                                    consent: contact.consent || false,
+
+                                    // Parent 1
+                                    parent1Name: contact.parent1Name || '',
+                                    parent1Phone: contact.parent1Phone || '',
+                                    parent1Whatsapp: contact.parent1Whatsapp || false,
+
+                                    // Parent 2
+                                    parent2Name: contact.parent2Name || '',
+                                    parent2Phone: contact.parent2Phone || '',
+                                    parent2Whatsapp: contact.parent2Whatsapp || false
+                                };
+                            });
+
+                            // Update localStorage cache
+                            localStorage.setItem('benchbalancer_pro_squad', JSON.stringify(players));
+
+                            // Update global reference for edit button handler
+                            window.players = players;
+
+                            renderSquad();
+                            return;
+                        } else {
+                            console.log('[Team Sync] No players found in Supabase, checking localStorage');
+                        }
+                    }
+                } catch (err) {
+                    console.warn('[Team Sync] Error loading from Supabase:', err.message);
+                }
+            }
+
+            // Fallback: Load from localStorage (offline or not authenticated)
             const saved = localStorage.getItem('benchbalancer_pro_squad');
             if (saved) {
                 players = JSON.parse(saved);
+                window.players = players;  // Update global reference
+                console.log('[Team Sync] Loaded from localStorage (offline mode)');
             }
 
             // Always render, even if empty (so the Add button shows)
+            window.players = players;  // Ensure global ref is always current
             renderSquad();
-
-            // TODO: Sync with Supabase here
         }
 
-        function savePlayers() {
+        async function savePlayers() {
+            // Save to localStorage immediately for offline support
             localStorage.setItem('benchbalancer_pro_squad', JSON.stringify(players));
             renderSquad();
 
-            // TODO: Sync with Supabase here
-            // syncWithSupabase();
+            // Sync with Supabase in background
+            await syncWithSupabase();
+        }
+
+        async function syncWithSupabase() {
+            if (!window.benchBalancerSupabase) {
+                console.log('[Team Sync] ⚠ Offline mode - skipping Supabase sync');
+                return;
+            }
+
+            try {
+                const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                if (!user) {
+                    console.log('[Team Sync] ⚠ No authenticated user - skipping sync');
+                    return;
+                }
+
+                console.log('[Team Sync] Syncing ${players.length} players to Supabase...');
+
+                // Get existing roster from Supabase
+                const { data: existingRoster, error: fetchError } = await window.benchBalancerSupabase
+                    .from('teams_roster')
+                    .select('id')
+                    .eq('user_id', user.id);
+
+                if (fetchError) {
+                    console.error('[Team Sync] Failed to fetch existing roster:', fetchError.message);
+                    return;
+                }
+
+                const existingIds = (existingRoster || []).map(r => r.id);
+                const currentIds = players.map(p => p.id);
+
+                // Delete removed players
+                const toDelete = existingIds.filter(id => !currentIds.includes(id));
+                if (toDelete.length > 0) {
+                    console.log(`[Team Sync] Deleting ${toDelete.length} removed players...`);
+                    const { error: deleteError } = await window.benchBalancerSupabase
+                        .from('teams_roster')
+                        .delete()
+                        .in('id', toDelete);
+
+                    if (deleteError) {
+                        console.error('[Team Sync] Delete failed:', deleteError.message);
+                    }
+                }
+
+                // Upsert all current players
+                const playersToSync = players.map(player => ({
+                    id: player.id,
+                    user_id: user.id,
+                    name: player.name,
+                    jersey_number: player.jersey || null,
+                    position: player.position || null,
+                    notes: player.notes || null,
+                    // Store extended details in JSONB column to avoid schema migration
+                    parent_contact: {
+                        dob: player.dob || '',
+                        address: player.address || '',
+                        consent: player.consent || false,
+
+                        parent1Name: player.parent1Name || '',
+                        parent1Phone: player.parent1Phone || '',
+                        parent1Whatsapp: player.parent1Whatsapp || false,
+
+                        parent2Name: player.parent2Name || '',
+                        parent2Phone: player.parent2Phone || '',
+                        parent2Whatsapp: player.parent2Whatsapp || false
+                    },
+                    updated_at: new Date().toISOString()
+                }));
+
+                const { error: upsertError } = await window.benchBalancerSupabase
+                    .from('teams_roster')
+                    .upsert(playersToSync, { onConflict: 'id' });
+
+                if (upsertError) {
+                    console.error('[Team Sync] ❌ Upsert failed:', upsertError.message);
+                } else {
+                    console.log('[Team Sync] ✅ Successfully synced to Supabase');
+                }
+            } catch (err) {
+                console.error('[Team Sync] ❌ Sync error:', err.message);
+            }
         }
 
         function renderSquad() {
             const grid = document.getElementById('squadGrid');
             grid.innerHTML = '';
 
-            // Sort players alphabetically by name
-            const sortedPlayers = [...players].sort((a, b) => a.name.localeCompare(b.name));
-
-            sortedPlayers.forEach(player => {
-                const card = document.createElement('div');
-                card.className = 'player-card';
-                card.onclick = () => editPlayer(player.id);
-
-                const consentBadge = player.consent ?
-                    `<span class="badge badge-success">Consent Given</span>` :
-                    `<span class="badge badge-warning">No Consent</span>`;
-
-                card.innerHTML = `
-                    <div class="player-header">
-                        <div class="player-name">${player.name}</div>
-                        <div class="player-position">${player.position}</div>
-                    </div>
-                    <div class="player-details">
-                        <div class="detail-row">
-                            <span>📞</span> ${player.parent1Phone || 'No Phone'}
-                        </div>
-                        <div class="detail-row">
-                            <span>📍</span> ${player.address ? 'Address on file' : 'No Address'}
-                        </div>
-                    </div>
-                    <div class="status-badges">
-                        ${consentBadge}
-                        ${player.parent1Whatsapp || player.parent2Whatsapp ? '<span class="badge badge-success">WhatsApp</span>' : ''}
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-
-            // Add Player Card (Always Last)
+            // 1. Add Player Card (Always First)
             const addCard = document.createElement('div');
             addCard.className = 'add-player-card';
-            addCard.onclick = openPlayerModal;
+            addCard.onclick = () => openPlayerModal(); // Opens "Add New" form
             addCard.innerHTML = `
                 <div class="add-icon">+</div>
                 <div class="add-text">Add New Player</div>
             `;
             grid.appendChild(addCard);
+
+            // Add Schedule Tile (if logical for function order, but we handle it in loadSchedule too)
+            // It will be re-injected by loadSchedule() calling renderScheduleTile() which appends carefully.
+            // But to be safe, renderScheduleTile() should handle its own existence.
+
+            // 2. Render Existing Players
+            const sortedPlayers = [...players].sort((a, b) => a.name.localeCompare(b.name));
+
+            sortedPlayers.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                // Click on card opens View Modal
+                card.onclick = (e) => {
+                    // Prevent firing if clicking edit button
+                    if (!e.target.closest('.edit-card-btn')) {
+                        viewPlayer(player.id);
+                    }
+                };
+
+                // Mock Data for Design Compatibility
+                const joinedDate = player.joinedDate || "Joined 6/12/25"; // Mock default
+                const gamesPlayed = player.gamesPlayed || "1 Game played";
+                const parentName = player.parent1Name || player.parent2Name || "Parent";
+                const parentPhone = player.parent1Phone || player.parent2Phone || "No Phone";
+
+                card.innerHTML = `
+                    <div class="edit-card-btn" onclick="editPlayer('${player.id}')">
+                         <img src="assets/icon-edit.png" style="width: 16px; height: 16px; opacity: 0.8;" alt="Edit">
+                    </div>
+                    
+                    <div class="player-silhouette">
+                        <!-- CSS Shapes -->
+                    </div>
+
+                    <div class="player-info">
+                        <div class="player-card-name">
+                            ${player.jersey ? `<span style="color:var(--accent-cyan); margin-right:4px;">#${player.jersey}</span> ` : ''}
+                            ${player.name}
+                        </div>
+                        <div class="player-joined-date">${joinedDate}</div>
+                        <div class="player-matches-count">${gamesPlayed}</div>
+                        
+                        <div class="player-notes-preview">
+                            ${player.notes ? player.notes : 'No notes added.'}
+                        </div>
+                        
+                        <div style="margin-top: auto;">
+                            <div class="emergency-contact-label">Emergency contact:</div>
+                            <div class="emergency-contact-text">${parentName}</div>
+                            <div class="emergency-contact-text">${parentPhone}</div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Ensure Schedule Tile is present after render
+            // REMOVED at user request: if (typeof renderScheduleTile === 'function') renderScheduleTile();
         }
 
-        // Modal Functions
-        const modal = document.getElementById('playerModal');
-        const form = document.getElementById('playerForm');
+        // --- Player View Logic ---
+        const playerViewModal = document.getElementById('playerViewModal');
 
-        function openPlayerModal() {
-            form.reset();
-            document.getElementById('playerId').value = '';
-            modal.classList.add('active');
-        }
-
-        function closePlayerModal() {
-            modal.classList.remove('active');
-        }
-
-        function editPlayer(id) {
+        function viewPlayer(id) {
             const player = players.find(p => p.id === id);
             if (!player) return;
 
-            document.getElementById('playerId').value = player.id;
-            document.getElementById('playerName').value = player.name;
-            document.getElementById('playerPosition').value = player.position;
-            document.getElementById('playerDob').value = player.dob || '';
-            document.getElementById('playerAddress').value = player.address || '';
-            document.getElementById('parentalConsent').checked = player.consent;
-            document.getElementById('playerNotes').value = player.notes || '';
+            // Store ID for editing
+            document.getElementById('playerViewModal').dataset.playerId = id;
 
-            // Parent 1
-            document.getElementById('parent1Name').value = player.parent1Name || '';
-            document.getElementById('parent1Phone').value = player.parent1Phone || '';
-            document.getElementById('parent1Whatsapp').checked = player.parent1Whatsapp;
+            // Name & Join Date
+            document.getElementById('viewPlayerName').innerText = player.name;
+            document.getElementById('viewJoinedDate').innerText = player.joinedDate || "Joined recent";
 
-            // Parent 2
-            document.getElementById('parent2Name').value = player.parent2Name || '';
-            document.getElementById('parent2Phone').value = player.parent2Phone || '';
-            document.getElementById('parent2Whatsapp').checked = player.parent2Whatsapp;
+            // Age Calculation
+            let ageDisplay = "-";
+            if (player.dob) {
+                const birthDate = new Date(player.dob);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                ageDisplay = age;
+            }
+            document.getElementById('viewPlayerAge').innerText = ageDisplay;
 
-            modal.classList.add('active');
+            // Details
+            document.getElementById('viewPlayerPosition').innerText = player.position || "-";
+            document.getElementById('viewPlayerJersey').innerText = player.jersey || "-";
+            document.getElementById('viewNotes').innerText = player.notes || "No notes.";
+
+            // Parent 1 (Emergency)
+            document.getElementById('viewEmergencyName').innerText = player.parent1Name || player.parent2Name || "No Contact";
+            document.getElementById('viewEmergencyPhone').innerText = player.parent1Phone || player.parent2Phone || "-";
+            document.getElementById('viewPlayerAddress').innerText = player.address || "";
+
+            // Consent
+            const consentBox = document.getElementById('viewConsentBox');
+            if (player.consent) {
+                consentBox.classList.add('checked');
+            } else {
+                consentBox.classList.remove('checked');
+            }
+
+            // Parent 2 (Optional)
+            const p2Section = document.getElementById('viewParent2Section');
+            if (player.parent2Name) {
+                p2Section.style.display = 'block';
+                document.getElementById('viewParent2Name').innerText = player.parent2Name;
+                document.getElementById('viewParent2Phone').innerText = player.parent2Phone || "-";
+            } else {
+                p2Section.style.display = 'none';
+            }
+
+            playerViewModal.classList.add('active');
+        }
+
+        function closePlayerViewModal() {
+            playerViewModal.classList.remove('active');
+        }
+
+        function editCurrentViewPlayer() {
+            // Get elements FRESH every time - don't rely on global variables
+            const viewModal = document.getElementById('playerViewModal');
+            const playerId = viewModal ? viewModal.dataset.playerId : null;
+
+            console.log('[Edit Flow] Edit button clicked. Player ID from dataset:', playerId);
+
+            if (!playerId) {
+                console.error('[Edit Flow] ERROR: No player ID found in dataset');
+                alert('Error: No player selected. Please try clicking the player card again.');
+                return;
+            }
+
+            // Find the player using STRING comparison to avoid type mismatch
+            const player = players.find(p => String(p.id) === String(playerId));
+
+            if (!player) {
+                console.error('[Edit Flow] ERROR: Player not found for ID:', playerId);
+                console.log('[Edit Flow] Available players:', players.map(p => ({ id: p.id, name: p.name })));
+                alert('Error: Player data not found. Please refresh the page.');
+                return;
+            }
+
+            console.log('[Edit Flow] Found player to edit:', player.name);
+
+            // Get the edit modal FRESH
+            const editModal = document.getElementById('playerModal');
+            const editForm = document.getElementById('playerForm');
+
+            if (!editModal) {
+                console.error('[Edit Flow] ERROR: #playerModal element not found in DOM');
+                alert('Error: Edit form not found. Please refresh the page.');
+                return;
+            }
+
+            // Close the view modal FIRST
+            if (viewModal) {
+                viewModal.classList.remove('active');
+            }
+
+            // Reset form if it exists
+            if (editForm) {
+                editForm.reset();
+            }
+
+            // Helper functions for safe field population
+            const setField = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.value = value || '';
+            };
+            const setCheck = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.checked = !!value;
+            };
+
+            // Populate ALL form fields with player data
+            setField('playerId', player.id);
+            setField('playerName', player.name);
+            setField('playerPosition', player.position);
+            setField('playerDob', player.dob);
+            setField('playerAddress', player.address);
+            setField('playerJersey', player.jersey);
+            setField('playerNotes', player.notes);
+            setCheck('parentalConsent', player.consent);
+            setField('parent1Name', player.parent1Name);
+            setField('parent1Phone', player.parent1Phone);
+            setCheck('parent1Whatsapp', player.parent1Whatsapp);
+            setField('parent2Name', player.parent2Name);
+            setField('parent2Phone', player.parent2Phone);
+            setCheck('parent2Whatsapp', player.parent2Whatsapp);
+
+            // FORCE the modal to be visible
+            console.log('[Edit Flow] Opening edit modal NOW...');
+            editModal.classList.add('active');
+            editModal.style.opacity = '1';
+            editModal.style.pointerEvents = 'auto';
+
+            // Scroll to top
+            const content = editModal.querySelector('.modal-content');
+            if (content) content.scrollTop = 0;
+
+            console.log('[Edit Flow] Edit modal should now be visible. Classes:', editModal.className);
+        }
+
+        // Close modal on outside click
+        const pvModalRef = document.getElementById('playerViewModal');
+        if (pvModalRef) {
+            pvModalRef.onclick = (e) => {
+                if (e.target === pvModalRef) closePlayerViewModal();
+            }
+        }
+
+        // Modal Functions - Get fresh references each time
+        function openPlayerModal() {
+            console.log('[Edit Flow] Opening Add Player Modal');
+            const modalEl = document.getElementById('playerModal');
+            const formEl = document.getElementById('playerForm');
+
+            if (!modalEl) {
+                console.error('[Edit Flow] ERROR: playerModal not found');
+                return;
+            }
+
+            if (formEl) formEl.reset();
+
+            const pidInput = document.getElementById('playerId');
+            const jerseyInput = document.getElementById('playerJersey');
+            if (pidInput) pidInput.value = '';
+            if (jerseyInput) jerseyInput.value = '';
+
+            modalEl.classList.add('active');
+            modalEl.style.opacity = '1';
+            modalEl.style.pointerEvents = 'auto';
+
+            const modalContent = modalEl.querySelector('.modal-content');
+            if (modalContent) modalContent.scrollTop = 0;
+        }
+
+        function closePlayerModal() {
+            const modalEl = document.getElementById('playerModal');
+            if (modalEl) {
+                modalEl.classList.remove('active');
+                modalEl.style.opacity = '';
+                modalEl.style.pointerEvents = '';
+            }
+        }
+
+        // Legacy editPlayer function - now redirects to editCurrentViewPlayer logic
+        function editPlayer(id) {
+            console.log('[Edit Flow] editPlayer called with:', id);
+
+            // Set the ID in the dataset and call the main edit function
+            const viewModal = document.getElementById('playerViewModal');
+            if (viewModal) {
+                viewModal.dataset.playerId = id;
+            }
+
+            // Use the same logic as editCurrentViewPlayer but without closing view modal
+            const player = players.find(p => String(p.id) === String(id));
+
+            if (!player) {
+                console.error('[Edit Flow] Player not found for ID:', id);
+                return;
+            }
+
+            const editModal = document.getElementById('playerModal');
+            const editForm = document.getElementById('playerForm');
+
+            if (!editModal) {
+                console.error('[Edit Flow] playerModal not found');
+                return;
+            }
+
+            if (editForm) editForm.reset();
+
+            const setField = (elemId, value) => {
+                const el = document.getElementById(elemId);
+                if (el) el.value = value || '';
+            };
+            const setCheck = (elemId, value) => {
+                const el = document.getElementById(elemId);
+                if (el) el.checked = !!value;
+            };
+
+            setField('playerId', player.id);
+            setField('playerName', player.name);
+            setField('playerPosition', player.position);
+            setField('playerDob', player.dob);
+            setField('playerAddress', player.address);
+            setField('playerJersey', player.jersey);
+            setField('playerNotes', player.notes);
+            setCheck('parentalConsent', player.consent);
+            setField('parent1Name', player.parent1Name);
+            setField('parent1Phone', player.parent1Phone);
+            setCheck('parent1Whatsapp', player.parent1Whatsapp);
+            setField('parent2Name', player.parent2Name);
+            setField('parent2Phone', player.parent2Phone);
+            setCheck('parent2Whatsapp', player.parent2Whatsapp);
+
+            editModal.classList.add('active');
+            editModal.style.opacity = '1';
+            editModal.style.pointerEvents = 'auto';
+
+            const content = editModal.querySelector('.modal-content');
+            if (content) content.scrollTop = 0;
         }
 
         function handleSavePlayer(e) {
             e.preventDefault();
 
-            const id = document.getElementById('playerId').value || Date.now().toString();
+            const id = document.getElementById('playerId').value || generateUUID();
 
             const playerData = {
                 id: id,
                 name: document.getElementById('playerName').value,
                 position: document.getElementById('playerPosition').value,
+                dob: document.getElementById('playerDob').value,
+                address: document.getElementById('playerAddress').value,
+                position: document.getElementById('playerPosition').value,
+                jersey: document.getElementById('playerJersey').value.replace(/[^0-9]/g, '').slice(0, 2), // Numeric only
                 dob: document.getElementById('playerDob').value,
                 address: document.getElementById('playerAddress').value,
                 consent: document.getElementById('parentalConsent').checked,
@@ -901,16 +2442,433 @@
         }
 
         // Logout
-        document.getElementById('logoutBtn').onclick = async () => {
-            if (confirm('Sign out?')) {
-                if (window.benchBalancerSupabase) {
-                    await window.benchBalancerSupabase.auth.signOut();
+        // Logout Logic
+        async function handleSignOut() {
+            if (confirm('Are you sure you want to sign out?')) {
+                try {
+                    if (window.benchBalancerSupabase) {
+                        await window.benchBalancerSupabase.auth.signOut();
+                    }
+                    // Clear local cache for consistency
+                    localStorage.removeItem('sb-pomcalscfnwsqlscunxf-auth-token');
+                    window.location.href = 'index.html';
+                } catch (e) {
+                    console.error('Logout error', e);
+                    window.location.href = 'index.html';
                 }
-                window.location.href = 'index.html';
             }
         }
 
+
+
+        // Chain load
+        const originalLoadPlayers = window.loadPlayers || loadPlayers;
+        window.loadPlayers = function () {
+            if (typeof originalLoadPlayers === 'function') originalLoadPlayers();
+        };
+
+        // ===== STARTING LINEUP MANAGEMENT =====
+
+        function openLineupModal() {
+            const modal = document.getElementById('lineupModal');
+            if (!modal) return;
+
+            // Populate lists with current players
+            const startingList = document.getElementById('startingList');
+            const benchList = document.getElementById('benchList');
+
+            if (!startingList || !benchList) return;
+
+            // Clear lists
+            startingList.innerHTML = '';
+            benchList.innerHTML = '';
+
+            // Load saved lineup from user metadata
+            loadStartingLineup().then(() => {
+                // Create draggable items for each player
+                players.forEach(player => {
+                    const item = document.createElement('div');
+                    item.className = 'drag-player-item';
+                    item.dataset.playerId = player.id;
+                    item.innerHTML = `
+                        <span>${player.name}</span>
+                        ${player.jersey ? `<span class="player-jersey">#${player.jersey}</span>` : ''}
+                    `;
+
+                    // Check if player is in starting lineup
+                    if (player.isStarter) {
+                        startingList.appendChild(item);
+                    } else {
+                        benchList.appendChild(item);
+                    }
+                });
+
+                // Initialize Sortable for drag & drop
+                if (window.Sortable) {
+                    new Sortable(startingList, {
+                        group: 'lineup',
+                        animation: 150
+                    });
+                    new Sortable(benchList, {
+                        group: 'lineup',
+                        animation: 150
+                    });
+                }
+
+                modal.classList.add('active');
+            });
+        }
+
+        function closeLineupModal() {
+            const modal = document.getElementById('lineupModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        async function saveStartingLineup() {
+            const startingList = document.getElementById('startingList');
+            const benchList = document.getElementById('benchList');
+
+            if (!startingList || !benchList) return;
+
+            // Get player IDs from starting list
+            const starterIds = Array.from(startingList.children).map(el => el.dataset.playerId);
+
+            // Update players array with starter status
+            players.forEach(player => {
+                player.isStarter = starterIds.includes(player.id);
+            });
+
+            // Save to localStorage
+            localStorage.setItem('benchbalancer_pro_squad', JSON.stringify(players));
+
+            // Save to Supabase user metadata
+            if (window.benchBalancerSupabase) {
+                try {
+                    const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                    if (user) {
+                        const { error } = await window.benchBalancerSupabase.auth.updateUser({
+                            data: {
+                                starting_lineup: starterIds
+                            }
+                        });
+
+                        if (error) {
+                            console.error('[Lineup Sync] Failed to save:', error.message);
+                            alert('⚠️ Failed to save lineup to cloud. Saved locally only.');
+                        } else {
+                            console.log('[Lineup Sync] ✅ Saved to Supabase');
+                            alert('✅ Starting lineup saved successfully!');
+                        }
+                    }
+                } catch (err) {
+                    console.error('[Lineup Sync] Error:', err.message);
+                }
+            }
+
+            // Sync full roster to database
+            await syncWithSupabase();
+
+            closeLineupModal();
+        }
+
+        async function loadStartingLineup() {
+            // Try to load from Supabase user metadata
+            if (window.benchBalancerSupabase) {
+                try {
+                    const { data: { user } } = await window.benchBalancerSupabase.auth.getUser();
+
+                    if (user && user.user_metadata?.starting_lineup) {
+                        const starterIds = user.user_metadata.starting_lineup;
+                        console.log('[Lineup Sync] ✅ Loaded lineup from Supabase');
+
+                        // Update players with starter status
+                        players.forEach(player => {
+                            player.isStarter = starterIds.includes(player.id);
+                        });
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('[Lineup Sync] Error loading from Supabase:', err.message);
+                }
+            }
+
+            // Fallback: all players are bench by default
+            players.forEach(player => {
+                if (player.isStarter === undefined) {
+                    player.isStarter = false;
+                }
+            });
+        }
+
+        // Make functions globally available
+        window.openLineupModal = openLineupModal;
+        window.closeLineupModal = closeLineupModal;
+        window.saveStartingLineup = saveStartingLineup;
     </script>
+    <!-- Upgrade Modal -->
+    <div class="modal-overlay" id="upgradeModal" onclick="closeUpgradeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 520px;">
+            <!-- Close X -->
+            <img src="assets/icon-close.png"
+                style="position:absolute; top:16px; right:16px; width:28px; height:28px; cursor:pointer;"
+                onclick="closeUpgradeModal()">
+
+            <div id="upgradeStep1">
+                <div class="upgrade-title">
+                    CHOOSE YOUR<br>PLAN
+                </div>
+
+                <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">
+                    Unlock unlimited matches, full statistics, and permanent match history.
+                </p>
+
+                <!-- Pro Plan -->
+                <div class="pricing-option" onclick="showProOptions()" style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="pricing-price" style="font-size: 24px; text-align: left;">PRO</div>
+                            <div class="pricing-period" style="text-align: left;">1 sport - Unlimited matches</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #00ffe0; font-family: 'Russo One', sans-serif; font-size: 20px;">$5.99</div>
+                            <div style="color: #888; font-size: 11px;">/month</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Elite Plan -->
+                <div class="pricing-option" onclick="showEliteOptions()" style="border-color: #ffd700; background: rgba(255, 215, 0, 0.08); position: relative;">
+                    <div style="position: absolute; top: -10px; right: 12px; background: linear-gradient(90deg, #ffd700, #ffaa00); color: #000; font-size: 9px; font-weight: bold; padding: 3px 10px; border-radius: 10px; font-family: 'Russo One', sans-serif; letter-spacing: 0.5px;">BEST VALUE</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="pricing-price" style="font-size: 24px; text-align: left; color: #ffd700;">ELITE</div>
+                            <div class="pricing-period" style="text-align: left; color: #ccc;">All sports - Unlimited matches</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #ffd700; font-family: 'Russo One', sans-serif; font-size: 20px;">$9.95</div>
+                            <div style="color: #888; font-size: 11px;">/month</div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="pricing.html" style="display: block; color: #00ffe0; font-size: 13px; margin-top: 20px; text-decoration: underline;">Compare all features</a>
+                <div class="cancel-text">Cancel anytime</div>
+            </div>
+
+            <!-- Pro Pricing Options -->
+            <div id="upgradeStepPro" style="display:none;">
+                <div class="upgrade-title" style="font-size: 32px;">
+                    PRO PLAN
+                </div>
+                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">
+                    Unlimited matches for this sport. Full stats & match history.
+                </p>
+
+                <div class="pricing-option" onclick="selectPricing('pro_monthly')">
+                    <div class="pricing-price">$5.99/month</div>
+                    <div class="pricing-period">Billed monthly</div>
+                </div>
+
+                <div class="separator-or">Or</div>
+
+                <div class="pricing-option" onclick="selectPricing('pro_halfyearly')">
+                    <div class="pricing-price">$29.99/6 months</div>
+                    <div class="pricing-period">Save 17% - Billed half yearly</div>
+                </div>
+
+                <button onclick="showStep1()" style="background: none; border: none; color: #00ffe0; font-size: 13px; margin-top: 20px; cursor: pointer; text-decoration: underline;">Back to plans</button>
+                <div class="cancel-text">Cancel anytime</div>
+            </div>
+
+            <!-- Elite Pricing Options -->
+            <div id="upgradeStepElite" style="display:none;">
+                <div class="upgrade-title" style="font-size: 32px; color: #ffd700;">
+                    ELITE PLAN
+                </div>
+                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">
+                    Access ALL sports: Soccer, Basketball, Tag Football, AFL & more. Priority support included.
+                </p>
+
+                <div class="pricing-option" onclick="selectPricing('elite_monthly')" style="border-color: #ffd700;">
+                    <div class="pricing-price" style="color: #ffd700;">$9.95/month</div>
+                    <div class="pricing-period">Billed monthly</div>
+                </div>
+
+                <div class="separator-or">Or</div>
+
+                <div class="pricing-option" onclick="selectPricing('elite_halfyearly')" style="border-color: #ffd700;">
+                    <div class="pricing-price" style="color: #ffd700;">$49.95/6 months</div>
+                    <div class="pricing-period">Save 17% - Billed half yearly</div>
+                </div>
+
+                <button onclick="showStep1()" style="background: none; border: none; color: #ffd700; font-size: 13px; margin-top: 20px; cursor: pointer; text-decoration: underline;">Back to plans</button>
+                <div class="cancel-text">Cancel anytime</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upgrade JS -->
+    <script>
+        function openUpgradeModal() {
+            // Reset to step 1
+            showStep1();
+            document.getElementById('upgradeModal').classList.add('active');
+        }
+
+        function closeUpgradeModal(e) {
+            if (e) e.stopPropagation();
+            document.getElementById('upgradeModal').classList.remove('active');
+        }
+
+        function showStep1() {
+            document.getElementById('upgradeStep1').style.display = 'block';
+            document.getElementById('upgradeStepPro').style.display = 'none';
+            document.getElementById('upgradeStepElite').style.display = 'none';
+        }
+
+        function showProOptions() {
+            document.getElementById('upgradeStep1').style.display = 'none';
+            document.getElementById('upgradeStepPro').style.display = 'block';
+            document.getElementById('upgradeStepElite').style.display = 'none';
+        }
+
+        function showEliteOptions() {
+            document.getElementById('upgradeStep1').style.display = 'none';
+            document.getElementById('upgradeStepPro').style.display = 'none';
+            document.getElementById('upgradeStepElite').style.display = 'block';
+        }
+
+        function selectPricing(plan) {
+            // TODO: Replace with Stripe checkout redirect
+            // Example: window.location.href = 'https://checkout.stripe.com/pay/your_price_id?client_reference_id=' + userId;
+            const planNames = {
+                'pro_monthly': 'Pro Monthly ($5.99/mo)',
+                'pro_halfyearly': 'Pro 6-Month ($29.99)',
+                'elite_monthly': 'Elite Monthly ($9.95/mo)',
+                'elite_halfyearly': 'Elite 6-Month ($49.95)'
+            };
+            alert('Selected: ' + planNames[plan] + '\n\nStripe payment integration coming soon.');
+        }
+
+        // =========================================
+        // EDIT BUTTON FIX - JavaScript Event Listener
+        // =========================================
+        // Make players globally accessible
+        window.players = players;
+
+        // Attach edit button handler when DOM is ready
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('[Edit Setup] Attaching edit button handler...');
+
+            var editBtn = document.getElementById('editProfileBtn');
+            if (editBtn) {
+                console.log('[Edit Setup] Edit button found, attaching click handler');
+                editBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    console.log('[Edit Click] Button clicked!');
+
+                    var viewModal = document.getElementById('playerViewModal');
+                    var playerId = viewModal ? viewModal.dataset.playerId : null;
+
+                    console.log('[Edit Click] Player ID:', playerId);
+
+                    if (!playerId) {
+                        console.error('[Edit Click] ERROR: No player ID found');
+                        return;
+                    }
+
+                    var allPlayers = window.players || players || [];
+                    console.log('[Edit Click] Players array length:', allPlayers.length);
+
+                    var player = allPlayers.find(function (p) {
+                        return String(p.id) === String(playerId);
+                    });
+
+                    if (!player) {
+                        console.error('[Edit Click] Player not found for ID:', playerId);
+                        console.log('[Edit Click] Available IDs:', allPlayers.map(function (p) { return p.id; }));
+                        return;
+                    }
+
+                    console.log('[Edit Click] Found player:', player.name);
+
+                    // Close view modal
+                    if (viewModal) {
+                        viewModal.classList.remove('active');
+                    }
+
+                    // Open edit modal
+                    var editModal = document.getElementById('playerModal');
+                    var editForm = document.getElementById('playerForm');
+
+                    if (!editModal) {
+                        alert('ERROR: Edit modal element not found');
+                        return;
+                    }
+
+                    if (editForm) editForm.reset();
+
+                    // Populate fields
+                    function setVal(id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; }
+                    function setChk(id, v) { var el = document.getElementById(id); if (el) el.checked = !!v; }
+
+                    setVal('playerId', player.id);
+                    setVal('playerName', player.name);
+                    setVal('playerPosition', player.position);
+                    setVal('playerDob', player.dob);
+                    setVal('playerAddress', player.address);
+                    setVal('playerJersey', player.jersey);
+                    setVal('playerNotes', player.notes);
+                    setChk('parentalConsent', player.consent);
+                    setVal('parent1Name', player.parent1Name);
+                    setVal('parent1Phone', player.parent1Phone);
+                    setChk('parent1Whatsapp', player.parent1Whatsapp);
+                    setVal('parent2Name', player.parent2Name);
+                    setVal('parent2Phone', player.parent2Phone);
+                    setChk('parent2Whatsapp', player.parent2Whatsapp);
+
+                    // Force show edit modal
+                    editModal.classList.add('active');
+                    editModal.style.opacity = '1';
+                    editModal.style.pointerEvents = 'auto';
+
+                    console.log('[Edit Click] Edit modal opened successfully');
+                }, true);  // true = capture phase, catches click before any other handlers
+            } else {
+                console.error('[Edit Setup] ERROR: editProfileBtn not found in DOM');
+            }
+        });
+    </script>
+
+    <!-- Bottom Navigation -->
+    <nav class="footer-nav">
+        <a href="basketball-dashboard.html" class="nav-item">
+            <img src="assets/icon-home.png" class="nav-icon-img" alt="Home">
+            <span class="nav-label">HOME</span>
+        </a>
+        <a href="pro-squad-management.html" class="nav-item active">
+            <img src="assets/icon-teams.png" class="nav-icon-img" alt="Teams">
+            <span class="nav-label">TEAMS</span>
+        </a>
+        <a href="basketball-dashboard.html?action=start" class="nav-item"
+            onclick="if(typeof openGameModeModal === 'function'){openGameModeModal(); return false;}">
+            <img src="assets/icon-start.png" class="nav-icon-img" alt="Start">
+            <span class="nav-label">START</span>
+        </a>
+        <a href="#" class="nav-item" onclick="alert('Stats module coming soon!')">
+            <img src="assets/icon-stats.png" class="nav-icon-img" alt="Stats">
+            <span class="nav-label">STATS</span>
+        </a>
+        <a href="#" class="nav-item" onclick="alert('Coaches module coming soon!')">
+            <img src="assets/icon-coaches.png" class="nav-icon-img" alt="Coaches">
+            <span class="nav-label">COACHES</span>
+        </a>
+    </nav>
 </body>
 
 </html>

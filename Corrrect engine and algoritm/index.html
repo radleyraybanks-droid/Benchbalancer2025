@@ -55,7 +55,7 @@
                 rgba(26, 38, 43, 1) 100%);
             padding: 20px 30px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(0, 255, 224, 0.2);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -72,11 +72,31 @@
         /* Text-based logo fallback with styling matching the brand */
         .header-logo-text {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 2.8rem;
+            font-size: 2.2rem;
             font-weight: 400;
             color: #ffffff;
             letter-spacing: 3px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-cyan);
         }
 
         /* Main Content */
@@ -234,16 +254,21 @@
         }
 
         /* Mobile specific adjustments */
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .header {
                 padding: 15px;
-                min-height: 70px;
-                justify-content: center;
+                min-height: auto;
+                flex-direction: column;
+                gap: 12px;
             }
 
             .header-logo-text {
-                font-size: 2rem;
+                font-size: 1.8rem;
                 letter-spacing: 2px;
+            }
+
+            .nav-links {
+                gap: 20px;
             }
 
             .hero-title {
@@ -259,7 +284,11 @@
 
 <body>
     <header class="header">
-        <span class="header-logo-text">BENCHBALANCER</span>
+        <a href="index.html" class="header-logo-text">BENCHBALANCER</a>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="pricing.html">Pricing</a>
+        </nav>
     </header>
 
     <main class="main-content">
